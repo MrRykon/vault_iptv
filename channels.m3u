@@ -1,380 +1,908 @@
 #EXTM3U
 
-# ===== NEWS =====
-#EXTINF:-1 tvg-id="BluRadio.co@SD",Blu Radio (720p)
-https://mdstrm.com/live-stream-playlist/58d1921a72e2b22e2905e493.m3u8
-#EXTINF:-1 tvg-id="CanalCapital.co@SD",Canal Capital (1080p) [Geo-blocked]
-https://mdstrm.com/live-stream-playlist/6952dc88cb62083467eb6ab4.m3u8
-#EXTINF:-1 tvg-id="Noticiero90Minutos.co@SD",Noticiero 90 Minutos (1080p)
-https://play.cdn.enetres.net/621B146D29C541AFB1507809F038F471021/021/playlist.m3u8
-#EXTINF:-1 tvg-id="RedPlus.co@SD",Red+ (1080p)
-https://inforedvos.lcdn.claro.net.co/Content/HLS_HLS_DIR/Live/channel(REDMASHDWEB)/master.m3u8
-#EXTINF:-1 tvg-id="MasTalk.ve@SD",Más Talk (1080p)
+# ===== ITALY | KIDS =====
+#EXTINF:-1 tvg-id="BeJoykids.it@HD" group-title="Italy | Kids",BeJoy.kids (1080p)
+https://64b16f23efbee.streamlock.net/bejoy/bejoy/playlist.m3u8
+#EXTINF:-1 tvg-id="IuniorTV.it@SD" group-title="Italy | Kids",Iunior TV (1080p)
+https://5f22d76e220e1.streamlock.net/iuniortv/iuniortv/chunklist_w774879328.m3u8
+#EXTINF:-1 tvg-id="IuniorTV.it@SD" group-title="Italy | Kids",Iunior TV (720p) [Not 24/7]
+https://5f22d76e220e1.streamlock.net/iuniortv/iuniortv/playlist.m3u8
+#EXTINF:-1 tvg-id="RaiGulp.it@SD" group-title="Italy | Kids",Rai Gulp (1080p)
+http://78.130.250.2:8023/play/a04m/index.m3u8
+#EXTINF:-1 tvg-id="RaiGulp.it@SD" group-title="Italy | Kids",Rai Gulp (576p)
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746953
+#EXTINF:-1 tvg-id="RaiYoyo.it@SD" group-title="Italy | Kids",Rai Yoyo (1080p)
+http://78.130.250.2:8023/play/a04d/index.m3u8
+#EXTINF:-1 tvg-id="RaiYoyo.it@SD" group-title="Italy | Kids",Rai YoYo (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746899
+#EXTINF:-1 tvg-id="Super.it@SD" group-title="Italy | Kids",Super!
+https://495c5a85d9074f29acffeaea9e0215eb.msvdn.net/super/super_main/super_main_hbbtv/playlist.m3u8
+
+# ===== ITALY | MOVIES =====
+#EXTINF:-1 tvg-id="20.it@SD" group-title="Italy | Movies",20 Mediaset [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(lb)/index.m3u8
+#EXTINF:-1 tvg-id="Cine34.it@SD" group-title="Italy | Movies",Cine 34 [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(b6)/index.m3u8
+#EXTINF:-1 tvg-id="Iris.it@SD" group-title="Italy | Movies",Iris [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(ki)/index.m3u8
+#EXTINF:-1 tvg-id="RaiMovie.it@SD" group-title="Italy | Movies",Rai Movie (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=747002
+
+# ===== ITALY | NEWS =====
+#EXTINF:-1 tvg-id="Adnkronos.it@SD" group-title="Italy | News",Adnkronos (720p)
+https://5e73cf528f404.streamlock.net/GR_sport/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="ClassCNBC.it@SD" group-title="Italy | News",Class CNBC
+https://raw.githubusercontent.com/Sibprod/streams/main/ressources/dm/py/hls/classcnbc.m3u8
+#EXTINF:-1 tvg-id="GiornaleRadioTV.it@SD" group-title="Italy | News",Giornale Radio TV (720p)
+https://5f204aff97bee.streamlock.net/GR_tv/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="LaCNews24.it@SD" group-title="Italy | News",LaC News 24 (720p)
+https://f5842579ff984c1c98d63b8d789673eb.msvdn.net/live/S27391994/HVvPMzy/playlist.m3u8
+#EXTINF:-1 tvg-id="LeCronacheTV.it@SD" group-title="Italy | News",Le Cronache TV (720p)
+http://77.68.40.210:8888/hls/cronache.m3u8
+#EXTINF:-1 tvg-id="LeCronacheTV.it@SD" group-title="Italy | News",Le Cronache TV (720p)
+http://stucazz.com:8888/hls/cronache.m3u8
+#EXTINF:-1 tvg-id="MinformoTV.it@SD" group-title="Italy | News",Minformo TV (720p)
+https://5db313b643fd8.streamlock.net/MinformoTV/MinformoTV/playlist.m3u8
+#EXTINF:-1 tvg-id="RaiNews24.it@SD" group-title="Italy | News",Rai News 24 (1080p)
+http://78.130.250.2:8023/play/a04l/index.m3u8
+#EXTINF:-1 tvg-id="RaiNews24.it@SD" group-title="Italy | News",Rai News 24 (720p)
+https://rainews1-live.akamaized.net/hls/live/598326/rainews1/rainews1/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioRomaNews.it@SD" group-title="Italy | News",Radio Roma News
+https://raw.githubusercontent.com/Sibprod/streams/main/ressources/dm/py/hls/radioromanews.m3u8
+#EXTINF:-1 tvg-id="TSNTeleSondrioNews.it@SD" group-title="Italy | News",Tele Sondrio News (480p) [Not 24/7]
+https://59d8c0cee6f3d.streamlock.net/tsn/tsn_mobile/playlist.m3u8
+
+# ===== ITALY | SPORTS =====
+#EXTINF:-1 tvg-id="ACISportTV.it@SD" group-title="Italy | Sports",ACI Sport TV (1080p)
+https://webstream.multistream.it/memfs/e2cb3629-c1a2-495b-b43a-9eb386f04ed8.m3u8
+#EXTINF:-1 tvg-id="ItalianFishingTV.it@SD" group-title="Italy | Sports",Italian Fishing TV (1080p)
+https://fms.premio.link/fishingtv/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="Italy | Sports",Rai Sport 2
+http://originstream12.rai.it/italy/raisport2_1200/master.m3u8
+#EXTINF:-1 tvg-id="Sportitalia24.it@SD" group-title="Italy | Sports",Sportitalia 24 (720p) [Geo-blocked]
+https://di-yx2saj20.vo.lswcdn.net/sportitalia/smil:silive24.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="Italy | Sports",Sportitalia Live 24
+https://di-g7ij0rwh.vo.lswcdn.net/sportitalia/silive24.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="SportitaliaMotori.it@SD" group-title="Italy | Sports",Sportitalia Motori (720p) [Geo-blocked]
+https://di-yx2saj20.vo.lswcdn.net/sportitalia/smil:simotori.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="SportitaliaSolocalcio.it@SD" group-title="Italy | Sports",Sportitalia SoloCalcio
+https://di-g7ij0rwh.vo.lswcdn.net/sportitalia/sisolocalcio.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="SportitaliaSolocalcio.it@SD" group-title="Italy | Sports",Sportitalia Solocalcio (1080p)
+https://distribution.sportitalialive.it/sportitalia/sisolocalcio_abr/playlist.m3u8
+#EXTINF:-1 tvg-id="SportitaliaSolocalcio.it@SD" group-title="Italy | Sports",Sportitalia Solocalcio (720p) [Geo-blocked]
+https://di-yx2saj20.vo.lswcdn.net/sportitalia/smil:sisolocalcio.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.it@SD" group-title="Italy | Sports",Sportitalia (720p) [Geo-blocked]
+https://di-yx2saj20.vo.lswcdn.net/sportitalia/smil:sportitaliahd.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.it@SD" group-title="Italy | Sports",Sportitalia TV/Sportitalia/SI
+https://di-g7ij0rwh.vo.lswcdn.net/sportitalia/sihd/playlist.m3u8
+
+# ===== ITALY | OTHER =====
+#EXTINF:-1 tvg-id="111TV.it@SD" group-title="Italy | Other",111 TV (720p)
+https://5db313b643fd8.streamlock.net/111/111/playlist.m3u8
+#EXTINF:-1 tvg-id="12TVParma.it@SD" group-title="Italy | Other",12 TV Parma (540p) [Not 24/7]
+https://5929b138b139d.streamlock.net/12TVParma/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="Twentyseven.it@SD" group-title="Italy | Other",27 TwentySeven [Geo-blocked]
+https://live2.msf.cdn.mediaset.net/content/hls_h0_cls_vos/live/channel(ts)/index.m3u8
+#EXTINF:-1 tvg-id="51RadioTV.it@SD" group-title="Italy | Other",51 Radio TV (480p) [Geo-blocked]
+http://wms.shared.streamshow.it/canale51/canale51/playlist.m3u8
+#EXTINF:-1 tvg-id="51RadioTV.it@SD" group-title="Italy | Other",51 Radio TV (480p) [Geo-blocked]
+https://59d7d6f47d7fc.streamlock.net/canale51/canale51/playlist.m3u8
+#EXTINF:-1 tvg-id="7RadioVisione.it@HD" group-title="Italy | Other",7 RadioVisione (720p)
+https://stream10.xdevel.com/video1s976543-1932/stream/playlist.m3u8
+#EXTINF:-1 tvg-id="7080TV.it@SD" group-title="Italy | Other",70-80 TV (1080P)
+https://585b674743bbb.streamlock.net/9050/9050/playlist.m3u8
+#EXTINF:-1 tvg-id="7YOUME.it@HD" group-title="Italy | Other",7 YOU & ME (720p)
+https://stream10.xdevel.com/video0s977798-2239/stream/playlist.m3u8
+#EXTINF:-1 tvg-id="A2iTV.it@SD" group-title="Italy | Other",A2i TV (1080p)
+https://stream.sen-gt.com/A2itv/myStream/playlist.m3u8
+#EXTINF:-1 tvg-id="AlmaTV.it@SD" group-title="Italy | Other",Alma TV (576p)
+http://151.0.207.99:1935/AlmaTv/AlmaTv/playlist.m3u8
+#EXTINF:-1 tvg-id="AltoAdigeTV.it@SD" group-title="Italy | Other",Alto Adige TV (720p)
+https://5f204aff97bee.streamlock.net/AltoAdigeTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="Antenna2TV.it@SD" group-title="Italy | Other",Antenna 2 TV (720p)
+https://58f12ffd2447a.streamlock.net/Antenna2/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="AntennaSud.it@SD" group-title="Italy | Other",Antenna Sud (720p)
+https://live.antennasudwebtv.it:9443/hls/vod.m3u8
+#EXTINF:-1 tvg-id="AntennaSudExtra.it@SD" group-title="Italy | Other",Antenna Sud Extra (720p)
+https://live.antennasudwebtv.it:9443/hls/vod92.m3u8
+#EXTINF:-1 tvg-id="AntennaTre.it@SD" group-title="Italy | Other",Antenna Tre Veneto (480p) [Geo-blocked]
+https://59d8c0cee6f3d.streamlock.net/antennatreveneto/antennatreveneto.stream/playlist.m3u8
+#EXTINF:-1 tvg-id="AuroraArte.it@SD" group-title="Italy | Other",Aurora Arte (480p)
+https://59d7d6f47d7fc.streamlock.net/auroraarte/auroraarte/playlist.m3u8
+#EXTINF:-1 tvg-id="AzzurraTV.it@SD" group-title="Italy | Other",Azzurra TV (576p)
+https://ed05.top-ix.org/avtvlive/azzurra/streaming/playlist.m3u8
+#EXTINF:-1 tvg-id="BergamoTV.it@SD" group-title="Italy | Other",Bergamo TV (1080p)
+https://db142859fd5541b09de25d6507f1f2d3.msvdn.net/live/S17501676/oIxAsgEEA46M/playlist_dvr.m3u8
+#EXTINF:-1 tvg-id="BomChannel.it@SD" group-title="Italy | Other",Bom Channel (720p)
+https://5f22d76e220e1.streamlock.net/canale6/canale6/playlist.m3u8
+#EXTINF:-1 tvg-id="CafeTV24.it@SD" group-title="Italy | Other",CafeTV24 (720p)
+https://srvx1.selftv.video/cafe/live/playlist.m3u8
+#EXTINF:-1 tvg-id="CalabriaTV.it@SD" group-title="Italy | Other",Calabria TV
+https://64b16f23efbee.streamlock.net/calabriatv/calabriatv/playlist.m3u8
+#EXTINF:-1 tvg-id="CameradeiDeputati.it@SD" group-title="Italy | Other",Camera dei Deputati (via RR) (240p)
+https://video-ar.radioradicale.it/diretta/camera2/playlist.m3u8
+#EXTINF:-1 tvg-id="Canale2Altamura.it@SD" group-title="Italy | Other",Canale 2 Altamura (576p) [Not 24/7]
+https://59d7d6f47d7fc.streamlock.net/canale2/canale2/playlist.m3u8
+#EXTINF:-1 tvg-id="Canale21Extra.it@SD" group-title="Italy | Other",Canale 21 Extra (576p)
+https://0ff9dd7fe9b64bc08a5fc4ed525454c3.msvdn.net/live/S42170132/sT6C3LFaD1iA/playlist.m3u8
+#EXTINF:-1 tvg-id="Canale5.it@SD" group-title="Italy | Other",Canale 5 [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(C5)/index.m3u8
+#EXTINF:-1 tvg-id="Canale7.it@SD" group-title="Italy | Other",CANALE 7 (480p)
+http://wms.shared.streamshow.it/canale7/mp4:canale7/playlist.m3u8
+#EXTINF:-1 tvg-id="Canale7.it@SD" group-title="Italy | Other",Canale 7 (480p)
+http://wms.shared.streamshow.it/canale7/canale7/playlist.m3u8
+#EXTINF:-1 tvg-id="Canale8.it@SD" group-title="Italy | Other",CANALE 8 (480p)
+http://wms.shared.streamshow.it/canale8/mp4:canale8/playlist.m3u8
+#EXTINF:-1 tvg-id="Canale8.it@SD" group-title="Italy | Other",Canale 8 (480p)
+http://wms.shared.streamshow.it/canale8/canale8/playlist.m3u8
+#EXTINF:-1 tvg-id="CanaleDieci.it@SD" group-title="Italy | Other",Canale 10 (540p) [Not 24/7]
+http://37.187.142.147:1935/ch10live/high.stream/playlist.m3u8
+#EXTINF:-1 tvg-id="CarinaTV.it@SD" group-title="Italy | Other",CarinaTV
+https://samson.streamerr.co:8081/carinatv/tracks-v1a1/playlist.m3u8
+#EXTINF:-1 tvg-id="CasaItalia53.it@SD" group-title="Italy | Other",Casa Italia 53 (720p)
+https://ovp-live.akamaized.net/ac115_live/canale3.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="ClassTVModa.it@SD" group-title="Italy | Other",Class TV Moda
+https://raw.githubusercontent.com/Sibprod/streams/main/ressources/dm/py/hls/classtvmoda.m3u8
+#EXTINF:-1 tvg-id="CompanyTV.it@SD" group-title="Italy | Other",Company TV (720p)
+https://5929b138b139d.streamlock.net/CompanyTV/smil:CompanyTV.smil/master.m3u8
+#EXTINF:-1 tvg-id="CusanoItaliaTV.it@SD" group-title="Italy | Other",Cusano Italia TV (720p)
+https://router.xdevel.com/video0s975363-69/stream/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="Italy | Other",D Television (Antenna 10) (480p)
+https://ssh101.bozztv.com/ssh101/dtelevision/playlist.m3u8
+#EXTINF:-1 tvg-id="DeejayTV.it@SD" group-title="Italy | Other",Deejay TV (1080p)
+https://4c4b867c89244861ac216426883d1ad0.msvdn.net/live/S85984808/sMO0tz9Sr2Rk/playlist.m3u8
+#EXTINF:-1 tvg-id="DITV80.it@SD" group-title="Italy | Other",DI.TV 80 (720p)
+https://5f22d76e220e1.streamlock.net/ditv80/ditv80/playlist.m3u8
+#EXTINF:-1 tvg-id="DonnaTV.it@SD" group-title="Italy | Other",Donna TV (480p)
+https://streaming.softwarecreation.it/DonnaTv/DonnaTv/playlist.m3u8
+#EXTINF:-1 tvg-id="EliveTVBrescia.it@SD" group-title="Italy | Other",Elive TV Brescia (720p) [Not 24/7]
+https://59d7d6f47d7fc.streamlock.net/elivebresciatv/elivebresciatv/playlist.m3u8
+#EXTINF:-1 tvg-id="EntellaTV.it@SD" group-title="Italy | Other",Entella TV (720p) [Not 24/7]
+https://5f22d76e220e1.streamlock.net/EntellaTV/EntellaTV/playlist.m3u8
+#EXTINF:-1 tvg-id="EsperiaTV.it@SD" group-title="Italy | Other",Esperia TV (480p)
+http://wms.shared.streamshow.it/esperiatv/esperiatv/playlist.m3u8
+#EXTINF:-1 tvg-id="EsperiaTV.it@SD" group-title="Italy | Other",Esperia TV (480p) [Not 24/7]
+https://59d7d6f47d7fc.streamlock.net/esperiatv/esperiatv/playlist.m3u8
+#EXTINF:-1 tvg-id="EtnaEspressoChannel.it@SD" group-title="Italy | Other",Etna Espresso Channel (720p)
+https://5db313b643fd8.streamlock.net/Etnachannelponte/Etnachannelponte/playlist.m3u8
+#EXTINF:-1 tvg-id="eTvMarche.it@SD" group-title="Italy | Other",èTv Marche (720p)
+https://live.ipstream.it/etvmarche/etvmarche.stream/playlist.m3u8
+#EXTINF:-1 tvg-id="eTvRete7.it@SD" group-title="Italy | Other",èTv Rete 7 (720p)
+https://live.ipstream.it/etv/etv.stream/playlist.m3u8
+#EXTINF:-1 tvg-id="EuroIndieMusicChartTV.it@SD" group-title="Italy | Other",Euro Indie Music Chart TV (360p)
+http://178.33.224.197:1935/euroindiemusic/euroindiemusic/playlist.m3u8
+#EXTINF:-1 tvg-id="EuroTV.it@SD" group-title="Italy | Other",Euro TV (720p) [Not 24/7]
+https://5f22d76e220e1.streamlock.net/eurotv/eurotv/playlist.m3u8
+#EXTINF:-1 tvg-id="FanoTV.it@SD" group-title="Italy | Other",Fano TV (1080p)
+https://5cbd3bc28341f.streamlock.net:444/fanotv_live/_definst_/43DA-3923-9C72-4E9F/playlist.m3u8
+#EXTINF:-1 tvg-id="FMITALIA.it@SD" group-title="Italy | Other",FM ITALIA (1080p)
+https://stream2.xdevel.com/video0s975817-1183/stream/playlist.m3u8
+#EXTINF:-1 tvg-id="GiovanniPaoloTV.it@SD" group-title="Italy | Other",Giovanni Paolo TV (1080p)
+https://media2021.rtvweb.com/giovannipaolotv/web/playlist.m3u8
+#EXTINF:-1 tvg-id="GM24.it@SD" group-title="Italy | Other",GM24 (480p)
+https://streaming.softwarecreation.it/GM24/GM24/playlist.m3u8
+#EXTINF:-1 tvg-id="GOTVCanale163.it@SD" group-title="Italy | Other",GO-TV Canale 163 (720p)
+https://6zklxkbbdw9b-hls-live.mariatvcdn.it/msmotor/2f759512164fc6fe4acbed6a5648993a.sdp/playlist.m3u8
+#EXTINF:-1 tvg-id="GoldTV.it@SD" group-title="Italy | Other",Gold TV
+https://5a1178b42cc03.streamlock.net/golditalia/golditalia/playlist.m3u8
+#EXTINF:-1 tvg-id="GoldTV.it@SD" group-title="Italy | Other",Gold TV (576p)
+https://streaming.softwarecreation.it/GoldTv/GoldTv/playlist.m3u8
+#EXTINF:-1 tvg-id="GoldTVSat.it@SD" group-title="Italy | Other",Gold TV Sat (576p)
+https://streaming.softwarecreation.it/GoldTvSat/GoldTvSat/playlist.m3u8
+#EXTINF:-1 tvg-id="GRPVERATV.it@SD" group-title="Italy | Other",GRP VERATV (576p)
+https://webstream.multistream.it/memfs/a3195c96-f884-4c74-924f-2648814fc0b5_output_0.m3u8
+#EXTINF:-1 tvg-id="IcaroTV.it@SD" group-title="Italy | Other",Icaro TV (720p) [Not 24/7]
+https://59d7d6f47d7fc.streamlock.net/icarotv/icarotv/playlist.m3u8
+#EXTINF:-1 tvg-id="Italia1.it@SD" group-title="Italy | Other",Italia 1 [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(i1)/index.m3u8
+#EXTINF:-1 tvg-id="Italia2.it@SD" group-title="Italy | Other",Italia 2 (480p) [Geo-blocked]
+https://59d7d6f47d7fc.streamlock.net/italia2/italia2/playlist.m3u8
+#EXTINF:-1 tvg-id="Italia2.it@SD" group-title="Italy | Other",Italia 2 [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(i2)/index.m3u8
+#EXTINF:-1 tvg-id="Italia2TV.it@SD" group-title="Italy | Other",Italia 2 TV (480p) [Geo-blocked]
+http://wms.shared.streamshow.it/italia2/mp4:italia2/playlist.m3u8
+#EXTINF:-1 tvg-id="Italia7.it@SD" group-title="Italy | Other",Italia 7
+https://streaming.softwarecreation.it/Italia7/Italia7/playlist.m3u8
+#EXTINF:-1 tvg-id="Italia7.it@SD" group-title="Italy | Other",Italia 7 (576p)
+http://151.0.207.99:1935/italia7/italia7/playlist.m3u8
+#EXTINF:-1 tvg-id="Juwelo.it@SD" group-title="Italy | Other",Juwelo Italia (480p)
+https://sdn-global-live-streaming-packager-cache.3qsdn.com/7841/7841_264_live.m3u8
+#EXTINF:-1 tvg-id="KissKissNapoliTV.it@SD" group-title="Italy | Other",Kiss Kiss Napoli TV (720p)
+https://58f12ffd2447a.streamlock.net/KKTVNapoli/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="KissKissTV.it@SD" group-title="Italy | Other",Kiss Kiss TV (1080p)
+https://58f12ffd2447a.streamlock.net/KKMulti/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="KissKissTV.it@SD" group-title="Italy | Other",Kiss Kiss TV (720p)
+https://58f12ffd2447a.streamlock.net/KKTV01/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="KissKissTV.it@SD" group-title="Italy | Other",Kiss Kiss TV (720p)
+https://59253971be783.streamlock.net/KissKissTV/KissKissTV.stream/playlist.m3u8
+#EXTINF:-1 tvg-id="LaltroCorriereTV.it@SD" group-title="Italy | Other",L'altro Corriere TV (720P)
+https://stream.cp.ets-sistemi.it:1936/laltrocorriere-tv/laltrocorriere-tv/playlist.m3u8
+#EXTINF:-1 tvg-id="La5.it@SD" group-title="Italy | Other",La5 [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(ka)/index.m3u8
+#EXTINF:-1 tvg-id="LA7d.it@SD" group-title="Italy | Other",LA7d (720p)
+https://d15umi5iaezxgx.cloudfront.net/LA7D/CLN/HLS-B/Live.m3u8
+#EXTINF:-1 tvg-id="LaCTV.it@SD" group-title="Italy | Other",La C TV (720p)
+https://f5842579ff984c1c98d63b8d789673eb.msvdn.net/live/S47282891/JWjL3xqPf4bX/playlist.m3u8
+#EXTINF:-1 tvg-id="LaTR3Marsala.it@SD" group-title="Italy | Other",La TR3 Marsala (720p)
+https://tsw.streamingwebtv24.it:1936/eslife1/eslife1/playlist.m3u8
+#EXTINF:-1 tvg-id="LazioTV.it@SD" group-title="Italy | Other",Lazio TV (576p)
+http://151.0.207.99:1935/live/LAZIOTV12/playlist.m3u8
+#EXTINF:-1 tvg-id="LazioTV.it@SD" group-title="Italy | Other",Lazio TV (576p)
+https://streaming.softwarecreation.it/LazioTv/LazioTv/playlist.m3u8
+#EXTINF:-1 tvg-id="LiraTV.it@SD" group-title="Italy | Other",Lira TV
+https://a928c0678d284da5b383f29ecc5dfeec.msvdn.net/live/S57315730/8kTBWibNteJA/playlist.m3u8
+#EXTINF:-1 tvg-id="LiraTV.it@SD" group-title="Italy | Other",Lira TV (720p) [Not 24/7]
+https://5d79ae45bc63b.streamlock.net/Liratv/Liratv/playlist.m3u8
+#EXTINF:-1 tvg-id="LunaTV.it@SD" group-title="Italy | Other",Luna TV
+https://5f22d76e220e1.streamlock.net/lunatv/lunatv/playlist.m3u8
+#EXTINF:-1 tvg-id="m2oTV.it@SD" group-title="Italy | Other",m2o TV (1080p)
+https://4c4b867c89244861ac216426883d1ad0.msvdn.net/live/S62628868/uhdWBlkC1AoO/playlist.m3u8
+#EXTINF:-1 tvg-id="MadeinBOTV.it@SD" group-title="Italy | Other",MadeinBO TV (1080p)
+https://srvx1.selftv.video/dmchannel/live/playlist.m3u8
+#EXTINF:-1 tvg-id="MariaVisionItalia.it@SD" group-title="Italy | Other",Maria Vision (1080p)
+https://1601580044.rsc.cdn77.org/live/_jcn_/amlst:CHANNEL_2/playlist.m3u8
+#EXTINF:-1 tvg-id="MediasetExtra.it@SD" group-title="Italy | Other",Mediaset Extra [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(kq)/index.m3u8
+#EXTINF:-1 tvg-id="MediasetItalia.it@SD" group-title="Italy | Other",Mediaset Italia [Geo-blocked]
+https://live2.msf.cdn.mediaset.net/content/hls_h0_clr_vos/live/channel(i2)/index.m3u8
+#EXTINF:-1 tvg-id="MediterraniaTV.it@SD" group-title="Italy | Other",MediterraniaTV (1080p)
+https://59bb40cf810aa.streamlock.net:4443/streamingvincente/streamingvincente/playlist.m3u8
+#EXTINF:-1 tvg-id="MedjugorjeItaliaTV.it@SD" group-title="Italy | Other",Medjugorje Italia TV (480p)
+https://5f22d76e220e1.streamlock.net/medjugorjeitaliatv/medjugorjeitaliatv/playlist.m3u8
+#EXTINF:-1 tvg-id="NTN.it@SD" group-title="Italy | Other",NTN (720p)
+https://stream4.xdevel.com/video0s975955-782/stream/playlist.m3u8
+#EXTINF:-1 tvg-id="Odeon24.it@SD" group-title="Italy | Other",Odeon 24 (288p)
+https://streaming.softwarecreation.it/Odeon/Odeon/playlist.m3u8
+#EXTINF:-1 tvg-id="OndaNovaraTV.it@SD" group-title="Italy | Other",Onda Novara TV (720p) [Not 24/7]
+https://585b674743bbb.streamlock.net/9006/9006/master.m3u8
+#EXTINF:-1 tvg-id="OndaTV.it@SD" group-title="Italy | Other",Onda TV (568p)
+https://5926fc9c7c5b2.streamlock.net/9040/9040/chunklist_w1373908906.m3u8
+#EXTINF:-1 tvg-id="OrlerTV.it@SD" group-title="Italy | Other",Orler TV (420p) [Not 24/7]
+https://w1.mediastreaming.it/orlertv/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="OttoChannel.it@SD" group-title="Italy | Other",Otto Channel (480p)
+https://ottop-live-meride.akamaized.net/hls/live/2039996/ch1/playlist.m3u8
+#EXTINF:-1 tvg-id="PaciContemporaryChannel.it@SD" group-title="Italy | Other",Paci Contemporary Channel (720p)
+https://5f22d76e220e1.streamlock.net/pacicontemporarychannel/pacicontemporarychannel/playlist.m3u8
+#EXTINF:-1 tvg-id="PadrePioTV.it@SD" group-title="Italy | Other",Padre Pio TV (1080p)
+https://600f07e114306.streamlock.net/PadrePioTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="ParadiseTV.it@SD" group-title="Italy | Other",Paradise TV [Geo-blocked]
+https://tsw.streamingwebtv24.it:1936/paradisetv/paradisetv/playlist.m3u8
+#EXTINF:-1 tvg-id="ParolediVita.it@SD" group-title="Italy | Other",Parole di Vita (1080p)
+https://64b16f23efbee.streamlock.net/paroledivita/paroledivita/playlist.m3u8
+#EXTINF:-1 tvg-id="PassioneLotto.it@SD" group-title="Italy | Other",Passione Lotto (300p)
+http://185.63.52.103:8080/hls/passionelotto/1_2/index.m3u8
+#EXTINF:-1 tvg-id="PeerTVAltoAdige.it@SD" group-title="Italy | Other",Peer TV Alto Adige (1280p)
+https://iptv.peer.biz/live/peertv-it.m3u8
+#EXTINF:-1 tvg-id="PeerTVSouthTyrol.it@SD" group-title="Italy | Other",Peer TV South Tyrol (1280p)
+https://iptv.peer.biz/live/peertv-en.m3u8
+#EXTINF:-1 tvg-id="PeerTVSudtirol.it@SD" group-title="Italy | Other",Peer TV Südtirol (1080p)
+https://iptv.peer.biz/live/peertv.m3u8
+#EXTINF:-1 tvg-id="PrimaFree.it@SD" group-title="Italy | Other",PrimaFree
+https://5f22d76e220e1.streamlock.net/primafree/primafree/playlist.m3u8
+#EXTINF:-1 tvg-id="PrimAntennaTV.it@SD" group-title="Italy | Other",PrimAntenna TV (720p)
+https://5f22d76e220e1.streamlock.net/primantenna14/primantenna14/playlist.m3u8
+#EXTINF:-1 tvg-id="PrimaTV.it@SD" group-title="Italy | Other",Prima TV Sicilia (720p)
+https://5db313b643fd8.streamlock.net/PrimaTV/PrimaTV/playlist.m3u8
+#EXTINF:-1 tvg-id="Primocanale.it@SD" group-title="Italy | Other",Primocanale (1080p) [Not 24/7]
+https://msh0203.stream.seeweb.it/live/flv:stream2.sdp/playlist.m3u8
+#EXTINF:-1 tvg-id="PromovideoTV.it@SD" group-title="Italy | Other",Promovideo TV (486p)
+https://media2021.rtvweb.com/promovideo_web/promovideo/playlist.m3u8
+#EXTINF:-1 tvg-id="QuartoCanaleFlegreo.it@SD" group-title="Italy | Other",Quarto Canale Flegreo (720p)
+https://live.mariatvcdn.com/dialogos/171e41deedf405f10c7dd6311387fb43.sdp/playlist.m3u8
+#EXTINF:-1 tvg-id="QVC.it@SD" group-title="Italy | Other",QVC Italia (540p)
+https://qrg.akamaized.net/hls/live/2017383/lsqvc1it/master.m3u8
+#EXTINF:-1 tvg-id="Radio51TV.it@SD" group-title="Italy | Other",Radio 51 TV (480p) [Geo-blocked]
+http://178.32.140.155/canale51/canale51/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioBirikinaTV.it@SD" group-title="Italy | Other",Radio Birikina TV (720p) [Not 24/7]
+https://56b50ada2d659.streamlock.net/RadioBirikinaTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="Italy | Other",Radio Brianza TV
+https://57068da1deb21.streamlock.net/radiorbs/radiorbs/playlist.m3u8
+#EXTINF:-1 tvg-id="Radiofreccia.it@SD" group-title="Italy | Other",Radio Freccia TV (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S3160845/0tuSetc8UFkF/playlist_video.m3u8
+#EXTINF:-1 tvg-id="Radiofreccia.it@SD" group-title="Italy | Other",Radio Freccia TV (1080p)
+https://streamcdnb1-dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S3160845/0tuSetc8UFkF/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RadioIbizaTV.it@SD" group-title="Italy | Other",Radio Ibiza TV (720p) [Not 24/7]
+https://5929b138b139d.streamlock.net/RadioIbizaTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioIglesias.it@SD" group-title="Italy | Other",Radio Iglesias (576p) [Geo-blocked]
+http://wms.shared.streamshow.it/visualradio/mp4:visualradio/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioIglesiasSardegna.it@SD" group-title="Italy | Other",Radio Iglesias Sardegna (576p) [Geo-blocked]
+https://59d7d6f47d7fc.streamlock.net/visualradio/visualradio/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioNumberOne.it@SD" group-title="Italy | Other",Radio Number One (720p) [Not 24/7]
+https://56b50ada2d659.streamlock.net/RN1TV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioPiterPanTV.it@SD" group-title="Italy | Other",Radio Piter Pan TV (720p) [Not 24/7]
+https://58d921499d3d3.streamlock.net/RadioPiterpanTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="Italy | Other",Radio Radicale TV (240p) [Not 24/7]
+https://video-ar.radioradicale.it/diretta/padtv2/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioRomaTelevision.it@SD" group-title="Italy | Other",Radio Roma Television
+https://raw.githubusercontent.com/Sibprod/streams/main/ressources/dm/py/hls/radioromatv.m3u8
+#EXTINF:-1 tvg-id="RadioStudioDeltaTV.it@SD" group-title="Italy | Other",Radio Studio Delta TV (1080p) [Not 24/7]
+https://5ce9406b73c33.streamlock.net/RSD/ngrp:livestream_all/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioTaorminaSicilia.it@SD" group-title="Italy | Other",Radio Taormina Sicilia (720p) [Not 24/7]
+https://stream2.xdevel.com/video1s3-7/stream/playlist.m3u8
+#EXTINF:-1 tvg-id="RadioZeta.it@SD" group-title="Italy | Other",Radio Zeta TV (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S9346184/XEx1LqlYbNic/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RadioZeta.it@SD" group-title="Italy | Other",Radio Zeta TV (1080p)
+https://streamcdnb1-dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S9346184/XEx1LqlYbNic/playlist_video.m3u8
+#EXTINF:-1 tvg-id="Rai1.it@SD" group-title="Italy | Other",Rai 1 (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=2606803
+#EXTINF:-1 tvg-id="Rai1.it@SD" group-title="Italy | Other",Rai 1 (Geo) (576p)
+https://mediapolisevent.rai.it/relinker/relinkerServlet.htm?cont=2606803
+#EXTINF:-1 tvg-id="Rai2.it@SD" group-title="Italy | Other",Rai 2 (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=308718
+#EXTINF:-1 tvg-id="Rai3.it@HD" group-title="Italy | Other",Rai 3 (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=308709
+#EXTINF:-1 tvg-id="Rai4.it@SD" group-title="Italy | Other",Rai 4 (576p)
+https://mediapolisevent.rai.it/relinker/relinkerServlet.htm?cont=746966
+#EXTINF:-1 tvg-id="Rai4.it@SD" group-title="Italy | Other",Rai 4 (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746966
+#EXTINF:-1 tvg-id="Rai5.it@SD" group-title="Italy | Other",Rai 5 (1080p)
+http://78.130.250.2:8023/play/a04o/index.m3u8
+#EXTINF:-1 tvg-id="Rai5.it@SD" group-title="Italy | Other",Rai 5 (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=395276
+#EXTINF:-1 tvg-id="RaiPremium.it@SD" group-title="Italy | Other",Rai Premium (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746992
+#EXTINF:-1 tvg-id="RaiScuola.it@SD" group-title="Italy | Other",Rai Scuola (1080p)
+http://78.130.250.2:8023/play/a04h/index.m3u8
+#EXTINF:-1 tvg-id="RaiScuola.it@SD" group-title="Italy | Other",Rai Scuola (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=747011
+#EXTINF:-1 tvg-id="RaiStoria.it@SD" group-title="Italy | Other",Rai Storia (576p) [Geo-blocked]
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746990
+#EXTINF:-1 tvg-id="RDSSocialTV.it@SD" group-title="Italy | Other",RDS Social TV (720p)
+https://stream.rdstv.radio/out/v1/ec85f72b87f04555aa41d616d5be41dc/index.m3u8
+#EXTINF:-1 tvg-id="ReggioTV.it@SD" group-title="Italy | Other",ReggioTV (480p) [Not 24/7]
+https://cdn10.streamshow.it/cloud-reggiotv/reggiotv/playlist.m3u8
+#EXTINF:-1 tvg-id="Rete4.it@SD" group-title="Italy | Other",Rete 4 [Geo-blocked]
+https://live3-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(r4)/index.m3u8
+#EXTINF:-1 tvg-id="Rete8.it@SD" group-title="Italy | Other",Rete 8
+https://64b16f23efbee.streamlock.net/rete8/rete8/playlist.m3u8
+#EXTINF:-1 tvg-id="Rete55.it@SD" group-title="Italy | Other",Rete 55 (720p) [Not 24/7]
+https://stream.internet.one/Rete55_Live/index.m3u8
+#EXTINF:-1 tvg-id="ReteBiellaTV.it@SD" group-title="Italy | Other",Rete Biella TV (720p) [Not 24/7]
+https://sb.top-ix.org/retebiella/streaming/playlist.m3u8
+#EXTINF:-1 tvg-id="ReteOro.it@SD" group-title="Italy | Other",Rete Oro (720p) [Not 24/7]
+https://5926fc9c7c5b2.streamlock.net/9094/9094/playlist.m3u8
+#EXTINF:-1 tvg-id="Retemia.it@SD" group-title="Italy | Other",Retemia (720p) [Not 24/7]
+https://5db313b643fd8.streamlock.net/Retemia/Retemia/playlist.m3u8
+#EXTINF:-1 tvg-id="ReteTVItalia.it@SD" group-title="Italy | Other",Rete TV Italia (1080p)
+https://57068da1deb21.streamlock.net/retetvitalia/retetvitalia/playlist.m3u8
+#EXTINF:-1 tvg-id="Reteveneta.it@SD" group-title="Italy | Other",Reteveneta (480p)
+https://59d7d6f47d7fc.streamlock.net/reteveneta/reteveneta/playlist.m3u8
+#EXTINF:-1 tvg-id="RossiniTV.it@SD" group-title="Italy | Other",Rossini TV (720p)
+https://5cbd3bc28341f.streamlock.net:444/rossinitv_live/944A-63A6-9EB8-4492/playlist.m3u8
+#EXTINF:-1 tvg-id="RTCTelecalabria.it@SD" group-title="Italy | Other",RTC Telecalabria (720p) [Not 24/7]
+http://fl1.mediastreaming.it:1935/calabriachannel/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="RTCTelecalabria.it@SD" group-title="Italy | Other",RTC Telecalabria (720p) [Not 24/7]
+https://w1.mediastreaming.it/calabriachannel/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="RTL1025Best.it@SD" group-title="Italy | Other",RTL 102.5 Best (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S76960628/OEPHRUIctA0M/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RTL1025BroSis.it@SD" group-title="Italy | Other",RTL 102.5 Bro&Sis (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S75007890/MUGHuxc9dQ3b/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RTL1025Caliente.it@SD" group-title="Italy | Other",RTL 102.5 Caliente (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S8448465/zTYa1Z5Op9ue/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RTL1025Disco.it@SD" group-title="Italy | Other",RTL 102.5 Disco (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S51100361/0Fb4R3k82b5Z/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RTL1025Napule.it@SD" group-title="Italy | Other",RTL 102.5 Napulè (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S27134503/0f9AhuwKlhnZ/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RTL1025Traffic.it@SD" group-title="Italy | Other",RTL 102.5 Traffic (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S38122967/2lyQRIAAGgRR/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RTL1025TV.it@SD" group-title="Italy | Other",RTL 102.5 TV (1080p)
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RTMTV.it@SD" group-title="Italy | Other",RTM TV (1080p)
+https://5f22d76e220e1.streamlock.net/rtm/rtm/playlist.m3u8
+#EXTINF:-1 tvg-id="RTP.it@SD" group-title="Italy | Other",RTP (404p)
+https://flash2.xdevel.com/rtptv/rtptv/playlist.m3u8
+#EXTINF:-1 tvg-id="RTTRTrento.it@SD" group-title="Italy | Other",RTTR Trento (720p)
+https://5f204aff97bee.streamlock.net/RTTRlive/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="RTV38.it@SD" group-title="Italy | Other",RTV38 (576p)
+https://845d8509d2cb4f249dd0b2ae5755b6c2.msvdn.net/rtv38/rtv38_live_main/mainabr/rtv38_live_main/main_576/chunks_dvr.m3u8
+#EXTINF:-1 tvg-id="RTV38.it@SD" group-title="Italy | Other",RTV38 (576p)
+https://streamcdne1-845d8509d2cb4f249dd0b2ae5755b6c2.msvdn.net/rtv38/rtv38_live_main/mainabr/rtv38_live_main/main_576/chunks_dvr.m3u8
+#EXTINF:-1 tvg-id="SL48TV.it@SD" group-title="Italy | Other",SL48 TV (576p)
+http://media.velcom.it:1935/sl48/sl48/playlist.m3u8
+#EXTINF:-1 tvg-id="STEuropeChannel.it@SD" group-title="Italy | Other",ST Europe Channel (720p)
+https://5f22d76e220e1.streamlock.net/steuropetv/steuropetv/playlist.m3u8
+#EXTINF:-1 tvg-id="Stereo5TV.it@SD" group-title="Italy | Other",Stereo 5 TV (720p)
+https://stream1.aswifi.it/stereo5/live/index.m3u8
+#EXTINF:-1 tvg-id="SuperJTVTeramo.it@SD" group-title="Italy | Other",Super J TV (720p)
+https://54627d4fc5996.streamlock.net/SuperJtv/SuperJtv/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperJTVTeramo.it@SD" group-title="Italy | Other",Super J TV Teramo (720p) [Not 24/7]
+http://uk4.streamingpulse.com:1935/SuperJtv/SuperJtv/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperSix.it@SD" group-title="Italy | Other",SuperSix Lombardia (720p)
+https://5db313b643fd8.streamlock.net/SUPERSIXLombardia/SUPERSIXLombardia/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperTV.it@SD" group-title="Italy | Other",Super TV (720p)
+http://wms.shared.streamshow.it/supertv/mp4:supertv/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperTV.it@SD" group-title="Italy | Other",Super TV (720p)
+https://59d7d6f47d7fc.streamlock.net/supertv/supertv/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="Italy | Other",Super TV Brescia (720p)
+http://wms.shared.streamshow.it:1935/supertv/supertv/live.m3u8
+#EXTINF:-1 tvg-id="SuperTVOristano.it@SD" group-title="Italy | Other",Super TV Oristano (720p) [Not 24/7]
+http://193.70.81.40:1935/supertvoristano/supertvoristano/playlist.m3u8
+#EXTINF:-1 tvg-id="T9.it@SD" group-title="Italy | Other",T9 (288p)
+https://streaming.softwarecreation.it/tnove/tnove/playlist.m3u8
+#EXTINF:-1 tvg-id="TaurianovaTV.it@HD" group-title="Italy | Other",Taurianova TV (720p)
+https://5f22d76e220e1.streamlock.net/taurianovatv/taurianovatv/playlist.m3u8
+#EXTINF:-1 tvg-id="TeatroTV.it@SD" group-title="Italy | Other",Teatro TV (720p)
+https://m.iostream.it/hls/teatrotv/teatrotv.m3u8
+#EXTINF:-1 tvg-id="TeleAbruzzo.it@SD" group-title="Italy | Other",Tele Abruzzo (384p)
+http://uk4.streamingpulse.com:1935/TeleabruzzoTV/TeleabruzzoTV/playlist.m3u8
+#EXTINF:-1 tvg-id="Teleacras.it@SD" group-title="Italy | Other",Teleacras (576p)
+https://5cbd3bc28341f.streamlock.net:444/teleacras/live/playlist.m3u8
+#EXTINF:-1 tvg-id="TeleArena.it@SD" group-title="Italy | Other",TeleArena (480p)
+https://5ce9406b73c33.streamlock.net/TeleArena/TeleArena.stream/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="Italy | Other",TeleCampione [Geo-blocked]
+https://5f22d76e220e1.streamlock.net/telecampione/telecampione/playlist.m3u8
+#EXTINF:-1 tvg-id="TeleChiara.it@SD" group-title="Italy | Other",Telechiara (720p)
+http://fms.tvavicenza.it:1935/telechiara/diretta/playlist.m3u8
+#EXTINF:-1 tvg-id="TeleLiguriaSud.it@SD" group-title="Italy | Other",Tele Liguria Sud (576p)
+https://5f22d76e220e1.streamlock.net/tls/tls/playlist.m3u8
+#EXTINF:-1 tvg-id="TeleOne16.it@SD" group-title="Italy | Other",Tele One 16
+https://648026e87a75e.streamlock.net/teleone/teleone/playlist.m3u8
+#EXTINF:-1 tvg-id="Telepavia.it@SD" group-title="Italy | Other",Tele Pavia (720p)
+http://wms.shared.streamshow.it/telepavia/telepavia/playlist.m3u8
+#EXTINF:-1 tvg-id="TelePegasoCatania.it@SD" group-title="Italy | Other",Tele Pegaso Catania (404p) [Not 24/7]
+https://flash2.xdevel.com/telepegasocanale812/telepegasocanale812/playlist.m3u8
+#EXTINF:-1 tvg-id="TeleQuattro.it@SD" group-title="Italy | Other",Tele Quattro (480p) [Not 24/7]
+http://wms.shared.streamshow.it/telequattro/telequattro/playlist.m3u8
+#EXTINF:-1 tvg-id="TeleQuattro.it@SD" group-title="Italy | Other",Tele Quattro (720p)
+https://59d7d6f47d7fc.streamlock.net/telequattro/telequattro/playlist.m3u8
+#EXTINF:-1 tvg-id="TeleRadioSciacca.it@SD" group-title="Italy | Other",Tele Radio Sciacca (240p) [Not 24/7]
+http://5cbd3bc28341f.streamlock.net:1935/trs_live/teleradiosciacca-tv/playlist.m3u8
+
+# ===== JAPAN | ANIMATION =====
+#EXTINF:-1 tvg-id="" group-title="Japan | Animation",Animax (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs15
+
+# ===== JAPAN | KIDS =====
+#EXTINF:-1 tvg-id="DisneyChannel.jp@SD" group-title="Japan | Kids",Disney Channel Japan (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs24
+#EXTINF:-1 tvg-id="KidsStation.jp@SD" group-title="Japan | Kids",Kids Station (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs07
+
+# ===== JAPAN | MOVIES =====
+#EXTINF:-1 tvg-id="EiseiGekijo.jp@SD" group-title="Japan | Movies",Eisei Gekijo (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs22
+#EXTINF:-1 tvg-id="FamilyGekijyo.jp@SD" group-title="Japan | Movies",Family Gekijo (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs20
+#EXTINF:-1 tvg-id="NihonEigaSenmonChannel.jp@SD" group-title="Japan | Movies",Nihon Eiga Senmon (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs23
+#EXTINF:-1 tvg-id="" group-title="Japan | Movies",Star 1 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs08
+#EXTINF:-1 tvg-id="StarChannel2.jp@SD" group-title="Japan | Movies",Star 2 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs27
+#EXTINF:-1 tvg-id="StarChannel3.jp@SD" group-title="Japan | Movies",Star 3 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs28
+#EXTINF:-1 tvg-id="ToeiChannel.jp@SD" group-title="Japan | Movies",Toei Channel (1080p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs27
+#EXTINF:-1 tvg-id="WOWOWCinema.jp@SD" group-title="Japan | Movies",WOWOW Cinema (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs07
+
+# ===== JAPAN | NEWS =====
+#EXTINF:-1 tvg-id="NHKKishouSaigai.jp@SD" group-title="Japan | News",NHK Kishou Saigai (360p) [Not 24/7]
+https://newssimul-stream.nhk.jp/hls/live/2010561/nhknewssimul/master.m3u8
+#EXTINF:-1 tvg-id="NHKWorldJapan.jp@HD" group-title="Japan | News",NHK World-Japan HD (1080p) [Geo-blocked]
+https://nhk.lls.pbs.org/index.m3u8
+#EXTINF:-1 tvg-id="NHKWorldJapan.jp@SD" group-title="Japan | News",NHK World-Japan
+https://liveh12.vtvprime.vn/hls/NHKWORLD/03.m3u8
+#EXTINF:-1 tvg-id="NHKWorldJapan.jp@SD" group-title="Japan | News",NHK World-Japan (1080p)
+https://livehub-voidnet.onrender.com/cluster/streamcore/jp/NHK_StreamOrchestrator.m3u8
+#EXTINF:-1 tvg-id="NHKWorldJapan.jp@SD" group-title="Japan | News",NHK World-Japan (1080p)
+https://masterpl.hls.nhkworld.jp/hls/w/live/smarttv.m3u8
+#EXTINF:-1 tvg-id="NHKWorldJapan.jp@SD" group-title="Japan | News",NHK World-Japan (720p)
+https://media-tyo.hls.nhkworld.jp/hls/w/live/master.m3u8
+#EXTINF:-1 tvg-id="TBSNewsCS.jp@SD" group-title="Japan | News",TBS News (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs11
+#EXTINF:-1 tvg-id="Weathernews.jp@SD" group-title="Japan | News",Weathernews (720p)
+https://weather-live-hls01e.akamaized.net/ade36978-4ad3-48de-91ab-7d6edd0b6388/11ed8ed8ca.ism/manifest(format=m3u8-aapl-v3,audio-only=false).m3u8
+
+# ===== JAPAN | SPORTS =====
+#EXTINF:-1 tvg-id="FishingVision.jp@SD" group-title="Japan | Sports",Fishing Vision (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs25
+#EXTINF:-1 tvg-id="GAORASPORTS.jp@SD" group-title="Japan | Sports",Gaora Sports (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs17
+#EXTINF:-1 tvg-id="GolfNetwork.jp@SD" group-title="Japan | Sports",Golf Network (540p)
+http://202.60.106.14:8080/1335/playlist.m3u8
+#EXTINF:-1 tvg-id="GolfNetwork.jp@SD" group-title="Japan | Sports",Golf Network (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs03
+#EXTINF:-1 tvg-id="GreenChannel.jp@SD" group-title="Japan | Sports",Green Channel (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs14
+#EXTINF:-1 tvg-id="JSPORTS1.jp@SD" group-title="Japan | Sports",J Sports 1 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs18
+#EXTINF:-1 tvg-id="JSPORTS2.jp@SD" group-title="Japan | Sports",J Sports 2 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs19
+#EXTINF:-1 tvg-id="JSPORTS3.jp@SD" group-title="Japan | Sports",J Sports 3 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs21
+#EXTINF:-1 tvg-id="JSPORTS4.jp@SD" group-title="Japan | Sports",J Sports 4 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs22
+#EXTINF:-1 tvg-id="NitteleGPlus.jp@SD" group-title="Japan | Sports",Nittele G Plus (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs02
+#EXTINF:-1 tvg-id="SkyA.jp@SD" group-title="Japan | Sports",Sky A (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs01
+
+# ===== JAPAN | OTHER =====
+#EXTINF:-1 tvg-id="BSAsahi.jp@SD" group-title="Japan | Other",BS Asahi (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs03
+#EXTINF:-1 tvg-id="BSFuji.jp@SD" group-title="Japan | Other",BS Fuji TV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs06
+#EXTINF:-1 tvg-id="BSNipponTV.jp@SD" group-title="Japan | Other",BS Nippon TV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs02
+#EXTINF:-1 tvg-id="BSShochikuTokyu.jp@SD" group-title="Japan | Other",BS Shochiku Tokyu (1080p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs31
+#EXTINF:-1 tvg-id="BSTBS.jp@SD" group-title="Japan | Other",BS TBS (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs04
+#EXTINF:-1 tvg-id="BSTVTokyo.jp@SD" group-title="Japan | Other",BS TV Tokyo (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs05
+#EXTINF:-1 tvg-id="CGNTVJapan.jp@SD" group-title="Japan | Other",CGNTV Japan (1080p)
+#EXTVLCOPT:http-referrer=http://japan.cgntv.net/HD_player_jp.html
+https://d2p4mrcwl6ly4.cloudfront.net/out/v1/8d50f69fdbbf411a8d302743e4263716/CGNWebLiveJP.m3u8
+#EXTINF:-1 tvg-id="CGNTVJapan.jp@SD" group-title="Japan | Other",CGNTV Japan (720p)
+http://cgntv-glive.ofsdelivery.net/live/cgntv_jp/playlist.m3u8
+#EXTINF:-1 tvg-id="ChannelGinga.jp@SD" group-title="Japan | Other",Channel Ginga (1080p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs29
+#EXTINF:-1 tvg-id="Dlife.jp@SD" group-title="Japan | Other",Dlife (1080p)
+https://43.100.9.67/api/streams/live/cs312/1080p/mpegts
+#EXTINF:-1 tvg-id="JOCXDTV.jp@SD" group-title="Japan | Other",Fuji TV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gd05
+#EXTINF:-1 tvg-id="FujiTVNEXT.jp@SD" group-title="Japan | Other",Fuji TV NEXT (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs26
+#EXTINF:-1 tvg-id="" group-title="Japan | Other",Gaki no Tsukai (English Subs) (720p)
+https://hamada.gaki-no-tsukai.stream/hls/test.m3u8
+#EXTINF:-1 tvg-id="GSTV.jp@SD" group-title="Japan | Other",GSTV (720p)
+https://japaneast.av.mk.io/mediakindcdn-mediakind/b8278d70-0a5f-400c-9b16-c7acf7004355/index.qfm/manifest(format=m3u8-cmaf)
+#EXTINF:-1 tvg-id="History.jp@SD" group-title="Japan | Other",History Channel Japan (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs09
+#EXTINF:-1 tvg-id="HomeDramaChannel.jp@SD" group-title="Japan | Other",Home Drama Channel (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs05
+#EXTINF:-1 tvg-id="JOABDTV.jp@SD" group-title="Japan | Other",JOAB-DTV
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gd02
+#EXTINF:-1 tvg-id="JOAXDTV.jp@SD" group-title="Japan | Other",Nippon TV (540p) [Not 24/7]
+https://ntv4.mov3.co/hls/ntv.m3u8
+#EXTINF:-1 tvg-id="JODXDTV.jp@SD" group-title="Japan | Other",Kansai TV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gx03
+#EXTINF:-1 tvg-id="JOMXDTV.jp@SD" group-title="Japan | Other",Tokyo MX1 (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gd08
+#EXTINF:-1 tvg-id="JOIXDTV.jp@SD" group-title="Japan | Other",YTV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gx04
+#EXTINF:-1 tvg-id="JOBHDTV.jp@SD" group-title="Japan | Other",TV Osaka (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gx05
+#EXTINF:-1 tvg-id="JOBKDTV.jp@SD" group-title="Japan | Other",NHK G (Osaka) (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gx06
+#EXTINF:-1 tvg-id="JOOYDTV.jp@SD" group-title="Japan | Other",MBS (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gx01
+#EXTINF:-1 tvg-id="JORXDTV.jp@SD" group-title="Japan | Other",JORX-DTV
+https://tbs5.mov3.co/hls/tbs.m3u8
+#EXTINF:-1 tvg-id="JOTXDTV.jp@SD" group-title="Japan | Other",TV Tokyo (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gd07
+#EXTINF:-1 tvg-id="JOUHDTV.jp@SD" group-title="Japan | Other",Sun TV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=gx07
+#EXTINF:-1 tvg-id="KayoPops.jp@SD" group-title="Japan | Other",Kayo Pops (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs13
+#EXTINF:-1 tvg-id="MTV.jp@SD" group-title="Japan | Other",MTV Japan (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs18
+#EXTINF:-1 tvg-id="MusicJapanTV.jp@SD" group-title="Japan | Other",Music Japan TV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs06
+#EXTINF:-1 tvg-id="NationalGeographic.jp@SD" group-title="Japan | Other",National Geographic Japan (1080p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs10
+#EXTINF:-1 tvg-id="NHKBS.jp@SD" group-title="Japan | Other",NHK BS
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs11
+#EXTINF:-1 tvg-id="NHKBSP4K.jp@SD" group-title="Japan | Other",NHK BSP4K (1080p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs01
+#EXTINF:-1 tvg-id="NHKWorldPremium.jp@SD" group-title="Japan | Other",NHK World Premium (720p) [Not 24/7]
+https://cdn.nhkworld.jp/www11/nhkworld-tv/pre/hlscomp.m3u8
+#EXTINF:-1 tvg-id="QVC.jp@SD" group-title="Japan | Other",QVC Japan (720p)
+https://cdn-live1.qvc.jp/iPhone/1501/1501.m3u8
+#EXTINF:-1 tvg-id="ShopChannel.jp@SD" group-title="Japan | Other",Shop Channel (1080p) [Not 24/7]
+https://stream3.shopch.jp/HLS/master.m3u8
+#EXTINF:-1 tvg-id="SpaceShowerTV.jp@SD" group-title="Japan | Other",Space Shower TV (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs26
+#EXTINF:-1 tvg-id="TAKARAZUKASKYSTAGE.jp@SD" group-title="Japan | Other",TAKARAZUKA SKY STAGE (1080p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=cs28
+#EXTINF:-1 tvg-id="WOWOWLive.jp@SD" group-title="Japan | Other",WOWOW Live
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs20
+#EXTINF:-1 tvg-id="WOWOWPrime.jp@SD" group-title="Japan | Other",WOWOW Prime (544p)
+http://cdns.jp-primehome.com:8000/zhongying/live/playlist.m3u8?cid=bs12
+
+# ===== UNITED STATES | ANIMATION =====
+#EXTINF:-1 tvg-id="" group-title="United States | Animation",Power Rangers (1080p) [Geo-blocked]
+https://amg00461-eone-amg00461c2-firetv-us-5210.playouts.now.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="YuGiOh.us@SD" group-title="United States | Animation",Yu-Gi-Oh! (1080p)
+https://amg01796-amg01796c19-rakuten-gb-7486.playouts.now.amagi.tv/playlist/amg01796-fastmediafast-yugioh2en-rakutengb/playlist.m3u8
+
+# ===== UNITED STATES | KIDS =====
+#EXTINF:-1 tvg-id="DisneyChannel.us@East" group-title="United States | Kids",Disney Channel
+http://104.255.88.155/disney/playlist.m3u8
+#EXTINF:-1 tvg-id="DisneyChannel.us@East" group-title="United States | Kids",Disney Channel
+https://moviezona593.com:8443/play/cO7SMyYsfVeNHbC5IQqRpHzyzgpISTmz_ch_ZVKDwht95XgI8UhySeZgp7szKj3V/m3u8
+#EXTINF:-1 tvg-id="Nickelodeon.us@East" group-title="United States | Kids",Nickelodeon (576i)
+http://79.127.207.193/Nickelodeon/playlist.m3u8
+#EXTINF:-1 tvg-id="NickelodeonLatinAmerica.us@North" group-title="United States | Kids",Nickelodeon Latin America North (480p)
+http://201.217.246.42:44310/Live/3fcb6e26785fd8d415571b26dc3cf5d3/local-33_480.m3u8
+#EXTINF:-1 tvg-id="NickelodeonLatinAmerica.us@Panregional" group-title="United States | Kids",Nickelodeon Latin America
+#EXTVLCOPT:http-referrer=https://www.nickelodeon.la/
+http://201.217.246.42:44310/Live/d93a7c495cb5f5d236b25a3ffea95003/local-35.playlist.m3u8
+#EXTINF:-1 tvg-id="PBSKids.us@SD" group-title="United States | Kids",PBS Kids (720p)
+https://livestream.pbskids.org/out/v1/14507d931bbe48a69287e4850e53443c/est.m3u8
+
+# ===== UNITED STATES | MOVIES =====
+#EXTINF:-1 tvg-id="" group-title="United States | Movies",Cine en Espanol (720p) [Geo-blocked]
+https://amg02724-somos-amg02724c1-klowdtv-us-2002.playouts.now.amagi.tv/playlist/amg02724-somosfast-cineenespanol-klowdtvus/playlist.m3u8
+#EXTINF:-1 tvg-id="UniversalCinema.us@SD" group-title="United States | Movies",Universal Cinema (480p)
+http://190.2.212.209:8050/play/a0q3
+
+# ===== UNITED STATES | NEWS =====
+#EXTINF:-1 tvg-id="ABCNewsLive1.us@SD" group-title="United States | News",ABC News Live 1 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023560/abcnewshudson1/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive10.us@SD" group-title="United States | News",ABC News Live 10 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023569/abcnewshudson10/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive2.us@SD" group-title="United States | News",ABC News Live 2 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023561/abcnewshudson2/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive3.us@SD" group-title="United States | News",ABC News Live 3 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023562/abcnewshudson3/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive4.us@SD" group-title="United States | News",ABC News Live 4 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023563/abcnewshudson4/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive5.us@SD" group-title="United States | News",ABC News Live 5 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023564/abcnewshudson5/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive6.us@SD" group-title="United States | News",ABC News Live 6 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023565/abcnewshudson6/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive7.us@SD" group-title="United States | News",ABC News Live 7 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023566/abcnewshudson7/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive8.us@SD" group-title="United States | News",ABC News Live 8 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023567/abcnewshudson8/master_4000.m3u8
+#EXTINF:-1 tvg-id="ABCNewsLive9.us@SD" group-title="United States | News",ABC News Live 9 (720p)
+https://abcnews-streams.akamaized.net/hls/live/2023568/abcnewshudson9/master_4000.m3u8
+#EXTINF:-1 tvg-id="BloombergOriginals.us@SD" group-title="United States | News",Bloomberg Originals (1080p)
+https://86fdc85a.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnT3JpZ2luYWxzX0hMUw/playlist.m3u8
+#EXTINF:-1 tvg-id="BloombergOriginals.us@SD" group-title="United States | News",Bloomberg Originals (1080p)
+#EXTVLCOPT:http-referrer=https://www.bloomberg.com/originals
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0
+https://www.bloomberg.com/media-manifest/streams/originals-global.m3u8
+#EXTINF:-1 tvg-id="BloombergOriginals.us@US" group-title="United States | News",Bloomberg Originals (1080p)
+https://bloomberg.com/media-manifest/streams/qt.m3u8
+#EXTINF:-1 tvg-id="BloombergOriginals.us@US" group-title="United States | News",Bloomberg Originals (1080p)
+https://dai.google.com/linear/hls/event/jKwfd4apQcuxQtyRI9Q6-Q/master.m3u8
+#EXTINF:-1 tvg-id="BloombergTV.us@LiveEvent" group-title="United States | News",Bloomberg TV US Live Event (720p)
+https://bloomberg.com/media-manifest/streams/us-event.m3u8
+#EXTINF:-1 tvg-id="BloombergTV.us@PoliticsLiveEvent" group-title="United States | News",Bloomberg TV US Politics Live Event (720p)
+https://bloomberg.com/media-manifest/streams/politics.m3u8
+#EXTINF:-1 tvg-id="BloombergTV.us@Plus" group-title="United States | News",Bloomberg TV + (2160p)
+https://66e4bbba.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnVFZQbHVzX0hMUw/playlist.m3u8
+#EXTINF:-1 tvg-id="BloombergTV.us@Plus" group-title="United States | News",Bloomberg TV+ (1080p)
+https://bloomberg.com/media-manifest/streams/phoenix-us.m3u8
+#EXTINF:-1 tvg-id="BloombergTV.us@US" group-title="United States | News",Bloomberg TV US (720p)
+https://bloomberg.com/media-manifest/streams/us.m3u8
+#EXTINF:-1 tvg-id="FoxNewsChannel.us@SD" group-title="United States | News",Fox News Channel (144p)
+http://247preview.foxnews.com/hls/live/2020027/fncv3preview/primary.m3u8
+#EXTINF:-1 tvg-id="FoxNewsChannel.us@SD" group-title="United States | News",Fox News Channel (480p)
+http://41.205.93.154/FOX-NEWS/index.m3u8
+#EXTINF:-1 tvg-id="FoxNewsRadio.us@SD" group-title="United States | News",Fox News Radio (720p)
+https://radiovid.foxnews.com/hls/live/661547/RADIOVID/index.m3u8
+#EXTINF:-1 tvg-id="FoxWeather.us@SD" group-title="United States | News",Fox Weather (720p)
+https://247wlive.foxweather.com/stream/index.m3u8
+#EXTINF:-1 tvg-id="NBCNewsNOW.us@SD" group-title="United States | News",NBC News NOW (1080p)
+https://d1bl6tskrpq9ze.cloudfront.net/hls/master.m3u8?ads.xumo_channelId=99984003
+#EXTINF:-1 tvg-id="NBCNewsNOW.us@SD" group-title="United States | News",NBC News NOW (1080p)
+https://livehub-voidnet.onrender.com/cluster/streamcore/us/NBC_REDIS.m3u8
+#EXTINF:-1 tvg-id="" group-title="United States | News",NBC Chicago News (1080p)
+https://nbcu-nbcchicagonews-firetv.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="United States | News",NBCU Telemundo Florida (1080p)
+https://nbcu-telemundoflorida-firetv.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="United States | News",NBCU Telemundo North East (1080p)
+https://nbcu-telemundonortheast-firetv.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="United States | News",NBCU Telemundo Texas (1080p)
+https://nbcu-telemundotexas-firetv.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="" group-title="United States | News",NBCU Telemundo West (1080p)
+https://nbcu-telemundowest-firetv.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="TelemundoAlDia.us@HD" group-title="United States | News",Telemundo Al Dia
+https://d1rqgw5gocwo9i.cloudfront.net/manifest/3fec3e5cac39a52b2132f9c66c83dae043dc17d4/prod_default_xumo-nbcu-stitched/10a44c37-f976-4d2b-ab23-8637a7a094ca/3.m3u8
+
+# ===== UNITED STATES | SPORTS =====
+#EXTINF:-1 tvg-id="" group-title="United States | Sports",beIN SPORTS Xtra en Español (1080p)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0
+https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/bein-sports-xtra-en-espanol/playlist.m3u8?ads.vf=SylQdpcCl2O
+#EXTINF:-1 tvg-id="beINSPORTSXTRA.us@SD" group-title="United States | Sports",beIN SPORTS Xtra (1080p)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0
+https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/bein-sports-xtra/playlist.m3u8?ads.vf=kBQplLldqQO
+#EXTINF:-1 tvg-id="DirecTVSports.us@Panregional" group-title="United States | Sports",DirecTV Sports (1080p)
+https://latam-cache-sv2-cdn.latamlive.net/DS1_ENC_LIVE/index.mpd
+#EXTINF:-1 tvg-id="ESPNDeportes.us@SD" group-title="United States | Sports",ESPN Deportes (360p)
+http://Tdo@origin.thetvapp.to/hls/espn-deportes/mono.m3u8
+#EXTINF:-1 tvg-id="FanDuelRacing.us@SD" group-title="United States | Sports",FanDuel Racing
+https://d3ehq1uaxory6w.cloudfront.net/out/v1/35c05f080f4e49a4b4eb031b5a14e505/TVG2index_2.m3u8
+#EXTINF:-1 tvg-id="FanDuelTV.us@SD" group-title="United States | Sports",FanDuel TV (720p)
+https://d2jl8r92tdc3f1.cloudfront.net/out/v1/59419700344b4625b7cb0693ba265ea3/TVGindex_1.m3u8
+#EXTINF:-1 tvg-id="FoxSports3LatinAmerica.us@Panregional" group-title="United States | Sports",Fox Sports 3 Latin America (1080p)
+http://201.217.246.42:44310/Live/b10474c9b1ba4a0986b574d1211c065b/local-92.playlist.m3u8
+#EXTINF:-1 tvg-id="GolfChannelLatinAmerica.us@SD" group-title="United States | Sports",Golf Channel Latin America
+http://181.114.57.246:4000/play/BHGDIhvdyuw/index.m3u8
+#EXTINF:-1 tvg-id="NBCSportsNOW.us@SD" group-title="United States | Sports",NBC Sports NOW (1080p)
+https://d4whmvwm0rdvi.cloudfront.net/10007/99993008/hls/master.m3u8?ads.xumo_channelId=99993008
+#EXTINF:-1 tvg-id="TUDN.us@SD" group-title="United States | Sports",TUDN (1080p) [Geo-blocked]
+https://streaming-live-fcdn.api.prd.univisionnow.com/tudn/tudn.isml/hls/tudn.m3u8
+
+# ===== UNITED STATES | OTHER =====
+#EXTINF:-1 tvg-id="WFTVDT1.us@SD" group-title="United States | Other",ABC 9 Orlando FL (WFTV) (720p)
+https://amg00327-coxmediagroup-wftvbreaking-ono-hec7b.amagi.tv/playlist/amg00327-coxmediagroup-wftvbreaking-ono/playlist.m3u8
+#EXTINF:-1 tvg-id="AELatinAmerica.us@South" group-title="United States | Other",A&E Latin America South (480p)
+http://201.217.246.42:44310/Live/3fcb6e26785fd8d415571b26dc3cf5d3/local-71_480.m3u8
+#EXTINF:-1 tvg-id="AtlantaChannel.us@SD" group-title="United States | Other",Atlanta Channel (720p)
+http://media4.tripsmarter.com:1935/LiveTV/ACVBHD/playlist.m3u8
+#EXTINF:-1 tvg-id="AtlantaChannel.us@SD" group-title="United States | Other",Atlanta Channel (720p)
+https://5b0f5374bdf0c.streamlock.net:444/LiveTV/ATLHD/playlist.m3u8
+#EXTINF:-1 tvg-id="WATCDT1.us@SD" group-title="United States | Other",Atlanta's 57 WATC 57.1 (720p)
+https://uni01rtmp.tulix.tv/watc57/watc57/playlist.m3u8
+#EXTINF:-1 tvg-id="WATCDT2.us@SD" group-title="United States | Other",Atlanta's 57 WATC TOO 57.2 (720p)
+https://uni01rtmp.tulix.tv/watc57-2/watc57-2/playlist.m3u8
+#EXTINF:-1 tvg-id="CatholicTV.us@SD" group-title="United States | Other",Catholic TV (1080p)
+https://catholictvhd-lh.akamaized.net/hls/live/2043390/CTVLiveHD/master.m3u8
+#EXTINF:-1 tvg-id="CBNEspanol.us@SD" group-title="United States | Other",CBN Espanol (1080p)
+https://fastly.live.brightcove.com/6383462549112/us-east-1/734546207001/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJob3N0IjoiczFpM3ZpLmVncmVzcy50N2M3emwiLCJhY2NvdW50X2lkIjoiNzM0NTQ2MjA3MDAxIiwiZWhuIjoiZmFzdGx5LmxpdmUuYnJpZ2h0Y292ZS5jb20iLCJpc3MiOiJibGl2ZS1wbGF5YmFjay1zb3VyY2UtYXBpIiwic3ViIjoicGF0aG1hcHRva2VuIiwiYXVkIjpbIjczNDU0NjIwNzAwMSJdLCJqdGkiOiI2MzgzNDYyNTQ5MTEyIn0.g04lznsvgqgIXQt2ZH0H_tWtIeTsMgGjVORsjOJ0T6U/playlist-hls.m3u8
+#EXTINF:-1 tvg-id="ComedyCentralLatinAmerica.us@Panregional" group-title="United States | Other",Comedy Central Latin America (1080p)
+http://201.217.246.42:44310/Live/3fcb6e26785fd8d415571b26dc3cf5d3/local-60.playlist.m3u8
+#EXTINF:-1 tvg-id="Freeform.us@East" group-title="United States | Other",Freeform (720p) [Geo-blocked]
+https://tvpass.org/live/FreeformEast/hd
+#EXTINF:-1 tvg-id="FreeSpeechTV.us@SD" group-title="United States | Other",Free Speech TV (720p)
+https://edge.fstv-live-linear-channel.top.comcast.net/Content/HLS_HLSv3/Live/channel(b168a609-19c1-2203-ae1d-6b9726f05e67)/index.m3u8
+#EXTINF:-1 tvg-id="GooderNationChannel32.us@West" group-title="United States | Other",Gooder Nation Channel 32 (720p) [Not 24/7]
+https://ssh101stream.ssh101.com/akamaissh101/ssh101/channel32/playlist.m3u8
+#EXTINF:-1 tvg-id="HistoryenEspanol.us@SD" group-title="United States | Other",History en Español (480p)
+http://201.217.246.42:44310/Live/3fcb6e26785fd8d415571b26dc3cf5d3/local-40_480.m3u8
+#EXTINF:-1 tvg-id="LaMegaMundial.us@SD" group-title="United States | Other",La Mega Mundial
+https://server40.servistreaming.com:3477/stream/play.m3u8
+#EXTINF:-1 tvg-id="LaQueBuenaAtlanta.us@SD" group-title="United States | Other",La Que Buena Atlanta
+https://streamyes.alsolnet.com/quebuenaatlanta/live/index.m3u8
+#EXTINF:-1 tvg-id="LifetimeLatinAmerica.us@Panregional" group-title="United States | Other",Lifetime Latin America (720p)
+http://201.217.246.42:44310/Live/3fcb6e26785fd8d415571b26dc3cf5d3/Lifetime_720.m3u8
+#EXTINF:-1 tvg-id="StarChannelLatinAmerica.us@South" group-title="United States | Other",Star Channel Latin America South (1080p)
+http://201.217.246.42:44310/Live/3fcb6e26785fd8d415571b26dc3cf5d3/local-68.playlist.m3u8
+#EXTINF:-1 tvg-id="TelemundoInternacional.us@South" group-title="United States | Other",Telemundo Internacional
+http://181.114.57.246:4000/play/XmUjm3NXcGJkvvQ8/index.m3u8
+#EXTINF:-1 tvg-id="TelemundoInternacional.us@South" group-title="United States | Other",Telemundo Internacional (720p)
+http://201.217.246.42:44310/Live/3fcb6e26785fd8d415571b26dc3cf5d3/local-26_720.m3u8
+#EXTINF:-1 tvg-id="UniversalComedy.us@SD" group-title="United States | Other",Universal Comedy (480p)
+http://190.2.212.209:8050/play/a0q4
+#EXTINF:-1 tvg-id="UnivisionTlnovelas.us@SD" group-title="United States | Other",Univision Tlnovelas [Not 24/7]
+https://moviezona593.com:8443/play/cO7SMyYsfVeNHbC5IQqRpHzyzgpISTmz_ch_ZVKDwhuebPX8UYW2fAiSlZGjGoPc/m3u8
+#EXTINF:-1 tvg-id="VallenatoInternacional.us@SD" group-title="United States | Other",Vallenato Internacional (720p) [Not 24/7]
+https://59a564764e2b6.streamlock.net/vallenato/vallenatom/playlist.m3u8
+
+# ===== VENEZUELA | NEWS =====
+#EXTINF:-1 tvg-id="MasTalk.ve@SD" group-title="Venezuela | News",Más Talk (1080p)
 https://vod2live.univtec.com/manifest/89290956-94ab-4950-accb-a54bbd7e176f.m3u8
-#EXTINF:-1 tvg-id="Telesur.ve@SD",Telesur (480p)
-https://mblesmain01.telesur.ultrabase.net/mbliveMain/480p/playlist.m3u8
-#EXTINF:-1 tvg-id="Telesur.ve@English",Telesur English (480p)
+#EXTINF:-1 tvg-id="Telesur.ve@English" group-title="Venezuela | News",Telesur English (480p)
 https://mblenmain01.telesur.ultrabase.net/mblivev3/480p/playlist.m3u8
-#EXTINF:-1 tvg-id="Telesur.ve@EnglishHD",Telesur English HD (1080p)
+#EXTINF:-1 tvg-id="Telesur.ve@EnglishHD" group-title="Venezuela | News",Telesur English HD (1080p)
 https://mblenmain01.telesur.ultrabase.net/mblivev3/hd/playlist.m3u8
-#EXTINF:-1 tvg-id="Telesur.ve@HD",Telesur HD (1080p)
+#EXTINF:-1 tvg-id="Telesur.ve@HD" group-title="Venezuela | News",Telesur HD (1080p)
 https://mblesmain01.telesur.ultrabase.net/mbliveMain/hd/playlist.m3u8
-#EXTINF:-1 tvg-id="UN24.ve@untv720",UN24 (720p)
+#EXTINF:-1 tvg-id="Telesur.ve@SD" group-title="Venezuela | News",Telesur (480p)
+https://mblesmain01.telesur.ultrabase.net/mbliveMain/480p/playlist.m3u8
+#EXTINF:-1 tvg-id="UN24.ve@untv720" group-title="Venezuela | News",UN24 (720p)
 #EXTVLCOPT:http-referrer=https://un24.tv/
 https://59d39900ebfb8.streamlock.net/untv-720/untv-720/playlist.m3u8
-#EXTINF:-1 tvg-id="VPItv.ve@SD",VPItv (1080p)
+#EXTINF:-1 tvg-id="VPItv.ve@SD" group-title="Venezuela | News",VPItv (1080p)
 https://ott3.streann.com/loadbalancer/services/public/channels/5d23d5882cdce61dae029fd8/playlist.m3u8
 
-# ===== SPORTS =====
-#EXTINF:-1 tvg-id="WinPlusFutbol.co@SD",Win+ Futbol (1080p)
-https://live20.bozztv.com/akamaissh101/ssh101/winsporplusco/playlist.m3u8
-#EXTINF:-1 tvg-id="AS3SportTV.ve@SD",AS3 Sport TV (1080p)
+# ===== VENEZUELA | SPORTS =====
+#EXTINF:-1 tvg-id="AS3SportTV.ve@SD" group-title="Venezuela | Sports",AS3 Sport TV (1080p)
 https://streamtv.as3sport.online:3394/hybrid/play.m3u8
-#EXTINF:-1 tvg-id="MeridianoTV.ve@SD",Meridiano TV (480p)
+#EXTINF:-1 tvg-id="MeridianoTV.ve@SD" group-title="Venezuela | Sports",Meridiano TV (480p)
 https://e1.viginet.vectormax.com:5210/quickstart/114-934-21/index.m3u8
 
-# ===== KIDS =====
-#EXTINF:-1 tvg-id="CanicaTV.co@SD",Canica TV (240p)
-https://stmv4.voxtvhd.com.br/canicatv/canicatv/playlist.m3u8
-#EXTINF:-1 tvg-id="Eureka.co@SD",Eureka (1080p) [Geo-blocked]
-https://mdstrm.com/live-stream-playlist/6952e02d19eabace52e2885f.m3u8
-
-# ===== ANIMATION =====
-#EXTINF:-1 tvg-id="MemoriasTVToons.co@SD",Memorias TV Toons (480p) [Geo-blocked]
-https://video.xtrematv.com:3812/live/memoriastoonslive.m3u8
-
-# ===== MOVIES =====
-#EXTINF:-1 tvg-id="MemoriasTVFilm.co@SD",Memorias TV Film (720p) [Geo-blocked]
-https://video.xtrematv.com:3725/live/memoriasfilmlive.m3u8
-#EXTINF:-1 tvg-id="MemoriasTVSeries.co@SD",Memorias TV Series (720p) [Geo-blocked]
-https://video.xtrematv.com:3633/live/memoriasserieslive.m3u8
-
-# ===== OTHER =====
-#EXTINF:-1 tvg-id="ATNTelevision.co@SD",ATN Televisión (720p) [Not 24/7]
-https://streaming5.globalhostla.com/rtplive/atntelevision/playlist.m3u8
-#EXTINF:-1 tvg-id="AvivamientoTV.co@SD",Avivamiento TV (1080p) [Not 24/7]
-https://s1.abntelevision.com/avivamientoabr/stream/avivamientohd/avivamientohd/playlist.m3u8
-#EXTINF:-1 tvg-id="BendicionChannel.co@HD",Bendicion Channel (720p)
-https://s.emisoras.tv:8081/bendicionchannel/index.m3u8
-#EXTINF:-1 tvg-id="BUMTelevision.co@SD",BUM Televisión (720p) [Not 24/7]
-https://movil.ejeserver.com/live/visiondorada.m3u8
-#EXTINF:-1 tvg-id="BUMTelevision.co@SD",BUM Televisión (720p) [Not 24/7]
-https://video.ejeserver.com/live/visiondorada.m3u8
-#EXTINF:-1 tvg-id="CaliTV.co@SD",Cali TV (540p) [Not 24/7]
-https://5ab772334c39c.streamlock.net/live-calitv/calitv1/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal1.co@SD",Canal 1 (1080p) [Geo-blocked]
-https://mdstrm.com/live-stream-playlist/5a5e1c2568b1910913db5fe2.m3u8
-#EXTINF:-1 tvg-id="Canal2AlpavisionNeiva.co@SD",Canal 2 Alpavisión Neiva (720p) [Not 24/7]
-https://stmv1.voxtvhd.com.br/alpavision/alpavision/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal8TVPlus.co@SD",Canal 8 TV+ (720p)
-https://movil.ejeserver.com/live/canal8tv.m3u8
-#EXTINF:-1 tvg-id="Canal8TVPlus.co@SD",Canal 8 TV+ (720p)
-https://video.ejeserver.com/live/canal8tv.m3u8
-#EXTINF:-1 tvg-id="Canal10SOLTV.co@SD",Canal 10 SOL TV (1080p)
-http://190.211.140.89:8081/SVTranscoder/SOLTVabr.stream/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal14Codazzi.co@SD",Canal 14 Codazzi (720p) [Not 24/7]
-https://eu1.servers10.com:8081/8056/index.m3u8
-#EXTINF:-1 tvg-id="Canal55TelemoriscoTV.co@SD",Canal 55 Telemorisco TV (720p)
-http://canal.mediaserver.com.co/live/telemorisco.m3u8
-#EXTINF:-1 tvg-id="CanalCalimaTV.co@SD",Canal Calima TV (720p)
-https://movil.ejeserver.com/live/calimatv.m3u8
-#EXTINF:-1 tvg-id="CanalDos.co@SD",Canal Dos Yopal (720p)
-http://131.221.41.94/hls/canal2.m3u8
-#EXTINF:-1 tvg-id="CanalInstitucional.co@SD",Canal Institucional (720p)
-https://streaming.rtvc.gov.co/TV_CanalInstitucional_live/smil:live.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="CanalMasTelevision.co@SD",Canal Más Televisión (720p)
-https://movil.ejeserver.com/live/teledoradahd.m3u8
-#EXTINF:-1 tvg-id="CanalMasTelevision.co@SD",Canal Más Televisión (720p)
-https://video.ejeserver.com/live/teledoradahd.m3u8
-#EXTINF:-1 tvg-id="CanalMundoVision.co@SD",Canal Mundo Visión (720p) [Not 24/7]
-https://movil.ejeserver.com/live/mundovisiontv.m3u8
-#EXTINF:-1 tvg-id="CanalMundoVision.co@SD",Canal Mundo Visión (720p) [Not 24/7]
-https://video.ejeserver.com/live/mundovisiontv.m3u8
-#EXTINF:-1 tvg-id="CanalNets.co@SD",Canal Nets (720p) [Not 24/7]
-https://movil.ejeserver.com/live/nets.m3u8
-#EXTINF:-1 tvg-id="CanalNets.co@SD",Canal Nets (720p) [Not 24/7]
-https://video.ejeserver.com/live/nets.m3u8
-#EXTINF:-1 tvg-id="CanalOracionConSon.co@SD",Canal Oración Con Son (1080p)
-https://canal.mediaserver.com.co/live/oracionconson.m3u8
-#EXTINF:-1 tvg-id="CanalSantaMartaTV.co@SD",Canal Santa Marta TV (720p)
-https://stream.amelbasoluciones.co/live/santamartalive.m3u8
-#EXTINF:-1 tvg-id="CanalTelefamilia.co@SD",Canal Telefamilia (360p) [Not 24/7]
-https://stmv2.voxtvhd.com.br/telefamilia/telefamilia/playlist.m3u8
-#EXTINF:-1 tvg-id="CanalTRO.co@SD",Canal TRO (1080p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/canaltro2live/smil:live.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="CanalTROPlus.co@SD",Canal TRO Plus (1080p) [Geo-blocked]
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/canaltro2live/smil:troplus.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="CanalTV3.co@SD",Canal TV3 (720p) [Not 24/7]
-https://streaming.telenetdigital.net.co:8086/canal3tv/stream.m3u8
-#EXTINF:-1 tvg-id="CitytvBogota.co@SD",Citytv Bogota (1080p)
-http://181.114.57.246:4000/play/u2H4dIJoRipgGI3A/index.m3u8
-#EXTINF:-1 tvg-id="CMBTelevision.co@SD",CMB Television (1080p)
-https://cdn1.cmbcolombia.tv/bethesda/video.m3u8
-#EXTINF:-1 tvg-id="CMBTelevision.co@SD",CMB Television (1080p)
-https://hls-m9hrfayq-livepush.akamaized.net/live_cdn/nsxlDfnVmUyEy/eme2QCj5oX02cY/index.m3u8
-#EXTINF:-1 tvg-id="CNCBugavision.co@SD",CNC Bugavisión (720p)
-https://movil.ejeserver.com/live/cncbuga.m3u8
-#EXTINF:-1 tvg-id="CNCBugavision.co@SD",CNC Bugavisión (720p)
-https://video.ejeserver.com/live/cncbuga.m3u8
-#EXTINF:-1 tvg-id="CNCChoco.co@SD",CNC Chocó (720p) [Not 24/7]
-https://hvtraficonew.ddns.net/corescomunicaciones/index.fmp4.m3u8
-#EXTINF:-1 tvg-id="CNCLaUnion.co@SD",CNC La Union (720p)
-https://live.amelbatv.co:81/cnclaunion/index.fmp4.m3u8
-#EXTINF:-1 tvg-id="CNCPereira.co@SD",CNC Pereira (720p)
-https://cloudvideo.servers10.com:8081/latinchaneltv/index.m3u8
-#EXTINF:-1 tvg-id="CNCSantanderdeQuilichao.co@SD",CNC Santander de Quilichao (480p)
-https://movil.ejeserver.com/live/cncsantander.m3u8
-#EXTINF:-1 tvg-id="CNCSantanderdeQuilichao.co@SD",CNC Santander de Quilichao (480p)
-https://video.ejeserver.com/live/cncsantander.m3u8
-#EXTINF:-1 tvg-id="CNCTulua.co@SD",CNC Tulua (1080p)
-https://live.amelbatv.co:81/cnctulualive/index.fmp4.m3u8
-#EXTINF:-1 tvg-id="Cosmovision.co@SD",Cosmovision (720p) [Geo-blocked]
-https://videohls2.cosmovision.tv/hls/sd.m3u8
-#EXTINF:-1 tvg-id="Cristovision.co@SD",Cristovision (720p)
-https://5fc584f3f19c9.streamlock.net/cristovision/videocristovision/playlist.m3u8
-#EXTINF:-1 tvg-id="CTVBarranquilla.co@SD",CTV Barranquilla (1080p)
-https://live.ctvbarranquilla.com/live/ctv-4ad31c89f3764bf0980e642bc12fd00a.m3u8
-#EXTINF:-1 tvg-id="CucutaRetroTV.co@SD",Cúcuta Retro TV [Not 24/7]
-https://mist01.homestream.fun/hls/ntvlive/0_1/index.m3u8
-#EXTINF:-1 tvg-id="Eduvision.co@SD",Eduvision (1080p)
-https://stmv3.voxtvhd.com.br/conex2/conex2/playlist.m3u8
-#EXTINF:-1 tvg-id="ElMundodelCampo.co@SD",El Mundo del Campo (720p)
-https://movil.ejeserver.com/live/elmundodelcampo.m3u8
-#EXTINF:-1 tvg-id="FrecuenciaFTV.co@SD",Frecuencia F TV (1080p)
-https://tv.frecuenciaf.com/live/envivo_1080p4000kbs/index.m3u8
-#EXTINF:-1 tvg-id="LaCantinaMemorias.co@SD",La Cantina Memorias (480p) [Geo-blocked]
-https://video.xtrematv.com:3208/live/memoriaslacantinalive.m3u8
-#EXTINF:-1 tvg-id="LaHermandadSalsera.co@SD",La Hermandad Salsera (1080p) [Not 24/7]
-https://streamlov.alsolnet.com/hermandadsalsera/live/playlist.m3u8
-#EXTINF:-1 tvg-id="LaKalle.co@SD",La Kalle (720p)
-https://mdstrm.com/live-stream-playlist/58d191f07290fbb058025843.m3u8
-#EXTINF:-1 tvg-id="LaMoradaRadioTV.co@SD",La Morada Radio TV (720p)
-https://movil.ejeserver.com/live/lamoradatv.m3u8
-#EXTINF:-1 tvg-id="LunaEstereo1064FM.co@SD",Luna Estéreo 106.4 FM (720p) [Not 24/7]
-https://servervideo.intermediacolombia.com:19360/kychbbfhdz/kychbbfhdz.m3u8
-#EXTINF:-1 tvg-id="MasNorteTV.co@SD",Mas Norte TV [Not 24/7]
-https://live.arnoproducciones.com/hls/norte.m3u8
-#EXTINF:-1 tvg-id="MasMusicaFM.co@SD",MasMusica FM (720p)
-https://movil.ejeserver.com/live/masmusica.m3u8
-#EXTINF:-1 tvg-id="MasMusicaFM.co@SD",MasMusica FM (720p)
-https://video.ejeserver.com/live/masmusica.m3u8
-#EXTINF:-1 tvg-id="MaxTV.co@HD",MaxTV [Not 24/7]
-https://inliveserver.com:1936/8078/8078/playlist.m3u8
-#EXTINF:-1 tvg-id="MCITelevision.co@SD",MCI Televisión (1080p)
-https://video.ejeserver.com/live/mcitelevision.m3u8
-#EXTINF:-1 tvg-id="MemoriasdelCorazon.co@SD",Memorias del Corazon (480p) [Geo-blocked]
-https://video.xtrematv.com:3401/live/grupomemoriaslive.m3u8
-#EXTINF:-1 tvg-id="MemoriasFMPopLatino.co@SD",Memorias FM Pop Latino (480p) [Geo-blocked]
-https://video.xtrematv.com:3891/live/memoriaspoplatinolive.m3u8
-#EXTINF:-1 tvg-id="MemoriasTVClassic.co@SD",Memorias TV Classic (480p) [Geo-blocked]
-https://video.xtrematv.com:3576/live/memoriasclassiclive.m3u8
-#EXTINF:-1 tvg-id="MemoriasTVTropical.co@SD",Memorias TV Tropical (480p) [Geo-blocked]
-https://video.xtrematv.com:3361/live/memoriastropicallive.m3u8
-#EXTINF:-1 tvg-id="MiGenteTV.co@SD",Mi Gente TV (720p) [Geo-blocked]
-https://byecableiptvnew3.ddns.net/ENVIVOMIGENTE/video.m3u8
-#EXTINF:-1 tvg-id="NSTV.co@SD",NSTV (1080p)
-https://sistemastr.tropicalmoonmedia.com/live/2C7CA6CECC9B8F8C3A07315FDA110936/21.m3u8
-#EXTINF:-1 tvg-id="NSTV.co@SD",NSTV (720p)
-http://138.186.23.7:22281/nstv/nstv/playlist.m3u8
-#EXTINF:-1 tvg-id="OasisTV.co@SD",Oasis TV (720p) [Not 24/7]
-https://5e85d90130e77.streamlock.net/6020/6020/playlist.m3u8
-#EXTINF:-1 tvg-id="OndambientalTV.co@SD",Ondambiental TV (360p)
-https://stmv4.voxtvhd.com.br/ondastereo/ondastereo/playlist.m3u8
-#EXTINF:-1 tvg-id="ParrandaVallenata.co@SD",Parranda Vallenata (720p)
-https://backupmaxmedia.hvmultiplay.com/hls/stream3/parrandavallenata.m3u8
-#EXTINF:-1 tvg-id="Reyali.co@SD",Reyali (614p)
-https://eu1.servers10.com:8081/8090/index.m3u8
-#EXTINF:-1 tvg-id="RioTelevision.co@SD",Rio Television (720p)
-https://stream.amelbasoluciones.co/live/riotv.m3u8
-#EXTINF:-1 tvg-id="SalsaGordaTelevision.co@SD",Salsa Gorda Television (1080p) [Not 24/7]
-https://live20.bozztv.com/akamaissh101/ssh101/qMUAZEy/playlist.m3u8
-#EXTINF:-1 tvg-id="SenalColombia.co@SD",Senal Colombia (720p)
-https://streaming.rtvc.gov.co/TV_Senal_Colombia_live/smil:live.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="SupermusicaTV.co@SD",Supermúsica TV (720p)
-https://backupmaxmedia.hvmultiplay.com/hls/stream4/supermusica.m3u8
-#EXTINF:-1 tvg-id="SuramTV.co@SD",Suram TV (1080p)
-https://livetv.305streamhd.com:3111/live/suramtvlive.m3u8
-#EXTINF:-1 tvg-id="SuramTV.co@SD",Suram TV (720p)
-https://us.streaminghd.cl/suramtv/index.m3u8
-#EXTINF:-1 tvg-id="TeleAmiga.co@SD",Tele Amiga (480p) [Not 24/7]
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/teleamigatvlive/smil:dvrlive.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="Tele MocoaCanal10.co@SD",Tele Mocoa Canal 10 (720p)
-https://live.amelbatv.co:81/telemocoalive/index.m3u8
-#EXTINF:-1 tvg-id="Teleantioquia.co@SD",Teleantioquia (720p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/teleantioquialive/smil:dvrlive.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="Telebolivar.co@SD",Telebolívar (720p)
-https://live20.bozztv.com/akamaissh101/ssh101/telebolivar/playlist.m3u8
-#EXTINF:-1 tvg-id="Telecafe.co@SD",Telecafe (1080p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta318.cdnmedia.tv/telecafelive/smil:rtmp01.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="Telecaribe.co@SD",Telecaribe (720p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/telecaribetvlive/smil:rtmp01.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="TelecaribePlus.co@SD",Telecaribe Plus (720p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/telecaribetvlive/smil:rtmp02.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="Teleislas.co@SD",Teleislas (486p) [Not 24/7]
-https://5ab772334c39c.streamlock.net/live-teleislas/teleislas/playlist.m3u8
-#EXTINF:-1 tvg-id="Telemedellin.co@SD",Telemedellin (720p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/tvtelemedellinlive/smil:rtmp01.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="Telepacifico.co@SD",Telepacífico (1080p) [Geo-blocked]
-https://play.cdn.enetres.net/6E5C615AA5FF4123ACAF0DAB57B7B8DC021/022/playlist.m3u8
-#EXTINF:-1 tvg-id="TeveColombia.co@SD",TeveColombia (720p) [Not 24/7]
-https://cloud6.livescast.com:3900/live/tevecolombialive.m3u8
-#EXTINF:-1 tvg-id="TeleVid.co@SD",Tele Vid (1080p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/televidtvlive/smil:rtmp01.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="Trece.co@SD",Trece (720p)
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160
-https://liveingesta118.cdnmedia.tv/trecetvlive/smil:rtmp01.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="TuUniversoTV.co@SD",Tu Universo TV (720p)
-https://5bf8041cb3fed.streamlock.net/TUUNIVERSOTV/TUUNIVERSOTV/playlist.m3u8
-#EXTINF:-1 tvg-id="TV3LaPlata.co@SD",TV3 La Plata (480p)
-https://live.amelbatv.co:81/teleopita/index.fmp4.m3u8
-#EXTINF:-1 tvg-id="TVPenol.co@SD",TV Penol (720p) [Not 24/7]
-https://live20.bozztv.com/akamaissh101/ssh101/tvpenol2026/playlist.m3u8
-#EXTINF:-1 tvg-id="TVRivera.co@SD",TV Rivera [Not 24/7]
-https://movil.ejeserver.com/live/tvrivera.m3u8
-#EXTINF:-1 tvg-id="TVRivera.co@SD",TV Rivera [Not 24/7]
-https://video.ejeserver.com/live/tvrivera.m3u8
-#EXTINF:-1 tvg-id="TVSanJorge.co@SD",TV San Jorge (1080p) [Not 24/7]
-https://asucap.com/livestream/asucap_envivo.m3u8
-#EXTINF:-1 tvg-id="UltraCasanareTV.co@SD",Ultra Casanare TV (1080p) [Not 24/7]
-https://eu1.servers10.com:8081/8072/index.m3u8
-#EXTINF:-1 tvg-id="UMCTV.co@SD",UMC TV (720p)
-https://streaming5.globalhostla.com/rtplive/unamirad/playlist.m3u8
-#EXTINF:-1 tvg-id="ViveTV.co@SD",Vive TV Colombia (1080p)
-http://192.144.113.132:1935/live/ViveTV/playlist.m3u8
-#EXTINF:-1 tvg-id="Zoom.co@SD",Zoom (1080p)
-https://canalzoom.smoothcloud.co:3027/live/canalzoombr1live.m3u8
-#EXTINF:-1 tvg-id="LaCheverisimaRadioTV.co@SD",La Cheverisima Radio TV (720p)
-https://byecablecluster.ddns.net/neira/neira.stream/index.fmp4.m3u8
-#EXTINF:-1 tvg-id="Telesangil.co@SD",Telesangil (720p)
-https://live20.bozztv.com/akamaissh101/ssh101/telesangil/playlist.m3u8
-#EXTINF:-1 tvg-id="CanalPyC.co@SD",Canal PyC (720p)
-https://live20.bozztv.com/akamaissh101/ssh101/pyctelevision/playlist.m3u8
-#EXTINF:-1 tvg-id="KaluTV.co@SD",Kalu TV (1080p)
-https://tv.kaludecolombia.com/memfs/d71c0104-4752-4690-bdbf-19aa849da6c4.m3u8
-#EXTINF:-1 tvg-id="AguacateTV.ve@SD",Aguacate TV (1080p)
+# ===== VENEZUELA | OTHER =====
+#EXTINF:-1 tvg-id="AguacateTV.ve@SD" group-title="Venezuela | Other",Aguacate TV (1080p)
 https://streamtv.intervenhosting.net:3040/hybrid/play.m3u8
-#EXTINF:-1 tvg-id="AlcanceTV.ve@SD",Alcance TV (720p)
+#EXTINF:-1 tvg-id="AlcanceTV.ve@SD" group-title="Venezuela | Other",Alcance TV (720p)
 https://rv100.globalhost1.com:3516/live/tjjqdqurlive.m3u8
-#EXTINF:-1 tvg-id="AnzoateguiTV.ve@SD",Anzoátegui TV (360p) [Not 24/7]
+#EXTINF:-1 tvg-id="AnzoateguiTV.ve@SD" group-title="Venezuela | Other",Anzoátegui TV (360p) [Not 24/7]
 https://vcp2.myplaytv.com/anzoateguitv/anzoateguitv/playlist.m3u8
-#EXTINF:-1 tvg-id="AudazTV.ve@SD",Audaz TV (432p) [Not 24/7]
+#EXTINF:-1 tvg-id="AudazTV.ve@SD" group-title="Venezuela | Other",Audaz TV (432p) [Not 24/7]
 https://cloud2.streaminglivehd.com:1936/8264/8264/playlist.m3u8
-#EXTINF:-1 tvg-id="BarinasTV.ve@SD",Barinas TV (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="BarinasTV.ve@SD" group-title="Venezuela | Other",Barinas TV (720p) [Not 24/7]
 https://vcp13.myplaytv.com/barinastv/barinastv/playlist.m3u8
-#EXTINF:-1 tvg-id="BTATV.ve@SD",BTA TV (720p)
+#EXTINF:-1 tvg-id="BTATV.ve@SD" group-title="Venezuela | Other",BTA TV (720p)
 https://cloud.fastchannel.es/manifiest/hls/prog9/btatv.m3u8
-#EXTINF:-1 tvg-id="Canal21Tachira.ve@SD",Canal 21 Táchira (360p)
+#EXTINF:-1 tvg-id="Canal21Tachira.ve@SD" group-title="Venezuela | Other",Canal 21 Táchira (360p)
 https://stmv2.voxtvhd.com.br/canal21/canal21/playlist.m3u8
-#EXTINF:-1 tvg-id="CanalCdelZulia.ve@HD",Canal C Del Zulia (720p)
+#EXTINF:-1 tvg-id="CanalCdelZulia.ve@HD" group-title="Venezuela | Other",Canal C Del Zulia (720p)
 https://vs20.live.opencaster.com/cristianhilos_314b91b0/index.m3u8
-#EXTINF:-1 tvg-id="CanalOnce.ve@SD",Canal Once (480p)
+#EXTINF:-1 tvg-id="CanalOnce.ve@SD" group-title="Venezuela | Other",Canal Once (480p)
 #EXTVLCOPT:http-referrer=https://canal11delzulia.com/
 https://tv.streamcasthd.com:3676/live/canal11delzulialive.m3u8
-#EXTINF:-1 tvg-id="CatatumboTV.ve@SD",Catatumbo TV (406p)
+#EXTINF:-1 tvg-id="CatatumboTV.ve@SD" group-title="Venezuela | Other",Catatumbo TV (406p)
 https://cloud.fastchannel.es/manifiest/hls/prog9/catatumbotv.m3u8
-#EXTINF:-1 tvg-id="ChivacoaTVInternacional.ve@SD",Chivacoa TV Internacional (720p)
+#EXTINF:-1 tvg-id="ChivacoaTVInternacional.ve@SD" group-title="Venezuela | Other",Chivacoa TV Internacional (720p)
 https://live20.bozztv.com/akamaissh101/ssh101/1234chivacoa/chunks.m3u8
-#EXTINF:-1 tvg-id="EXCTV.ve@SD",Explosión Creativa (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="EXCTV.ve@SD" group-title="Venezuela | Other",Explosión Creativa (720p) [Not 24/7]
 https://vcp.myplaytv.com/explosioncreativa/explosioncreativa/playlist.m3u8
-#EXTINF:-1 tvg-id="FortunaTV.ve@SD",Fortuna TV (1080p)
+#EXTINF:-1 tvg-id="FortunaTV.ve@SD" group-title="Venezuela | Other",Fortuna TV (1080p)
 https://streamtv.intervenhosting.net:3355/live/fortunatvlive.m3u8
-#EXTINF:-1 tvg-id="GlobalTV.ve@SD",GlobalTV (480p) [Not 24/7]
+#EXTINF:-1 tvg-id="GlobalTV.ve@SD" group-title="Venezuela | Other",GlobalTV (480p) [Not 24/7]
 https://streamtv.intervenhosting.net:3179/live/globaltvlive.m3u8
-#EXTINF:-1 tvg-id="GrandeTV.ve@SD",Grande TV (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="GrandeTV.ve@SD" group-title="Venezuela | Other",Grande TV (720p) [Not 24/7]
 https://live20.bozztv.com/akamaissh101/ssh101/grandetv2240/playlist.m3u8
-#EXTINF:-1 tvg-id="GuaroTV.ve@SD",Guaro TV (720p)
+#EXTINF:-1 tvg-id="GuaroTV.ve@SD" group-title="Venezuela | Other",Guaro TV (720p)
 https://streamtv.intervenhosting.net:3592/stream/play.m3u8
-#EXTINF:-1 tvg-id="InterTV.ve@SD",interTV (1080p)
+#EXTINF:-1 tvg-id="InterTV.ve@SD" group-title="Venezuela | Other",interTV (1080p)
 https://streamtv.intervenhosting.net:3439/hybrid/play.m3u8
-#EXTINF:-1 tvg-id="IslaTV.ve@SD",Isla TV (480p)
+#EXTINF:-1 tvg-id="IslaTV.ve@SD" group-title="Venezuela | Other",Isla TV (480p)
 https://59d39900ebfb8.streamlock.net/islatv/islatv/playlist.m3u8
-#EXTINF:-1 tvg-id="Italianissimo.ve@SD",Italianissimo (360p) [Not 24/7]
+#EXTINF:-1 tvg-id="Italianissimo.ve@SD" group-title="Venezuela | Other",Italianissimo (360p) [Not 24/7]
 https://vcp.myplaytv.com/italianissimo/italianissimo/playlist.m3u8
-#EXTINF:-1 tvg-id="KandelaTV.ve@SD",KandelaTV (480p)
+#EXTINF:-1 tvg-id="KandelaTV.ve@SD" group-title="Venezuela | Other",KandelaTV (480p)
 https://streamtv.intervenhosting.net:3718/live/kandelamedioslive.m3u8
-#EXTINF:-1 tvg-id="LatinaTV.ve@SD",Latina TV (1080p)
+#EXTINF:-1 tvg-id="LatinaTV.ve@SD" group-title="Venezuela | Other",Latina TV (1080p)
 https://streamtv.latinamedios.com:3413/live/latinatvlive.m3u8
-#EXTINF:-1 tvg-id="LGDTelevision.ve@SD",LGD Television (720p)
+#EXTINF:-1 tvg-id="LGDTelevision.ve@SD" group-title="Venezuela | Other",LGD Television (720p)
 https://streamtv.intervenhosting.net:3403/hybrid/play.m3u8
-#EXTINF:-1 tvg-id="MonagasVision.ve@SD",Monagas Visión (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="MonagasVision.ve@SD" group-title="Venezuela | Other",Monagas Visión (720p) [Not 24/7]
 https://cloud2.streaminglivehd.com:1936/monagasvision-2/monagasvision-2/playlist.m3u8
-#EXTINF:-1 tvg-id="NortenaTv.ve@HD",Norteña TV
+#EXTINF:-1 tvg-id="NortenaTv.ve@HD" group-title="Venezuela | Other",Norteña TV
 https://vs20.live.opencaster.com/nortena933fm_00010364/index.m3u8
-#EXTINF:-1 tvg-id="OasisTelevision.ve@SD",Oasis Televisión (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="OasisTelevision.ve@SD" group-title="Venezuela | Other",Oasis Televisión (720p) [Not 24/7]
 http://vcp1.myplaytv.com/oasistv/oasistv/playlist.m3u8
-#EXTINF:-1 tvg-id="OnzaTV.ve@SD",Onza TV (720p)
+#EXTINF:-1 tvg-id="OnzaTV.ve@SD" group-title="Venezuela | Other",Onza TV (720p)
 https://stmv1.srvstm.com/gproducciones/gproducciones/playlist.m3u8
-#EXTINF:-1 tvg-id="OxigenoTV.ve@SD",Oxigeno TV (360p) [Not 24/7]
+#EXTINF:-1 tvg-id="OxigenoTV.ve@SD" group-title="Venezuela | Other",Oxigeno TV (360p) [Not 24/7]
 https://vcp.myplaytv.com/oxigenotv/oxigenotv/playlist.m3u8
-#EXTINF:-1 tvg-id="PlousTV.ve@SD",Plous TV (1080p)
+#EXTINF:-1 tvg-id="PlousTV.ve@SD" group-title="Venezuela | Other",Plous TV (1080p)
 https://vcp.myplaytv.com/glowtv/glowtv/playlist.m3u8
-#EXTINF:-1 tvg-id="PortuguesaTelevision.ve@SD",PortuTV (480p) [Not 24/7]
+#EXTINF:-1 tvg-id="PortuguesaTelevision.ve@SD" group-title="Venezuela | Other",PortuTV (480p) [Not 24/7]
 https://streamtv.intervenhosting.net:3789/live/portutvlive.m3u8
-#EXTINF:-1 tvg-id="ProclamacionTV.ve@SD",Proclamación TV [Not 24/7]
+#EXTINF:-1 tvg-id="ProclamacionTV.ve@SD" group-title="Venezuela | Other",Proclamación TV [Not 24/7]
 https://video2.getstreamhosting.com:19360/8000/8000.m3u8
-#EXTINF:-1 tvg-id="PromarTV.ve@SD",PromarTV (1080p) [Not 24/7]
+#EXTINF:-1 tvg-id="PromarTV.ve@SD" group-title="Venezuela | Other",PromarTV (1080p) [Not 24/7]
 http://vcp1.myplaytv.com:1935/promar/promar/playlist.m3u8
-#EXTINF:-1 tvg-id="PromarTV.ve@SD",PromarTV (576p)
+#EXTINF:-1 tvg-id="PromarTV.ve@SD" group-title="Venezuela | Other",PromarTV (576p)
 https://vcp.myplaytv.com/promar/promar/playlist.m3u8
-#EXTINF:-1 tvg-id="ReformaTV.ve@SD",Reforma TV (1080p)
+#EXTINF:-1 tvg-id="ReformaTV.ve@SD" group-title="Venezuela | Other",Reforma TV (1080p)
 https://5bf8041cb3fed.streamlock.net/ReformaTV/ReformaTV/playlist.m3u8
-#EXTINF:-1 tvg-id="SiembraTV.ve@SD",Siembra TV [Not 24/7]
+#EXTINF:-1 tvg-id="SiembraTV.ve@SD" group-title="Venezuela | Other",Siembra TV [Not 24/7]
 https://cloud2.streaminglivehd.com:1936/siembratv/siembratv/playlist.m3u8
-#EXTINF:-1 tvg-id="SomosTV.ve@SD",Somos TV (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="SomosTV.ve@SD" group-title="Venezuela | Other",Somos TV (720p) [Not 24/7]
 https://vcp3.myplaytv.com/somostv/somostv/playlist.m3u8
-#EXTINF:-1 tvg-id="TAMTV.ve@SD",TAM TV (720p)
+#EXTINF:-1 tvg-id="TAMTV.ve@SD" group-title="Venezuela | Other",TAM TV (240p)
+https://tv.webtuya.com:3726/live/tammeridalive.m3u8
+#EXTINF:-1 tvg-id="TAMTV.ve@SD" group-title="Venezuela | Other",TAM TV (720p)
 #EXTVLCOPT:http-referrer=https://tamtv.com.ve
 https://tv.webtuya.com:3726/hybrid/play.m3u8
-#EXTINF:-1 tvg-id="TAMTV.ve@SD",TAM TV (240p)
-https://tv.webtuya.com:3726/live/tammeridalive.m3u8
-#EXTINF:-1 tvg-id="TeleAragua.ve@SD",TeleAragua (480p)
+#EXTINF:-1 tvg-id="TeleAragua.ve@SD" group-title="Venezuela | Other",TeleAragua (480p)
 http://45.173.198.59:8080/hls/nginx3.m3u8?tla=
-#EXTINF:-1 tvg-id="Telebocono.ve@SD",Teleboconó (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="Telebocono.ve@SD" group-title="Venezuela | Other",Teleboconó (720p) [Not 24/7]
 https://ssh101stream.ssh101.com/akamaissh101/ssh101/tcbstreaming/playlist.m3u8
-#EXTINF:-1 tvg-id="Telecentro.ve@SD",Telecentro (720p)
-https://streamtv.intervenhosting.net:3161/live/telecentrolive.m3u8
-#EXTINF:-1 tvg-id="Telecentro.ve@SD",Telecentro (480p) [Not 24/7]
+#EXTINF:-1 tvg-id="Telecentro.ve@SD" group-title="Venezuela | Other",Telecentro (480p) [Not 24/7]
 https://streamtv.intervenhosting.net:3698/live/telecentrolive.m3u8
-#EXTINF:-1 tvg-id="Telecolor.ve@SD",Telecolor (480p)
+#EXTINF:-1 tvg-id="Telecentro.ve@SD" group-title="Venezuela | Other",Telecentro (720p)
+https://streamtv.intervenhosting.net:3161/live/telecentrolive.m3u8
+#EXTINF:-1 tvg-id="Telecolor.ve@SD" group-title="Venezuela | Other",Telecolor (480p)
 https://cloud.livescast.com:19360/telecolor/telecolor.m3u8
-#EXTINF:-1 tvg-id="TelevisoradeOriente.ve@SD",Televisora de Oriente (406p)
+#EXTINF:-1 tvg-id="TelevisoradeOriente.ve@SD" group-title="Venezuela | Other",Televisora de Oriente (406p)
 https://cloud.fastchannel.es/manifiest/hls/prog9/tvo.m3u8
-#EXTINF:-1 tvg-id="TNORadio.ve@SD",TNO Radio (720p)
+#EXTINF:-1 tvg-id="TNORadio.ve@SD" group-title="Venezuela | Other",TNO Radio (720p)
 https://stmv1.srvstm.com/tnovideo1/tnovideo1/playlist.m3u8
-#EXTINF:-1 tvg-id="TorococoTV.ve@SD",Torococo TV (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="TorococoTV.ve@SD" group-title="Venezuela | Other",Torococo TV (720p) [Not 24/7]
 https://us.streaminghd.cl/torococotelevision/video.m3u8
-#EXTINF:-1 tvg-id="TRT.ve@SD",TRT (410p) [Not 24/7]
+#EXTINF:-1 tvg-id="TRT.ve@SD" group-title="Venezuela | Other",TRT (410p) [Not 24/7]
 https://vcp12.myplaytv.com/trt/trt/playlist.m3u8
-#EXTINF:-1 tvg-id="TRV.ve@SD",TRV (480p)
+#EXTINF:-1 tvg-id="TRV.ve@SD" group-title="Venezuela | Other",TRV (480p)
 https://vcp3.myplaytv.com/trv/trv/playlist.m3u8
-#EXTINF:-1 tvg-id="TVAndes.ve@SD",TV Andes (720p) [Not 24/7]
+#EXTINF:-1 tvg-id="TVAndes.ve@SD" group-title="Venezuela | Other",TV Andes (720p) [Not 24/7]
 https://vcp3.myplaytv.com/tvandes/tvandes/playlist.m3u8
-#EXTINF:-1 tvg-id="TVFamilia.ve@SD",TV Familia (720p)
+#EXTINF:-1 tvg-id="TVFamilia.ve@SD" group-title="Venezuela | Other",TV Familia (720p)
 https://cloudusa.streamingconnect.com/tvfamiliatvbox/tvfamiliaweb.m3u8
-#EXTINF:-1 tvg-id="TVOasisMonay.ve@SD",TV Oasis Monay (486p)
+#EXTINF:-1 tvg-id="TVOasisMonay.ve@SD" group-title="Venezuela | Other",TV Oasis Monay (486p)
 https://live20.bozztv.com/akamaissh101/ssh101/oasistv123/playlist.m3u8
-#EXTINF:-1 tvg-id="TVMparati.ve@SD",TVM para ti (1080p)
+#EXTINF:-1 tvg-id="TVMparati.ve@SD" group-title="Venezuela | Other",TVM para ti (1080p)
 https://streamtv.intervenhosting.net:3529/live/tvmparatilive.m3u8
-#EXTINF:-1 tvg-id="TVS.ve@SD",TVS (720p)
+#EXTINF:-1 tvg-id="TVS.ve@SD" group-title="Venezuela | Other",TVS (720p)
 https://vcp10.myplaytv.com/tvs/tvs/playlist.m3u8
-#EXTINF:-1 tvg-id="UniTV.ve@SD",UniTV (720p)
+#EXTINF:-1 tvg-id="UniTV.ve@SD" group-title="Venezuela | Other",UniTV (720p)
 https://vcp6.myplaytv.com/unitv/unitv/playlist.m3u8
-#EXTINF:-1 tvg-id="ValeTV.ve@SD",Vale TV (480p) [Not 24/7]
+#EXTINF:-1 tvg-id="ValeTV.ve@SD" group-title="Venezuela | Other",Vale TV (480p) [Not 24/7]
 https://59d39900ebfb8.streamlock.net/valetv_480/valetv_480/playlist.m3u8
-#EXTINF:-1 tvg-id="ValeTV.ve@SD",Vale TV (480p) [Not 24/7]
+#EXTINF:-1 tvg-id="ValeTV.ve@SD" group-title="Venezuela | Other",Vale TV (480p) [Not 24/7]
 https://vcp2.myplaytv.com/valetv/valetv/playlist.m3u8
-#EXTINF:-1 tvg-id="Venevision.ve@SD",Venevision (480p)
+#EXTINF:-1 tvg-id="Venevision.ve@SD" group-title="Venezuela | Other",Venevision (480p)
 https://venevision-ioriver-cdn.encoders.immergo.tv/3/streamPlaylist.m3u8
-#EXTINF:-1 tvg-id="VenevisionInternacional.ve@SD",Venevisión Internacional (720p)
+#EXTINF:-1 tvg-id="VenevisionInternacional.ve@SD" group-title="Venezuela | Other",Venevisión Internacional (720p)
 https://vod2live.univtec.com/manifest/4c41c0d8-e2e4-43cc-bd43-79afe715e1b3.m3u8
-#EXTINF:-1 tvg-id="VepacoTV.ve@SD",Vepaco TV (480p)
+#EXTINF:-1 tvg-id="VepacoTV.ve@SD" group-title="Venezuela | Other",Vepaco TV (480p)
 https://cloud.fastchannel.es/manifiest/hls/prog9/vepacotv.m3u8
