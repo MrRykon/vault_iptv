@@ -895,6 +895,16 @@ https://nbcnewsnow.akamaized.net/hls/live/2033418/nbc_news_now/nbc_news_now.m3u8
 https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8
 #EXTINF:-1 tvg-id="" group-title="United States | News",Scripps News
 https://content.uplynk.com/channel/84c2d5ba1c664a5ca2e86c7ab6a40b79.m3u8
+#EXTINF:-1 tvg-id="WFTVDT1.us@SD" group-title="United States | News",ABC 9 Orlando FL (WFTV) (720p)
+https://amg00327-coxmediagroup-wftvbreaking-ono-hec7b.amagi.tv/playlist/amg00327-coxmediagroup-wftvbreaking-ono/playlist.m3u8
+#EXTINF:-1 tvg-id="AtlantaChannel.us@SD" group-title="United States | News",Atlanta Channel (720p)
+http://media4.tripsmarter.com:1935/LiveTV/ACVBHD/playlist.m3u8
+#EXTINF:-1 tvg-id="AtlantaChannel.us@SD" group-title="United States | News",Atlanta Channel (720p)
+https://5b0f5374bdf0c.streamlock.net:444/LiveTV/ATLHD/playlist.m3u8
+#EXTINF:-1 tvg-id="WATCDT1.us@SD" group-title="United States | News",Atlanta's 57 WATC 57.1 (720p)
+https://uni01rtmp.tulix.tv/watc57/watc57/playlist.m3u8
+#EXTINF:-1 tvg-id="WATCDT2.us@SD" group-title="United States | News",Atlanta's 57 WATC TOO 57.2 (720p)
+https://uni01rtmp.tulix.tv/watc57-2/watc57-2/playlist.m3u8
 
 # ===== UNITED STATES | SPORTS =====
 #EXTINF:-1 tvg-id="" group-title="United States | Sports",FIFA+
