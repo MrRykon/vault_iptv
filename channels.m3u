@@ -928,9 +928,9 @@ https://d3rl8jrxzt3d2q.cloudfront.net/out/v1/6b905f7d0e474b9b8d87907fd636cd39/in
 https://playerstv-fast.samsung.wurl.tv/manifest/playlist.m3u8
 #EXTINF:-1 tvg-id="" group-title="United States | Sports",World Poker Tour
 https://wptlive.roku.wurl.com/manifest/playlist.m3u8
-#EXTINF:-1 tvg-id="FanDuelRacing.us@SD" group-title="United States | Sports",FanDuel Racing
+#EXTINF:-1 tvg-id="" group-title="United States | Sports",FanDuel Racing
 https://d3ehq1uaxory6w.cloudfront.net/out/v1/35c05f080f4e49a4b4eb031b5a14e505/TVG2index_2.m3u8
-#EXTINF:-1 tvg-id="FanDuelTV.us@SD" group-title="United States | Sports",FanDuel TV (720p)
+#EXTINF:-1 tvg-id="" group-title="United States | Sports",FanDuel TV (720p)
 https://d2jl8r92tdc3f1.cloudfront.net/out/v1/59419700344b4625b7cb0693ba265ea3/TVGindex_1.m3u8
 
 # ===== UNITED STATES | MUSIC =====
