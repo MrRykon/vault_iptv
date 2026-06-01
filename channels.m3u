@@ -1,5 +1,12 @@
 #EXTM3U
 
+#EXTINF:-1 tvg-id="CanalCaracol.co" tvg-name="Canal Caracol" tvg-country="CO" tvg-language="Spanish" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/8/85/CaracolTelevisi%C3%B3n2019.png" group-title="General",Canal Caracol [Geo-locked]
+https://mdstrm.com/live-stream-playlist/574463697b9817cf0886fc17.m3u8
+#EXTINF:-1 tvg-id="CanalCaracol.co" tvg-name="Canal Caracol" tvg-country="CO" tvg-language="Spanish" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/8/85/CaracolTelevisi%C3%B3n2019.png" group-title="General",Canal Caracol (432p)
+https://2d03lw.janjua.pw:8088/live/championsch/playlist.m3u8?vidictid=189194547878&id=105560&pk=c2daafe353b9d8135581a3cd3eed853aae3d67f4ef0b2bfc83b29972d8307c90
+
+
+
 # ===== COLOMBIA | NEWS =====
 #EXTINF:-1 tvg-id="Canal1.co@SD" group-title="COLOMBIA | NEWS",Canal 1 (1080p) [Geo-blocked]
 https://mdstrm.com/live-stream-playlist/5a5e1c2568b1910913db5fe2.m3u8
