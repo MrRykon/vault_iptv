@@ -121,7 +121,11 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
               if (!forceUpdate && !_isDownloading) ...[
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('skipped_update_version', widget.updateData['latest_version']);
+                    if (context.mounted) Navigator.pop(context);
+                  },
                   child: const Text('LATER', style: TextStyle(color: Colors.grey)),
                 )
               ]

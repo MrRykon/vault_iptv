@@ -4,6 +4,7 @@ import '../../core/api/api_service.dart';
 import 'iptv_country_categories_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../player/player_screen.dart';
+import 'package:video_player/video_player.dart';
 
 class IptvScreen extends StatefulWidget {
   const IptvScreen({Key? key}) : super(key: key);
@@ -22,6 +23,7 @@ class _IptvScreenState extends State<IptvScreen> {
   List<String> _favorites = [];
   bool _showFavoritesOnly = false;
   dynamic _randomChannel;
+  VideoPlayerController? _randomChannelController;
 
   final Map<String, Map<String, String>> countryMetadata = {
      'UNITED STATES': {'flag': '🇺🇸', 'welcome': 'Welcome to'},
@@ -79,6 +81,14 @@ class _IptvScreenState extends State<IptvScreen> {
          _favorites = favs;
          if (rawData.isNotEmpty) {
            _randomChannel = rawData[math.Random().nextInt(rawData.length)];
+           if (_randomChannel['stream_url'] != null) {
+              _randomChannelController = VideoPlayerController.networkUrl(Uri.parse(_randomChannel['stream_url']));
+              _randomChannelController!.initialize().then((_) {
+                 _randomChannelController!.setVolume(0.0); // Mute
+                 _randomChannelController!.play(); // Auto-play
+                 if (mounted) setState(() {});
+              });
+           }
          }
          _isLoading = false;
        });
@@ -108,6 +118,12 @@ class _IptvScreenState extends State<IptvScreen> {
           });
       });
       return flat;
+  }
+
+  @override
+  void dispose() {
+    _randomChannelController?.dispose();
+    super.dispose();
   }
 
   @override
@@ -221,31 +237,73 @@ class _IptvScreenState extends State<IptvScreen> {
 
   Widget _buildRandomChannelBanner() {
     return GestureDetector(
-      onTap: () => importPlayer(_randomChannel),
+      onTap: () {
+         _randomChannelController?.pause();
+         importPlayer(_randomChannel);
+      },
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        padding: const EdgeInsets.all(16),
+        height: 120,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Colors.deepPurple, Colors.black87]),
+          color: Colors.black,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.amber.withOpacity(0.5)),
         ),
-        child: Row(
-          children: [
-            const Icon(Icons.casino, color: Colors.amber, size: 40),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Featured Random Channel', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                  Text(_randomChannel['channel_name'] ?? 'Unknown', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (_randomChannelController != null && _randomChannelController!.value.isInitialized)
+                 FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                       width: _randomChannelController!.value.size.width,
+                       height: _randomChannelController!.value.size.height,
+                       child: VideoPlayer(_randomChannelController!),
+                    ),
+                 )
+              else
+                 Container(
+                   decoration: const BoxDecoration(
+                     gradient: LinearGradient(colors: [Colors.deepPurple, Colors.black87]),
+                   )
+                 ),
+              
+              // Dark gradient overlay to make text readable
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  )
+                )
               ),
-            ),
-            const Icon(Icons.play_circle_fill, color: Colors.amber, size: 36),
-          ],
-        ),
+              
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    const Icon(Icons.casino, color: Colors.amber, size: 40),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Featured Random Channel', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold, shadows: [Shadow(color: Colors.black, blurRadius: 4)])),
+                          Text(_randomChannel['channel_name'] ?? 'Unknown', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, shadows: [Shadow(color: Colors.black, blurRadius: 4)])),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.play_circle_fill, color: Colors.amber, size: 36, shadows: [Shadow(color: Colors.black, blurRadius: 4)]),
+                  ],
+                ),
+              ),
+            ]
+          )
+        )
       ),
     );
   }

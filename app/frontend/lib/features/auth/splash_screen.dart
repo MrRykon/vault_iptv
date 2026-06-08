@@ -50,9 +50,14 @@ class _SplashScreenState extends State<SplashScreen>
       final response = await http.get(Uri.parse('${ApiService.baseUrl}/updates/check')).timeout(const Duration(seconds: 3));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['latest_version'] != packageInfo.version) { // Bump Version Natively
-          if (!mounted) return;
-          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => UpdatesScreen(updateData: data)));
+        if (data['latest_version'] != packageInfo.version) {
+          final prefs = await SharedPreferences.getInstance();
+          final skippedVersion = prefs.getString('skipped_update_version');
+          
+          if (skippedVersion != data['latest_version'] || data['force_update'] == true) {
+            if (!mounted) return;
+            await Navigator.of(context).push(MaterialPageRoute(builder: (_) => UpdatesScreen(updateData: data)));
+          }
         }
       }
     } catch (_) { }

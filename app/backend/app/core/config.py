@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     IPTV_SOURCE_URL: str = "https://raw.githubusercontent.com/MrRykon/vault_iptv/refs/heads/main/channels.m3u"
 
     # Updates
-    LATEST_VERSION: str = "0.0.0"
-    UPDATE_MESSAGE: str = "Plex VOD Tracking, Offline Live TV, Universal Search natively, and Picture-in-Picture."
+    LATEST_VERSION: str = "0.0.2"
+    UPDATE_MESSAGE: str = "Auto-play Live TV Random Channels and skipped-update logic fixes!"
     MINIMUM_SUPPORTED_VERSION: str = "0.9.0"
     APK_SHA256: str = ""
     FORCE_UPDATE: bool = False

@@ -8,6 +8,8 @@ class UpdateNotifierService {
   // Define update notes per version here
   static const Map<String, String> _updateNotes = {
     '0.0.0': 'Welcome to the reset version!\n\n- Reset version back to v0.0.0 to track our progress moving forward.\n- Added an update notification system to keep you informed of new features and fixes.\n- NEW FEATURE: Added live availability status indicators for IPTV channels (green dot for available, red dot for unavailable).',
+    '0.0.1': 'Frontend UI Updates!\n\n- Added "Unsorted Channels" section for missing categories.\n- Added "Random Channel" banner on Live TV.\n- Persistent Login now lasts for 60 minutes.\n- Added password visibility toggle.\n- Fixed version number layout jumping when keyboard opens.',
+    '0.0.2': 'Polishing Updates!\n\n- Random channel banner now auto-plays the live stream silently in the background!\n- The OTA Update prompt will no longer annoy you if you explicitly tap LATER.',
   };
 
   static Future<void> checkUpdateAndNotify(BuildContext context) async {
