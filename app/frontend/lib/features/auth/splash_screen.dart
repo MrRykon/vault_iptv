@@ -52,8 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
         final data = jsonDecode(response.body);
         if (data['latest_version'] != packageInfo.version) { // Bump Version Natively
           if (!mounted) return;
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => UpdatesScreen(updateData: data)));
-          return;
+          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => UpdatesScreen(updateData: data)));
         }
       }
     } catch (_) { }
@@ -65,12 +64,19 @@ class _SplashScreenState extends State<SplashScreen>
         
         final lastActive = prefs.getInt('last_active_time') ?? 0;
         final now = DateTime.now().millisecondsSinceEpoch;
-        final bool isExpired = lastActive > 0 && (now - lastActive) > 30 * 60 * 1000;
+        final bool isExpired = lastActive > 0 && (now - lastActive) > 60 * 60 * 1000;
         
         if (token != null) {
             if (isExpired) {
                 await ApiService().logout(); // Auto-lock
             } else {
+                final profile = await ApiService().getProfile();
+                if (profile == null) {
+                    await ApiService().logout();
+                    if (!mounted) return;
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                    return;
+                }
                 await prefs.setInt('last_active_time', now); // Refresh activity
                 if (!mounted) return;
                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));

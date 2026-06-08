@@ -202,7 +202,7 @@ class _IptvScreenState extends State<IptvScreen> {
                 ),
                 child: ListTile(
                     leading: Text(meta['flag']!, style: const TextStyle(fontSize: 32)),
-                    title: Text(country, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                    title: Text(country == 'UNCATEGORIZED' ? 'UNSORTED CHANNELS' : country, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
                     subtitle: Text('Total Channels: $validChannels', style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
                     trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
                   ),

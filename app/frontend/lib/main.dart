@@ -50,7 +50,7 @@ class _VaultAppState extends State<VaultApp> with WidgetsBindingObserver {
       await prefs.setInt('last_active_time', now);
     } else if (state == AppLifecycleState.resumed) {
       final lastActive = prefs.getInt('last_active_time') ?? 0;
-      if (lastActive > 0 && (now - lastActive) > 30 * 60 * 1000) {
+      if (lastActive > 0 && (now - lastActive) > 60 * 60 * 1000) {
         // Locked! Clear token and push login
         await ApiService().logout();
         navigatorKey.currentState?.pushAndRemoveUntil(

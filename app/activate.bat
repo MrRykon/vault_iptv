@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 echo ===================================================
-echo   Vault IPTV - Activate (Smart Auto-Build)
+echo   Vault IPTV - Activate Server (Smart Auto-Build)
 echo ===================================================
 
 :: 1. Detect Current IP Address
@@ -21,66 +21,46 @@ findstr /C:"return 'http://!CURRENT_IP!:8000';" "frontend\lib\core\api\api_servi
 if errorlevel 1 (
     echo [DETECTED] Network IP has changed.
     set IP_CHANGED=1
+    echo Updating api_service.dart with new IP...
+    powershell -Command "(Get-Content frontend\lib\core\api\api_service.dart) -replace 'return ''http://.*:8000''; // Fallback for Android testing', 'return ''http://!CURRENT_IP!:8000''; // Fallback for Android testing' | Set-Content frontend\lib\core\api\api_service.dart"
 )
 
-:: 3. Check for App Updates (Code changes)
-set APP_CHANGED=0
+:: 3. Smart OTA Syncer (No Compiling)
+echo.
+set "FULL_VERSION="
+for /f "tokens=2 delims=: " %%a in ('findstr "^version:" frontend\pubspec.yaml') do set FULL_VERSION=%%a
+for /f "tokens=1 delims=+" %%a in ("!FULL_VERSION!") do set APP_VERSION=%%a
 
-:: Check uncommitted changes in frontend (ignoring api_service.dart auto-updates)
-git status --porcelain frontend | findstr /V "api_service.dart" > temp_status.txt
-for %%A in (temp_status.txt) do if %%~zA GTR 0 set APP_CHANGED=1
+set LAST_BUILT=none
+if exist ".last_build_version" set /p LAST_BUILT=<.last_build_version
 
-:: Check committed changes
-git log -1 --format=%%H -- frontend > temp_hash.txt
-set /p CURRENT_HASH=<temp_hash.txt
-set LAST_HASH=none
-if exist ".last_build_hash" set /p LAST_HASH=<.last_build_hash
-if not "!CURRENT_HASH!"=="!LAST_HASH!" set APP_CHANGED=1
-
-if "!IP_CHANGED!"=="1" set APP_CHANGED=1
-
-if "!APP_CHANGED!"=="1" (
-    echo [DETECTED] App changes found. Starting compiler...
+if not "!APP_VERSION!"=="!LAST_BUILT!" (
+    echo [DETECTED] New version !APP_VERSION! found in pubspec.yaml.
+    echo Syncing pre-compiled OTA updates to backend...
+    echo.
     
-    :: Update IP in api_service.dart
-    if "!IP_CHANGED!"=="1" (
-        echo Updating api_service.dart with new IP...
-        powershell -Command "(Get-Content frontend\lib\core\api\api_service.dart) -replace 'return ''http://.*:8000''; // Fallback for Android testing', 'return ''http://!CURRENT_IP!:8000''; // Fallback for Android testing' | Set-Content frontend\lib\core\api\api_service.dart"
+    if not exist "backend\app\media" mkdir "backend\app\media"
+    
+    :: The user manually compiles the APK and places it in D:\Vault\app as VaultApp_v!APP_VERSION!.apk
+    if exist "VaultApp_v!APP_VERSION!.apk" (
+        echo Copying APK to Backend Media folder for OTA...
+        copy /Y "VaultApp_v!APP_VERSION!.apk" "backend\app\media\Vault_v!APP_VERSION!.apk" >nul
+        echo !APP_VERSION!> .last_build_version
+        echo [SUCCESS] App v!APP_VERSION! staged for OTA updates!
+    ) else (
+        echo [WARNING] VaultApp_v!APP_VERSION!.apk not found in D:\Vault\app. Please compile and place it here first!
     )
-
-    :: Build Web
-    echo.
-    echo Building Flutter Web App...
-    cd frontend
-    call flutter build web --release
-    cd ..
-    echo.
-    echo Copying Web Build to Backend...
-    if not exist "backend\app\web_client" mkdir "backend\app\web_client"
-    xcopy /E /Y /I "frontend\build\web\*" "backend\app\web_client\" >nul
-
-    :: Build APK
-    echo.
-    echo Building Android APK...
-    cd frontend
-    call flutter build apk --release
-    cd ..
     
-    echo.
-    echo Build complete. APK is available at: D:\Vault\app\frontend\build\app\outputs\apk\release\
-    
-    :: Save current hash to prevent rebuilding next time
-    echo !CURRENT_HASH!> .last_build_hash
-    
+    if exist "VaultWeb_v!APP_VERSION!.zip" (
+        echo Extracting Web Client to Backend...
+        if not exist "backend\app\web_client" mkdir "backend\app\web_client"
+        powershell -Command "Expand-Archive -Path 'VaultWeb_v!APP_VERSION!.zip' -DestinationPath 'backend\app\web_client' -Force" >nul
+    )
     echo.
 ) else (
-    echo [CLEAN] No IP or Code changes detected. Skipping compiler.
+    echo [CLEAN] App version !APP_VERSION! OTA files are already synced.
     echo.
 )
-
-:: Cleanup temp files
-if exist temp_status.txt del temp_status.txt
-if exist temp_hash.txt del temp_hash.txt
 
 :: 4. Start the FastAPI Server
 echo ===================================================
@@ -88,6 +68,15 @@ echo   Starting Vault Backend Server...
 echo   Web Interface: http://!CURRENT_IP!:8000/
 echo ===================================================
 cd backend
-call uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+if not exist "venv\" (
+    echo Creating Python Virtual Environment...
+    python -m venv venv
+)
+call venv\Scripts\activate.bat
+echo Installing dependencies...
+pip install -r requirements.txt -q
+
+call uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 pause

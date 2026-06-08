@@ -8,6 +8,7 @@ import '../iptv/iptv_screen.dart';
 import '../player/player_screen.dart';
 import 'package:video_player/video_player.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../auth/login_screen.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -40,7 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
          _avatarUrl = data['avatar_url'] ?? '';
       });
     } else if (mounted) {
-       setState(() { _isOfflineMode = true; });
+       await _apiService.logout();
+       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+       return;
     }
     
     final iptvData = await _apiService.fetchLastWatchedIptv();

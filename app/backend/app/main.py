@@ -14,6 +14,10 @@ from app.api import auth, users, admin, plex, iptv, updates, history, bugs, vod,
 # Create DB tables
 Base.metadata.create_all(bind=engine)
 
+# Seed admin user if configured
+from app.db.seed import seed_admin_user
+seed_admin_user()
+
 app = FastAPI(title="Vault Backend API", version=settings.LATEST_VERSION)
 
 app.mount("/media", StaticFiles(directory="app/media"), name="media")

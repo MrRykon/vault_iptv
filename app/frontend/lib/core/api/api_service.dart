@@ -12,7 +12,7 @@ class ApiService {
     if (kIsWeb) {
       return Uri.base.origin;
     }
-    return 'http://127.0.0.1:8000'; // Fallback for Android testing
+    return 'http://192.168.1.215:8000'; // Fallback for Android testing
   }
   final _storage = const FlutterSecureStorage();  
   Future<String?> getToken() async {  
@@ -39,7 +39,7 @@ class ApiService {
       ).timeout(const Duration(seconds: 5));  
       if (response.statusCode == 200) {  
         final data = jsonDecode(response.body);  
-        if (data['access_token'] = null) {  
+        if (data['access_token'] != null) {  
           await saveToken(data['access_token']);  
           return null; // null means success  
         }  
@@ -112,7 +112,7 @@ class ApiService {
     final token = await getToken();  
     if (token == null) return false;  
     final Map<String, dynamic> bodyPayload = {'display_name': displayName};  
-    if (avatarUrl = null && avatarUrl.isNotEmpty) {  
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {  
       bodyPayload['avatar_url'] = avatarUrl;  
     }  
     final res = await http.put(Uri.parse('${ApiService.baseUrl}/users/profile'),  
@@ -258,7 +258,7 @@ class ApiService {
       try {  
         final prefs = await SharedPreferences.getInstance();  
         final str = prefs.getString('offline_iptv_cache');  
-        if (str = null) return jsonDecode(str);  
+        if (str != null) return jsonDecode(str);  
       } catch (_) {}  
     }  
     return null;  
@@ -286,7 +286,7 @@ class ApiService {
       Dio dio = Dio();  
       await dio.download(downloadUrl, filePath, onReceiveProgress: onProgress);  
       final res = await OpenFile.open(filePath);  
-      if (res.type = ResultType.done) {  
+      if (res.type != ResultType.done) {  
         return "Execution rejected by Sandbox OS: ${res.message}";  
       }  
       return null; // success  
@@ -319,7 +319,7 @@ class ApiService {
           headers: {'Authorization': 'Bearer $token'});  
       if (res.statusCode == 200) {  
         final data = jsonDecode(res.body);  
-        if (data['stream_url'] = null) return data;  
+        if (data['stream_url'] != null) return data;  
       }  
     } catch (_) {}  
     return null;  

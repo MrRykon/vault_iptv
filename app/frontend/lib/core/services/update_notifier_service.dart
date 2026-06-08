@@ -19,6 +19,12 @@ class UpdateNotifierService {
       final String? lastVersion = prefs.getString(_lastVersionKey);
 
       if (lastVersion != currentVersion) {
+        if (lastVersion == null) {
+          // Fresh install or wiped data. Don't show update notes.
+          await prefs.setString(_lastVersionKey, currentVersion);
+          return;
+        }
+
         // Only show if there are actual notes for this exact version
         if (!_updateNotes.containsKey(currentVersion)) {
           // Still save the seen version so we don't keep checking
