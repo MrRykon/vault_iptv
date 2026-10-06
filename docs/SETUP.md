@@ -70,7 +70,15 @@ Con la app/build detenidos ejecuta `app/maintenance.bat` para borrar caches Pyth
 
 En Raspberry Pi, copia la carpeta `app` junto con una copia segura de `.env`, SQLite, listas y publicaciones; instala Python 3.12+ y ejecuta `bash start_server.sh --skip-build`. Compila APK en Windows y transfiere los APK publicados al Pi. Reserva una dirección de red o configura un dominio para evitar reconfigurar todos los dispositivos. Este lanzador Linux se comparte con Windows; el despliegue en hardware Pi aún debe comprobarse allí.
 
-## Validación
+## Vista HTML y publicación web
+
+`web/index.html` funciona sin compilación ni dependencias externas. Para servirla localmente: desde la raíz del repositorio ejecuta `python -m http.server 8080 --directory web`. El backend también sirve esta vista en `/preview/`, manteniendo el cliente Flutter en `/`.
+
+Puedes cambiar entre Web, Android y Chromecast/TV. La vista TV acepta flechas y Enter como un mando; en un dispositivo pequeño el marco TV se desplaza horizontalmente. No realiza casting ni instala una app en un Chromecast. La demostración muestra contenido ilustrativo. El login real requiere un servidor Vault, y la sesión vive sólo en memoria. Para conectar desde GitHub Pages, el servidor y las fuentes de reproducción deben usar HTTPS y ser accesibles desde el navegador. El reproductor usa los formatos admitidos nativamente por el navegador; Plex se reproduce con el cliente Android.
+
+Para publicar, abre el repositorio en GitHub → **Settings → Pages → Source → GitHub Actions**. El workflow `Publish Vault HTML` publica la carpeta `web` al recibir cambios en `main`; también se puede ejecutar manualmente desde Actions. La URL prevista es `https://mrrykon.github.io/vault_iptv/`. La activación de Pages y la primera publicación deben completarse en GitHub antes de que ese enlace funcione.
+
+## Pruebas
 
 Desde `app/backend`: `.venv/bin/python -m unittest discover -s tests -v` (Windows: `.venv\Scripts\python.exe`). Las pruebas usan SQLite, listas y publicaciones temporales.
 

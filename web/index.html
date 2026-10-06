@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c0c12">
+  <meta name="description" content="Vault: tu biblioteca, televisión en vivo y Xtream. Vista web con previsualización Android y TV.">
+  <title>Vault · Tu espacio de entretenimiento</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="preview-toolbar">
+    <a class="wordmark" href="./" aria-label="Vault, inicio"><span class="brand-mark">V</span> VAULT <span class="preview-label">VISTA WEB</span></a>
+    <div class="device-switch" role="group" aria-label="Formato de visualización">
+      <button data-device="web" aria-pressed="true">Web</button>
+      <button data-device="phone" aria-pressed="false">Android</button>
+      <button data-device="tv" aria-pressed="false">Chromecast / TV</button>
+    </div>
+    <button id="screen-toggle" class="quiet-button">Ver inicio</button>
+  </header>
+  <main class="preview-stage">
+    <div class="device-caption" id="device-caption">Vista web adaptable</div>
+    <div class="device-frame" data-device="web" id="device-frame">
+      <div class="phone-camera" aria-hidden="true"></div>
+      <div class="app-screen" id="app-screen">
+        <section class="login-view" id="login-view">
+          <div class="login-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="planet"></div><span class="art-caption">UN UNIVERSO.<br>TU VAULT.</span></div>
+          <div class="login-panel">
+            <span class="brand-mark large">V</span><span class="eyebrow">BIENVENIDO A VAULT</span>
+            <h1>Todo lo que te gusta.<br>En un solo lugar.</h1>
+            <p class="muted">Tu biblioteca, tus canales y tu próxima historia.</p>
+            <form id="login-form">
+              <label>Servidor Vault<input name="server" type="url" placeholder="https://tu-servidor.com" required autocomplete="url"></label>
+              <label>Usuario<input name="username" placeholder="Tu usuario" required autocomplete="username"></label>
+              <label>Contraseña<input name="password" type="password" placeholder="Tu contraseña" required autocomplete="current-password"></label>
+              <button class="primary-button" type="submit">Iniciar sesión <span>→</span></button>
+              <p class="form-message" id="login-message" role="status"></p>
+            </form>
+            <div class="divider"><span>EXPLORA EL DISEÑO</span></div>
+            <button id="demo-login" class="secondary-button">Entrar en demostración</button>
+            <p class="login-footnote">La demostración no necesita credenciales. Para tu cuenta, conecta el servidor Vault.</p>
+          </div>
+        </section>
+        <section class="vault-view" id="vault-view" hidden>
+          <header class="app-header">
+            <a href="#home" class="wordmark" data-nav="home"><span class="brand-mark">V</span> VAULT</a>
+            <span class="connection" id="connection"><i></i>Demostración</span>
+            <button class="profile-button" data-nav="profile" aria-label="Abrir perfil">V</button>
+          </header>
+          <div class="app-content" id="app-content" tabindex="-1"></div>
+          <nav class="bottom-nav" aria-label="Navegación principal">
+            <button data-nav="home" aria-current="page"><span>⌂</span>Inicio</button>
+            <button data-nav="live"><span>▣</span>Live TV</button>
+            <button data-nav="xtream"><span>ϟ</span>Xtream</button>
+          </nav>
+        </section>
+      </div>
+      <div class="phone-home" aria-hidden="true"></div>
+    </div>
+    <p class="preview-help" id="preview-help">Cambia de formato para explorar el diseño. El contenido de demostración es ilustrativo.</p>
+  </main>
+  <dialog id="detail-dialog"><button id="close-dialog" class="dialog-close" aria-label="Cerrar">×</button><div id="dialog-content"></div></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>

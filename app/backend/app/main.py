@@ -60,6 +60,11 @@ app.include_router(xtream.router, prefix="/xtream", tags=["xtream"])
 def health():
     return {"service": "vault", "status": "online", "playlist_revision": sync_status["revision"]}
 
+# Standalone HTML design preview, alongside the Flutter client.
+preview_dir = Path(__file__).resolve().parents[3] / "web"
+if preview_dir.is_dir():
+    app.mount("/preview", StaticFiles(directory=preview_dir, html=True), name="html_preview")
+
 # Mount the Flutter Web App
 app.mount("/", StaticFiles(directory=settings.WEB_CLIENT_DIR, html=True), name="web_client")
 
