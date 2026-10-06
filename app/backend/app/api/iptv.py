@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.db.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_admin
 from app.db.models import User, IPTVChannelCache
 from app.schemas.iptv import IPTVChannelResponse
 
@@ -23,13 +23,13 @@ from app.services import iptv_service
 import asyncio
 
 @router.post("/refresh")
-def admin_refresh_channels(background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if not current_user.admin_status:
-        return {"error": "Admin required"}
-    def background_sync(db_session):
-         asyncio.run(iptv_service.sync_iptv_channels(db_session))
-    background_tasks.add_task(background_sync, db)
-    return {"message": "IPTV sync request queued."}
+async def admin_refresh_channels(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    success = await iptv_service.sync_iptv_channels(db)
+    return {"success": success, **iptv_service.sync_status}
+
+@router.get("/status")
+def playlist_status(current_user: User = Depends(require_admin)):
+    return iptv_service.sync_status
 
 @router.get("/vod")
 def get_vod_catalog(current_user: User = Depends(get_current_user)):

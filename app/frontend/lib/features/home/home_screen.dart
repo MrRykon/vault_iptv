@@ -1,332 +1,359 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../../core/api/api_service.dart';
-import '../updates/updates_screen.dart';
+import '../../core/services/ota_service.dart';
+import '../auth/login_screen.dart';
 import '../profile/profile_screen.dart';
 import '../iptv/iptv_screen.dart';
+import '../xtream/xtream_screen.dart';
 import '../player/player_screen.dart';
-import 'package:video_player/video_player.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import '../auth/login_screen.dart';
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
 
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ApiService _apiService = ApiService();
-  bool _isAdmin = false;
-  bool _isOfflineMode = false;
-  String _avatarUrl = '';
-  Map<String, dynamic>? _lastIptv;
-  List<dynamic> _vodMovies = [];
-  List<dynamic> _activeNotifications = [];
-  VideoPlayerController? _previewController;
-  
+  final api = ApiService();
+  Timer? timer;
+  Map<String, dynamic>? profile;
+  String? token;
+  List<dynamic> library = [
+    {
+      'id': 'mock_movie_1',
+      'title': 'Cosmic Adventure',
+      'type': 'movie',
+      'mock': true,
+      'is_kids_safe': false
+    },
+    {
+      'id': 'mock_movie_2',
+      'title': 'Dark Thriller',
+      'type': 'movie',
+      'mock': true,
+      'is_kids_safe': false
+    },
+    {
+      'id': 'mock_show_1',
+      'title': 'Cartoon Funtime',
+      'type': 'show',
+      'mock': true,
+      'is_kids_safe': true
+    },
+  ];
+  List<dynamic> notifications = [];
+  String? error;
+  int tab = 0;
+  bool loading = true;
+  bool refreshing = false;
   @override
   void initState() {
     super.initState();
-    _fetchProfileStatus();
-    _checkForUpdatesSilent();
-  }
-  
-  Future<void> _fetchProfileStatus() async {
-    final data = await _apiService.getProfile();
-    if (data != null && mounted) {
-      setState(() {
-         _isAdmin = data['admin_status'] == true;
-         _avatarUrl = data['avatar_url'] ?? '';
-      });
-    } else if (mounted) {
-       await _apiService.logout();
-       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
-       return;
-    }
-    
-    final iptvData = await _apiService.fetchLastWatchedIptv();
-    if (iptvData != null && mounted) {
-       setState(() { _lastIptv = iptvData; });
-       _initPreview(iptvData['stream_url']);
-    }
-    
-    final vodData = await _apiService.getVodCatalog();
-    if (vodData != null && mounted) {
-        setState(() { _vodMovies = vodData; });
-    }
-    
-    final notes = await _apiService.getGlobalNotifications();
-    if (notes.isNotEmpty && mounted) {
-        setState(() { _activeNotifications = notes; });
-    }
+    refresh();
+    timer = Timer.periodic(const Duration(seconds: 30), (_) => refresh());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => OtaService.check(context));
   }
 
-  void _initPreview(String url) async {
-     if (_previewController != null) await _previewController!.dispose();
-     try {
-         _previewController = VideoPlayerController.networkUrl(Uri.parse(url));
-         await _previewController!.initialize();
-         await _previewController!.setVolume(0.0);
-         await _previewController!.play();
-         await _previewController!.setLooping(true);
-         if (mounted) setState(() {});
-     } catch (_) {}
+  Future<void> refresh() async {
+    if (refreshing) return;
+    refreshing = true;
+    try {
+      final user = await api.getProfile();
+      if (!mounted) return;
+      if (user == null && ApiService.sessionRejected) {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+            (_) => false);
+        return;
+      }
+      profile = user;
+      if (user?['profile_type'] == 'kids') {
+        library =
+            library.where((item) => item['is_kids_safe'] == true).toList();
+      }
+      token = await api.getToken();
+      error = null;
+      if (ApiService.serverOnline.value && user != null) {
+        try {
+          library = await api.requestJson('/plex/library') as List<dynamic>;
+        } catch (_) {
+          error = 'Plex no está disponible. Live TV sigue disponible.';
+          library = [];
+        }
+        notifications = await api.getGlobalNotifications();
+        if (mounted) OtaService.check(context);
+      }
+      if (mounted) setState(() => loading = false);
+    } finally {
+      refreshing = false;
+    }
   }
 
   @override
   void dispose() {
-     _previewController?.dispose();
-     super.dispose();
-  }
-
-  void _checkForUpdatesSilent() async {
-      try {
-          final packageInfo = await PackageInfo.fromPlatform();
-          final res = await http.get(Uri.parse('${ApiService.baseUrl}/updates/check')).timeout(const Duration(seconds: 5));
-          if(res.statusCode == 200) {
-              final data = jsonDecode(res.body);
-              if (data['latest_version'] != packageInfo.version && mounted) {
-                  showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                          backgroundColor: const Color(0xFF151515),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.white12)),
-                          title: const Row(children: [Icon(Icons.system_update, color: Colors.amber), SizedBox(width: 8), Text('Vault Update', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold))]),
-                          content: Text("Vault ${data['latest_version']} has been pushed out natively to the server. Do you want to invoke the Android OS Auto-Installer right now?", style: const TextStyle(color: Colors.white)),
-                          actions: [
-                              TextButton(child: const Text('LATER', style: TextStyle(color: Colors.grey)), onPressed: () => Navigator.pop(context)),
-                              ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                                  child: const Text('INSTALL OVER-THE-AIR', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  onPressed: () {
-                                      Navigator.pop(context);
-                                      Navigator.push(context, MaterialPageRoute(builder: (_) => UpdatesScreen(updateData: data)));
-                                  }
-                              )
-                          ]
-                      )
-                  );
-              }
-          }
-      } catch (_) {}
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: const Text('VAULT', style: TextStyle(letterSpacing: 4, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: GestureDetector(
-              onTap: () async {
-                final Map<String, dynamic>? currentProfile = await _apiService.getProfile();
-                if (currentProfile != null && mounted) {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(initialData: currentProfile))).then((_) {
-                      _fetchProfileStatus();
-                  });
-                }
-              },
-              child: CircleAvatar(
-                backgroundColor: const Color(0xFF2C2C2E),
-                backgroundImage: _avatarUrl.isNotEmpty ? NetworkImage(_avatarUrl) : null,
-                child: _avatarUrl.isEmpty ? const Icon(Icons.person, color: Colors.white38) : null,
-              ),
-            ),
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-              if (_isOfflineMode)
-                 Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                    decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.redAccent)),
-                    child: const Row(
-                       children: [
-                          Icon(Icons.warning_amber, color: Colors.orangeAccent),
-                          SizedBox(width: 12),
-                          Expanded(child: Text("⚠️ OFFLINE MODE (LIVE TV CACHE ACTIVE)\nVault PC Tracker is Offline. Profiles & VOD disabled natively.", style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold))),
-                       ]
-                    )
-                 ),
-
-              // Featured Hero Banner & Last Watched IPTV
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: GestureDetector(
-                         onTap: () {
-                             if (_vodMovies.isNotEmpty) {
-                                Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(
-                                   streamUrl: _vodMovies[0]['stream_url'],
-                                   contentId: _vodMovies[0]['id'],
-                                   contentTitle: _vodMovies[0]['title'],
-                                   source: 'vod',
-                                   isKidsSafe: false,
-                                )));
-                             }
-                         },
-                         child: Container(
-                           height: 180,
-                           decoration: BoxDecoration(
-                             borderRadius: BorderRadius.circular(16),
-                             image: _vodMovies.isNotEmpty ? DecorationImage(image: NetworkImage(_vodMovies[0]['poster_url']), fit: BoxFit.cover, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.3), BlendMode.darken)) : null,
-                             gradient: _vodMovies.isEmpty ? const LinearGradient(colors: [Colors.deepPurple, Colors.indigo]) : null,
-                             boxShadow: [
-                               BoxShadow(
-                                 color: Colors.deepPurple.withOpacity(0.4),
-                                 blurRadius: 15,
-                                 offset: const Offset(0, 5),
-                               )
-                             ]
-                           ),
-                           child: Center(
-                             child: Text(_vodMovies.isNotEmpty ? '▶ VIP PREMIERE' : 'Featured Movie', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, backgroundColor: Colors.black45)),
-                           )
-                         )
-                      )
-                    ),
-                    if (_lastIptv != null && _previewController != null && _previewController!.value.isInitialized) ...[
-                       const SizedBox(width: 12),
-                       Expanded(
-                          flex: 2,
-                          child: GestureDetector(
-                             onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(
-                                   streamUrl: _lastIptv!['stream_url'],
-                                   contentId: _lastIptv!['channel_id'],
-                                   contentTitle: _lastIptv!['channel_name'],
-                                   source: 'iptv',
-                                   isKidsSafe: false,
-                                )));
-                             },
-                             child: Container(
-                                height: 180,
-                                decoration: BoxDecoration(
-                                   borderRadius: BorderRadius.circular(16),
-                                   border: Border.all(color: Colors.white12, width: 2),
-                                   boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0,4))]
-                                ),
-                                child: ClipRRect(
-                                   borderRadius: BorderRadius.circular(14),
-                                   child: Stack(
-                                      fit: StackFit.expand,
-                                      children: [
-                                         FittedBox(
-                                            fit: BoxFit.cover,
-                                            child: SizedBox(
-                                               width: _previewController!.value.size.width,
-                                               height: _previewController!.value.size.height,
-                                               child: VideoPlayer(_previewController!),
-                                            )
-                                         ),
-                                         Positioned(
-                                            bottom: 0, left: 0, right: 0,
-                                            child: Container(
-                                               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                                               decoration: BoxDecoration(
-                                                  gradient: LinearGradient(colors: [Colors.black.withOpacity(0.9), Colors.transparent], begin: Alignment.bottomCenter, end: Alignment.topCenter)
-                                               ),
-                                               child: Text(_lastIptv!['channel_name'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                            )
-                                         )
-                                      ]
-                                   )
-                                )
-                             )
-                          )
-                       )
-                    ]
-                  ]
-                )
-              ),
-              if (!_isOfflineMode) ...[
-                 if (_activeNotifications.isNotEmpty) ...[
-                     const SizedBox(height: 10),
-                     const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Text('System Notices', style: TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold))),
-                     ..._activeNotifications.map((n) => Container(
-                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                         padding: const EdgeInsets.all(16),
-                         decoration: BoxDecoration(color: const Color(0xFF151515), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 10, offset: Offset(0,5))]),
-                         child: Column(
-                             crossAxisAlignment: CrossAxisAlignment.start,
-                             children: [
-                                Row(children: [const Icon(Icons.campaign, color: Colors.cyanAccent), const SizedBox(width: 8), Expanded(child: Text(n['subject'] ?? 'Update', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)))]),
-                                const SizedBox(height: 8),
-                                Text(n['content'] ?? '', style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4)),
-                             ]
-                         )
-                     )).toList()
-                 ],
-
-                 // Vault Cinematic VOD
-                 const SizedBox(height: 10),
-                 const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Text('Vault Cinematic Library', style: TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold))),
-                 SizedBox(
-                   height: 180,
-                   child: ListView.builder(
-                     scrollDirection: Axis.horizontal,
-                     itemCount: _vodMovies.length,
-                     itemBuilder: (context, index) {
-                       final vod = _vodMovies[index];
-                       return GestureDetector(
-                          onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(
-                                  streamUrl: vod['stream_url'],
-                                  contentId: vod['id'],
-                                  contentTitle: vod['title'],
-                                  source: 'vod',
-                                  isKidsSafe: false,
-                              )));
-                          },
-                          child: Container(
-                             width: 120,
-                             margin: const EdgeInsets.only(left: 16, top: 4, bottom: 4),
-                             decoration: BoxDecoration(
-                               color: const Color(0xFF1C1C1E),
-                               borderRadius: BorderRadius.circular(12),
-                               border: Border.all(color: Colors.white10),
-                               image: DecorationImage(image: NetworkImage(vod['poster_url']), fit: BoxFit.cover)
-                             ),
-                             child: const Center(child: Icon(Icons.play_circle_fill, color: Colors.white54, size: 40)),
-                          )
-                       );
-                     }
-                   )
-                 ),
-              ],
-             const SizedBox(height: 30),
+    return ValueListenableBuilder<bool>(
+      valueListenable: ApiService.serverOnline,
+      builder: (context, online, _) => Scaffold(
+        appBar: AppBar(
+          centerTitle: false,
+          title: const Text('VAULT',
+              style: TextStyle(letterSpacing: 5, fontWeight: FontWeight.w800)),
+          actions: [
+            IconButton(
+                tooltip: 'Mi perfil',
+                icon: const CircleAvatar(child: Icon(Icons.person_outline)),
+                onPressed: profile == null
+                    ? null
+                    : () async {
+                        await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    ProfileScreen(initialData: profile!)));
+                        refresh();
+                      })
           ],
-        )
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        backgroundColor: const Color(0xFF111111),
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search VOD'),
-          BottomNavigationBarItem(icon: Icon(Icons.live_tv), label: 'Live TV'),
-        ],
-        onTap: (index) {
-           if (index == 1) {
-             Navigator.push(context, MaterialPageRoute(builder: (_) => const IptvScreen()));
-           }
-        },
+        ),
+        body: Column(children: [
+          Material(
+              color: online ? const Color(0xFF123029) : const Color(0xFF33241A),
+              child: ListTile(
+                dense: true,
+                leading: Icon(
+                    online
+                        ? Icons.cloud_done_outlined
+                        : Icons.cloud_off_outlined,
+                    color: online ? Colors.greenAccent : Colors.orangeAccent),
+                title: Text(online
+                    ? 'Servidor conectado'
+                    : 'Servidor desconectado · Live TV disponible'),
+                subtitle: online
+                    ? null
+                    : const Text(
+                        'Se usan las últimas listas guardadas. Plex y Xtream requieren el servidor.'),
+                trailing: IconButton(
+                    tooltip: 'Reconectar',
+                    onPressed: refresh,
+                    icon: const Icon(Icons.refresh)),
+              )),
+          Expanded(
+              child: IndexedStack(index: tab, children: [
+            RefreshIndicator(
+                onRefresh: refresh,
+                child: ListView(padding: const EdgeInsets.all(20), children: [
+                  Text('Hola, ${profile?['display_name'] ?? 'bienvenido'}',
+                      style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 16),
+                  Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFF1C1628),
+                          borderRadius: BorderRadius.circular(16)),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(children: [
+                              Icon(Icons.campaign_outlined,
+                                  color: Colors.amber),
+                              SizedBox(width: 10),
+                              Text('Notificaciones del administrador')
+                            ]),
+                            const SizedBox(height: 8),
+                            if (notifications.isEmpty)
+                              const Text('No hay avisos por ahora.',
+                                  style: TextStyle(color: Colors.white60)),
+                            for (final note in notifications)
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                      '${note['subject']}\n${note['content']}')),
+                          ])),
+                  const SizedBox(height: 24),
+                  const Text('Películas y series',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  if (!online)
+                    const Text(
+                        'Conecta con Vault para abrir tu biblioteca Plex.'),
+                  if (error != null)
+                    Text(error!,
+                        style: const TextStyle(color: Colors.orangeAccent)),
+                  if (loading) const LinearProgressIndicator(),
+                  if (!loading && library.isEmpty && online && error == null)
+                    const Text('Tu biblioteca Plex está vacía.'),
+                  const SizedBox(height: 16),
+                  if (library.isNotEmpty)
+                    GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount:
+                                MediaQuery.sizeOf(context).width > 700 ? 5 : 2,
+                            childAspectRatio: .72,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14),
+                        itemCount: library.length,
+                        itemBuilder: (context, i) {
+                          final item = library[i];
+                          return InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: !online
+                                  ? null
+                                  : () => openPlex(context, item),
+                              child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            i.isEven
+                                                ? const Color(0xFF422D67)
+                                                : const Color(0xFF153B51),
+                                            const Color(0xFF111118)
+                                          ])),
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                            child: item['mock'] != true &&
+                                                    item['poster'] != null
+                                                ? Image.network(
+                                                    '${ApiService.baseUrl}${item['poster']}',
+                                                    headers: {
+                                                      'Authorization':
+                                                          'Bearer $token'
+                                                    },
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (_, __, ___) =>
+                                                        const Icon(Icons.movie_outlined,
+                                                            size: 64,
+                                                            color:
+                                                                Colors.white54))
+                                                : Center(
+                                                    child: Icon(
+                                                        item['type'] == 'show'
+                                                            ? Icons
+                                                                .video_library_outlined
+                                                            : Icons.movie_outlined,
+                                                        size: 64,
+                                                        color: Colors.white54))),
+                                        if (item['mock'] == true)
+                                          const Text('PRÓXIMAMENTE · PLEX',
+                                              style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.amber)),
+                                        const SizedBox(height: 8),
+                                        Text(item['title'] ?? 'Plex',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        Text(
+                                            item['type'] == 'show'
+                                                ? 'Serie'
+                                                : 'Película',
+                                            style: const TextStyle(
+                                                color: Colors.white60)),
+                                      ])));
+                        }),
+                ])),
+            const IptvScreen(),
+            const XtreamScreen(),
+          ])),
+        ]),
+        bottomNavigationBar: NavigationBar(
+            selectedIndex: tab,
+            onDestinationSelected: (value) => setState(() => tab = value),
+            destinations: const [
+              NavigationDestination(
+                  icon: Icon(Icons.movie_outlined),
+                  selectedIcon: Icon(Icons.movie),
+                  label: 'Inicio'),
+              NavigationDestination(
+                  icon: Icon(Icons.live_tv_outlined),
+                  selectedIcon: Icon(Icons.live_tv),
+                  label: 'Live TV'),
+              NavigationDestination(
+                  icon: Icon(Icons.hub_outlined),
+                  selectedIcon: Icon(Icons.hub),
+                  label: 'Xtream'),
+            ]),
       ),
     );
   }
+}
+
+Future<void> openPlex(BuildContext context, dynamic item) async {
+  if (!ApiService.serverOnline.value) return;
+  if (item['mock'] == true) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            'Vista de demostración. Configura tu servidor Plex para reproducir películas y series.')));
+    return;
+  }
+  if (item['type'] == 'show' || item['type'] == 'season') {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => PlexChildrenScreen(
+                id: item['id'].toString(), title: item['title'])));
+    return;
+  }
+  final token = await ApiService().getToken();
+  if (!context.mounted || !ApiService.serverOnline.value) return;
+  Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (_) => PlayerScreen(
+              streamUrl: '${ApiService.baseUrl}${item['stream_url']}',
+              contentId: item['id'].toString(),
+              contentTitle: item['title'],
+              source: 'plex',
+              isKidsSafe: item['is_kids_safe'] == true,
+              headers: {'Authorization': 'Bearer $token'})));
+}
+
+class PlexChildrenScreen extends StatefulWidget {
+  final String id;
+  final String title;
+  const PlexChildrenScreen({super.key, required this.id, required this.title});
+  @override
+  State<PlexChildrenScreen> createState() => _PlexChildrenScreenState();
+}
+
+class _PlexChildrenScreenState extends State<PlexChildrenScreen> {
+  late final Future<dynamic> items =
+      ApiService().requestJson('/plex/children/${widget.id}');
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: FutureBuilder<dynamic>(
+          future: items,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(
+                  child: Text('No se pudo abrir la serie. Comprueba Plex.'));
+            }
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final data = snapshot.data as List<dynamic>;
+            return ListView(children: [
+              for (final item in data)
+                ListTile(
+                    leading: const Icon(Icons.play_circle_outline),
+                    title: Text(item['title']),
+                    onTap: () => openPlex(context, item))
+            ]);
+          }));
 }

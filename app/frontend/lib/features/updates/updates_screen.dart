@@ -1,138 +1,119 @@
+import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/api/api_service.dart';
 
 class UpdatesScreen extends StatefulWidget {
   final Map<String, dynamic> updateData;
-
-  const UpdatesScreen({Key? key, required this.updateData}) : super(key: key);
-
+  const UpdatesScreen({super.key, required this.updateData});
   @override
-  _UpdatesScreenState createState() => _UpdatesScreenState();
+  State<UpdatesScreen> createState() => _UpdatesScreenState();
 }
 
 class _UpdatesScreenState extends State<UpdatesScreen> {
-  bool _isDownloading = false;
-  double _progress = 0.0;
-  String _statusMessage = 'A new Vault update is available!';
-
-  Future<void> _startDownload() async {
+  bool downloading = false;
+  double? progress;
+  String status = 'Actualización lista para descargar.';
+  final cancel = CancelToken();
+  Future<void> install() async {
     setState(() {
-      _isDownloading = true;
-      _statusMessage = 'Validating OS Installation permissions safely...';
+      downloading = true;
+      status = 'Descargando APK…';
     });
-
+    File? file;
     try {
-      // Prompt explicitly the OS settings page natively!
-      var status = await Permission.requestInstallPackages.status;
-      if (!status.isGranted) {
-          status = await Permission.requestInstallPackages.request();
-          if (!status.isGranted) {
-              setState(() {
-                  _statusMessage = 'INSTALLATION ABORTED: Explicit permission to automatically install packages is required dynamically by the Android OS.';
-                  _isDownloading = false;
-              });
-              return;
-          }
+      final digest = widget.updateData['apk_sha256']?.toString() ?? '';
+      if (!RegExp(r'^[a-f0-9]{64}$').hasMatch(digest)) {
+        throw StateError('Falta la firma de integridad');
       }
-
-      setState(() {
-          _statusMessage = 'Downloading update dynamically...';
+      final url = Uri.parse(widget.updateData['apk_download_url']);
+      if (url.origin != Uri.parse(ApiService.baseUrl).origin) {
+        throw StateError('Servidor de actualización incorrecto');
+      }
+      final permission = await Permission.requestInstallPackages.request();
+      if (!permission.isGranted) {
+        throw StateError(
+            'Autoriza la instalación desde Vault en los ajustes de Android');
+      }
+      final dir = await getTemporaryDirectory();
+      file = File('${dir.path}/vault-update.apk');
+      await Dio().download(url.toString(), file.path,
+          cancelToken: cancel, options: Options(followRedirects: false),
+          onReceiveProgress: (received, total) {
+        if (mounted) {
+          setState(() => progress = total > 0 ? received / total : null);
+        }
       });
-
-      final dio = Dio();
-      final targetUrl = widget.updateData['apk_download_url'];
-      
-      final tempDir = await getTemporaryDirectory();
-      final savePath = '${tempDir.path}/Vault${widget.updateData['latest_version']}.apk';
-
-      await dio.download(
-        targetUrl,
-        savePath,
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            setState(() {
-              _progress = received / total;
-            });
-          }
-        },
-      );
-
-      setState(() {
-        _statusMessage = 'Download complete! Launching installer...';
-      });
-
-      // Trigger the Android Native Package Installer Hook
-      final result = await OpenFile.open(savePath);
-      
+      final actual = await sha256.bind(file.openRead()).first;
+      if (actual.toString() != digest) {
+        await file.delete();
+        throw StateError(
+            'El APK no coincide con su SHA-256. Descarga rechazada.');
+      }
+      final result = await OpenFile.open(file.path,
+          type: 'application/vnd.android.package-archive');
       if (result.type != ResultType.done) {
-        setState(() {
-          _statusMessage = 'Failed to open installer: ${result.message}';
-        });
+        throw StateError('No se pudo abrir el instalador de Android');
       }
-    } catch (e) {
-      setState(() {
-         _statusMessage = 'Download failed: $e';
-         _isDownloading = false;
-      });
+      if (mounted) {
+        setState(() => status = 'Confirma la instalación en Android.');
+      }
+    } catch (_) {
+      if (file != null && await file.exists()) await file.delete();
+      if (mounted) {
+        setState(() => status =
+            'No se pudo instalar. Revisa el permiso de instalación, el servidor y la integridad del APK.');
+      }
+    } finally {
+      if (mounted) setState(() => downloading = false);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    bool forceUpdate = widget.updateData['force_update'] ?? false;
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.system_update_alt, size: 80, color: Colors.blueAccent),
-              const SizedBox(height: 24),
-              Text(
-                "Version ${widget.updateData['latest_version']} Available",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _statusMessage,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 40),
-              if (_isDownloading)
-                Column(
-                  children: [
-                    LinearProgressIndicator(value: _progress),
-                    const SizedBox(height: 8),
-                    Text("${(_progress * 100).toStringAsFixed(1)}%")
-                  ],
-                )
-              else
-                ElevatedButton(
-                  onPressed: _startDownload,
-                  child: const Text('DOWNLOAD AND INSTALL'),
-                ),
-              if (!forceUpdate && !_isDownloading) ...[
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('skipped_update_version', widget.updateData['latest_version']);
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                  child: const Text('LATER', style: TextStyle(color: Colors.grey)),
-                )
-              ]
-            ],
-          ),
-        ),
-      ),
-    );
+  void dispose() {
+    cancel.cancel();
+    super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+      canPop: !downloading && widget.updateData["force_update"] != true,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Actualizar Vault')),
+        body: Center(
+            child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.system_update, size: 72),
+                  const SizedBox(height: 20),
+                  Text(
+                      'Vault ${widget.updateData['latest_version']} · build ${widget.updateData['latest_build']}',
+                      style: const TextStyle(fontSize: 24)),
+                  const SizedBox(height: 16),
+                  Text(widget.updateData['release_notes'] ?? ''),
+                  const SizedBox(height: 16),
+                  Text(status),
+                  const SizedBox(height: 24),
+                  if (downloading)
+                    LinearProgressIndicator(value: progress)
+                  else
+                    FilledButton(
+                        onPressed: install,
+                        child: const Text('Descargar e instalar')),
+                  if (!downloading && widget.updateData["force_update"] != true)
+                    TextButton(
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('skipped_update_version',
+                              '${widget.updateData['latest_version']}+${widget.updateData['latest_build']}');
+                          if (context.mounted) Navigator.pop(context);
+                        },
+                        child: const Text('Más tarde')),
+                ]))),
+      ));
 }

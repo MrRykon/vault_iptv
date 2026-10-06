@@ -1,0 +1,7 @@
+.vault-build.json
+releases/*.apk
+releases/*.tmp
+releases/release.json
+tools/__pycache__/
+
+artifacts/

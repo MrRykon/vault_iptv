@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+/android/key.properties
+*.jks
+*.keystore
+/assets/playlists/*.m3u
+/assets/playlists/*.m3u8
+
+!/assets/playlists/demo.m3u

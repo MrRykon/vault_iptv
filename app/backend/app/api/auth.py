@@ -28,7 +28,7 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This account has been suspended. Please contact the administrator."
         )
-    if user.access_expires_at is not None and user.access_expires_at < datetime.now(timezone.utc):
+    if user.access_expires_at is not None and user.access_expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your Vault Access Pass has inherently expired organically."
@@ -42,7 +42,7 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
 
 @router.get("/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_user)):
-    if current_user.access_expires_at is not None and current_user.access_expires_at < datetime.now(timezone.utc):
+    if current_user.access_expires_at is not None and current_user.access_expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your Vault Access Pass has fundamentally expired natively."
@@ -56,6 +56,8 @@ def logout(current_user: User = Depends(get_current_user), db: Session = Depends
 
 @router.post("/register", response_model=UserResponse)
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
+    if not settings.ALLOW_PUBLIC_REGISTRATION:
+        raise HTTPException(status_code=403, detail="Accounts are created by the administrator")
     existing = db.query(User).filter(User.custom_username == user_in.custom_username).first()
     if existing:
         raise HTTPException(status_code=400, detail="Username already taken")

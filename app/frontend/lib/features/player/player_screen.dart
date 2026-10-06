@@ -2,135 +2,100 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:simple_pip_mode/simple_pip.dart';
-import 'package:simple_pip_mode/pip_widget.dart';
 import '../../core/api/api_service.dart';
 
 class PlayerScreen extends StatefulWidget {
   final String streamUrl;
   final String contentId;
   final String contentTitle;
-  final String source; // 'plex' or 'iptv'
+  final String source;
   final bool isKidsSafe;
-
-  const PlayerScreen({
-    Key? key,
-    required this.streamUrl,
-    required this.contentId,
-    required this.contentTitle,
-    required this.source,
-    required this.isKidsSafe,
-  }) : super(key: key);
-
+  final Map<String, String> headers;
+  const PlayerScreen(
+      {super.key,
+      required this.streamUrl,
+      required this.contentId,
+      required this.contentTitle,
+      required this.source,
+      required this.isKidsSafe,
+      this.headers = const {}});
   @override
-  _PlayerScreenState createState() => _PlayerScreenState();
+  State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  late VideoPlayerController _videoPlayerController;
-  ChewieController? _chewieController;
-  final ApiService _apiService = ApiService();
-  Timer? _historyTimer;
-  Timer? _timeoutTimer;
-  bool _failedTimeout = false;
-
+  VideoPlayerController? video;
+  ChewieController? controls;
+  Timer? history;
+  String? error;
   @override
   void initState() {
     super.initState();
-    _initializePlayer();
-    try { SimplePip().setAutoPipMode(autoEnter: true); } catch (_) {}
+    ApiService.serverOnline.addListener(connectionChanged);
+    initialize();
   }
 
-  void _initializePlayer() async {
-    _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.streamUrl));
-    await _videoPlayerController.initialize();
-
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      autoPlay: true,
-      looping: false,
-      aspectRatio: _videoPlayerController.value.aspectRatio,
-      errorBuilder: (context, errorMessage) {
-        return Center(
-          child: Text(
-            errorMessage,
-            style: const TextStyle(color: Colors.white),
-          ),
-        );
-      },
-    );
-    
-    setState(() {});
-
-    _timeoutTimer = Timer(const Duration(seconds: 30), () {
-        if (mounted && !_videoPlayerController.value.isInitialized) {
-            setState(() {
-                _failedTimeout = true;
-            });
-        }
-    });
-
-    // Begin 5-second offset tracker
-    _historyTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      if (_videoPlayerController.value.isPlaying) {
-         _apiService.recordHistory(
-            widget.source,
-            widget.contentId,
-            widget.contentTitle,
-            _videoPlayerController.value.position.inSeconds.toDouble(),
-            widget.isKidsSafe
-         );
+  void connectionChanged() {
+    if (widget.source != 'iptv' && !ApiService.serverOnline.value) {
+      video?.pause();
+      if (mounted) {
+        setState(() =>
+            error = 'El servidor se desconectó. Puedes seguir usando Live TV.');
       }
-    });
+    }
+  }
+
+  Future<void> initialize() async {
+    try {
+      if (widget.source != 'iptv' && !ApiService.serverOnline.value) {
+        throw StateError('Servidor desconectado');
+      }
+      video = VideoPlayerController.networkUrl(Uri.parse(widget.streamUrl),
+          httpHeaders: widget.headers);
+      await video!.initialize().timeout(const Duration(seconds: 30));
+      if (!mounted || error != null) return;
+      controls = ChewieController(
+          videoPlayerController: video!, autoPlay: true, looping: false);
+      setState(() {});
+      history = Timer.periodic(const Duration(seconds: 15), (_) async {
+        if (!ApiService.serverOnline.value || video?.value.isPlaying != true) {
+          return;
+        }
+        try {
+          await ApiService().recordHistory(
+              widget.source,
+              widget.contentId,
+              widget.contentTitle,
+              video!.value.position.inSeconds.toDouble(),
+              widget.isKidsSafe);
+        } catch (_) {/* History must not interrupt playback. */}
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() => error =
+            'No se pudo reproducir. Comprueba tu conexión, la fuente y los formatos compatibles.');
+      }
+    }
   }
 
   @override
   void dispose() {
-    _timeoutTimer?.cancel();
-    _historyTimer?.cancel();
-    _videoPlayerController.dispose();
-    _chewieController?.dispose();
+    ApiService.serverOnline.removeListener(connectionChanged);
+    history?.cancel();
+    controls?.dispose();
+    video?.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return PipWidget(
-      onPipEntered: () {},
-      onPipExited: () {},
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Column(
-            children: [
-               if (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized)
-                 Expanded(
-                   child: Stack(
-                     children: [
-                       Chewie(controller: _chewieController!),
-                       Positioned(
-                         top: 16,
-                         right: 16,
-                         child: IconButton(
-                           icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white, size: 28),
-                           onPressed: () {
-                               try { SimplePip().enterPipMode(); } catch (_) {}
-                           }
-                         )
-                       )
-                     ]
-                   )
-                 )
-               else
-                 const Expanded(
-                   child: Center(
-                     child: CircularProgressIndicator(color: Color(0xFF00E5FF)),
-                   )
-                 )
-            ]
-          )
-        )
-      )
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(title: Text(widget.contentTitle)),
+      body: SafeArea(
+          child: Center(
+        child: error != null
+            ? Padding(padding: const EdgeInsets.all(24), child: Text(error!))
+            : controls == null
+                ? const CircularProgressIndicator()
+                : Chewie(controller: controls!),
+      )));
 }

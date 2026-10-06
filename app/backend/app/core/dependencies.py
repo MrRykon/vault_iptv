@@ -40,6 +40,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             detail="This account has been suspended. Please contact the administrator."
         )
         
+    if user.access_expires_at is not None and user.access_expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=403, detail="Access expired")
     return user
 
 def require_admin(current_user: User = Depends(get_current_user)):

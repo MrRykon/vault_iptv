@@ -2,7 +2,7 @@ name: vault
 description: A private Android media app for personal/family use.
 publish_to: 'none'
 
-version: 0.0.2+1
+version: 0.1.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  crypto: ^3.0.7
   http: ^1.1.0
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.1
@@ -38,9 +39,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/animations/
     - assets/images/
-    - assets/icons/
+    - assets/playlists/
 
 flutter_launcher_icons:
   android: true

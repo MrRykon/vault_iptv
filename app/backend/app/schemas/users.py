@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 class UserBase(BaseModel):
     custom_username: str
@@ -19,8 +19,13 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: Optional[datetime]
 
+    @field_serializer('access_expires_at')
+    def serialize_expiry(self, value):
+        # SQLite strips timezone metadata; stored timestamps are UTC.
+        return value.replace(tzinfo=timezone.utc) if value is not None else None
+
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserUpdate(BaseModel):
     display_name: Optional[str] = None

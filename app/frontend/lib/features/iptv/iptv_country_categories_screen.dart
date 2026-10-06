@@ -88,7 +88,7 @@ class IptvCountryCategoriesScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                        radius: 30,
-                       backgroundColor: localColor.withOpacity(0.1),
+                       backgroundColor: localColor.withValues(alpha: 0.1),
                        child: Icon(localIcon, size: 32, color: localColor),
                     ),
                     const SizedBox(height: 12),

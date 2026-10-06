@@ -1,90 +1,95 @@
-import httpx
+"""Reconcile the complete playlist directory with the channel cache."""
+import asyncio
+import hashlib
+import logging
 import re
-from sqlalchemy.orm import Session
+from pathlib import Path
 from datetime import datetime, timezone
-
+from urllib.parse import urlparse
+import httpx
 from app.core.config import settings
+from app.db.database import SessionLocal
 from app.db.models import IPTVChannelCache
 
-def is_kids_channel(group_title: str) -> bool:
-    if not group_title:
-        return False
-    kids_keywords = ["kids", "children", "cartoon", "animation", "family"]
-    return any(keyword in group_title.lower() for keyword in kids_keywords)
+log = logging.getLogger(__name__)
+sync_lock = asyncio.Lock()
+sync_status = {"revision": "", "channels": 0, "error": None}
 
-async def sync_iptv_channels(db: Session):
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(settings.IPTV_SOURCE_URL, timeout=30.0)
+
+def is_kids_channel(group_title):
+    return any(word in (group_title or '').lower() for word in ('kids', 'children', 'cartoon', 'animation', 'family', 'infantil'))
+
+
+def parse_m3u(content):
+    if not content.lstrip('\ufeff \r\n').startswith('#EXTM3U'):
+        raise ValueError('Expected an extended M3U playlist')
+    metadata = None
+    for line in content.splitlines():
+        line = line.strip()
+        if line.startswith('#EXTINF:'):
+            attrs = dict(re.findall(r'([\w-]+)="([^"]*)"', line))
+            title = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line, maxsplit=1)
+            name = attrs.get('tvg-name') or (title[1].strip() if len(title) > 1 else 'Canal')
+            metadata = (attrs, name)
+        elif line and not line.startswith('#') and metadata:
+            attrs, name = metadata
+            metadata = None
+            if urlparse(line).scheme not in ('http', 'https'):
+                continue
+            group = attrs.get('group-title', 'General')
+            yield dict(channel_id=hashlib.sha256(line.encode()).hexdigest()[:24], channel_name=name,
+                       stream_url=line, logo_url=attrs.get('tvg-logo'), category=group,
+                       raw_group_title=group, country=attrs.get('tvg-country'),
+                       language=attrs.get('tvg-language'), is_kids_safe=is_kids_channel(group))
+
+
+async def collect_playlists():
+    root = Path(settings.PLAYLISTS_DIR)
+    root.mkdir(parents=True, exist_ok=True)
+    contents = []
+    async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+        for path in sorted(root.iterdir()):
+            if path.suffix.lower() in ('.m3u', '.m3u8'):
+                contents.append(path.read_text(encoding='utf-8-sig'))
+            elif path.suffix.lower() == '.txt':
+                for url in path.read_text(encoding='utf-8-sig').splitlines():
+                    url = url.strip()
+                    if not url or url.startswith('#'):
+                        continue
+                    if urlparse(url).scheme not in ('http', 'https'):
+                        raise ValueError('Playlist links must use HTTP or HTTPS')
+                    response = await client.get(url)
+                    response.raise_for_status()
+                    contents.append(response.text)
+        if settings.IPTV_SOURCE_URL:
+            response = await client.get(settings.IPTV_SOURCE_URL)
             response.raise_for_status()
-            content = response.text
-            
-            lines = content.splitlines()
-            if not lines or not lines[0].startswith("#EXTM3U"):
-                print("Invalid M3U file format.")
-                return
+            contents.append(response.text)
+    return contents
 
-            print("Starting IPTV Sync from ", settings.IPTV_SOURCE_URL)
-            
-            # Simple M3U parser extracting tvg-id, tvg-name, tvg-logo, group-title
-            extinf_pattern = re.compile(r'#EXTINF:.*?(tvg-id="([^"]*)")?.*?(tvg-name="([^"]*)")?.*?(tvg-logo="([^"]*)")?.*?(group-title="([^"]*)")?,(.*)')
-            
-            # Clean up old active channels by marking them inactive before processing new batch
-            db.query(IPTVChannelCache).update({"is_active": False})
-            
-            current_extinf = None
-            channels_added = 0
-            
-            for line in lines:
-                line = line.strip()
-                if not line:
-                    continue
-                    
-                if line.startswith("#EXTINF:"):
-                    current_extinf = line
-                elif not line.startswith("#") and current_extinf:
-                    match = extinf_pattern.search(current_extinf)
-                    if match:
-                        channel_id = match.group(2) or match.group(9) # Use ID or name as fallback
-                        channel_name = match.group(4) or match.group(9)
-                        logo_url = match.group(6)
-                        group_title = match.group(8)
-                        
-                        # Validate the entry, fallback if needed
-                        if channel_name:
-                            is_kids_safe = is_kids_channel(group_title)
-                            
-                            # Upsert logic
-                            channel_record = db.query(IPTVChannelCache).filter(IPTVChannelCache.channel_name == channel_name).first()
-                            
-                            if channel_record:
-                                channel_record.channel_id = channel_id or channel_name
-                                channel_record.stream_url = line
-                                channel_record.logo_url = logo_url
-                                channel_record.raw_group_title = group_title
-                                channel_record.category = group_title
-                                channel_record.is_kids_safe = is_kids_safe
-                                channel_record.is_active = True
-                                channel_record.last_refreshed_at = datetime.now(timezone.utc)
-                            else:
-                                new_channel = IPTVChannelCache(
-                                    channel_id=channel_id or channel_name,
-                                    channel_name=channel_name,
-                                    stream_url=line,
-                                    logo_url=logo_url,
-                                    raw_group_title=group_title,
-                                    category=group_title,
-                                    is_kids_safe=is_kids_safe,
-                                    is_active=True
-                                )
-                                db.add(new_channel)
-                            
-                            channels_added += 1
-                    current_extinf = None
-            
-            db.commit()
-            print(f"IPTV Sync completed silently. Refreshed/Added {channels_added} channels.")
-            
-    except Exception as e:
-        print(f"Failed to sync IPTV channels silently: {e}")
-        db.rollback()
+
+async def sync_iptv_channels(db):
+    async with sync_lock:
+        try:
+            contents = await collect_playlists()
+            channels = {c['channel_id']: c for text in contents for c in parse_m3u(text)}
+            revision = hashlib.sha256('\n'.join(contents).encode()).hexdigest()
+            if revision != sync_status['revision']:
+                # Fetch and parse first: a broken file must not erase the last good catalog.
+                db.query(IPTVChannelCache).delete()
+                db.add_all([IPTVChannelCache(**c, is_active=True, last_refreshed_at=datetime.now(timezone.utc)) for c in channels.values()])
+                db.commit()
+            sync_status.update(revision=revision, channels=len(channels), error=None)
+            return True
+        except Exception:
+            db.rollback()
+            sync_status['error'] = 'No se pudo leer una lista. Se conserva el último catálogo válido.'
+            log.warning('Playlist refresh failed; preserving the previous catalog')
+            return False
+
+
+async def watch_playlists():
+    while True:
+        with SessionLocal() as db:
+            await sync_iptv_channels(db)
+        await asyncio.sleep(max(5, settings.PLAYLIST_REFRESH_SECONDS))

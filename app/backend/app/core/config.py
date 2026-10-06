@@ -22,10 +22,15 @@ class Settings(BaseSettings):
     PLEX_TOKEN: str = ""
 
     # IPTV
-    IPTV_SOURCE_URL: str = "https://raw.githubusercontent.com/MrRykon/vault_iptv/refs/heads/main/channels.m3u"
+    IPTV_SOURCE_URL: str = ""
+    PLAYLISTS_DIR: str = "../playlists"
+    PLAYLIST_REFRESH_SECONDS: int = 30
+    RELEASES_DIR: str = "../releases"
+    ALLOW_PUBLIC_REGISTRATION: bool = False
+    WEB_CLIENT_DIR: str = "app/web_client"
 
     # Updates
-    LATEST_VERSION: str = "0.0.2"
+    LATEST_VERSION: str = "0.1.0"
     UPDATE_MESSAGE: str = "Auto-play Live TV Random Channels and skipped-update logic fixes!"
     MINIMUM_SUPPORTED_VERSION: str = "0.9.0"
     APK_SHA256: str = ""

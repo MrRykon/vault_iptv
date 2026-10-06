@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from fastapi.responses import StreamingResponse
 from typing import List
 import httpx
@@ -26,32 +26,52 @@ async def search_plex_library(q: str, current_user: User = Depends(get_current_u
 
 @router.get("/image")
 async def proxy_plex_image(url: str, current_user: User = Depends(get_current_user)):
-    """Secure reverse proxy for plex poster binaries with strict cache controls"""
-    if settings.MOCK_PLEX:
-        # Mock payload fallback
-        return Response(content=b"", media_type="image/png", headers={"Cache-Control": "public, max-age=604800"})
-
-    if not url:
-        raise HTTPException(status_code=400, detail="Missing URL")
-        
+    import re
+    match = re.fullmatch(r'/library/metadata/(\d+)/thumb(?:/\d+)?', url)
+    if not match:
+        raise HTTPException(400, 'Ruta de imagen Plex inválida')
+    await plex_service.allowed_metadata(int(match[1]), current_user.profile_type)
     try:
-        # Reconstruct exactly with standard token header to obfuscate network
-        headers = {"X-Plex-Token": settings.PLEX_TOKEN}
-        target = f"{settings.PLEX_BASE_URL}{url}"
-        
-        client = httpx.AsyncClient()
-        req = client.build_request("GET", target, headers=headers)
-        res = await client.send(req, stream=True)
-        
-        async def stream_generator():
-            async for chunk in res.aiter_raw():
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.get(settings.PLEX_BASE_URL.rstrip('/') + url, headers={'X-Plex-Token': settings.PLEX_TOKEN})
+            response.raise_for_status()
+            return Response(content=response.content, media_type=response.headers.get('content-type', 'image/jpeg'))
+    except httpx.HTTPError:
+        raise HTTPException(502, 'No se pudo cargar la imagen de Plex')
+
+
+@router.get('/children/{ident}')
+async def plex_children(ident: int, current_user: User = Depends(get_current_user)):
+    await plex_service.allowed_metadata(ident, current_user.profile_type)
+    nodes = (await plex_service.plex_json(f'/library/metadata/{ident}/children')).get('Metadata', [])
+    return [plex_service.normalize(n) for n in nodes]
+
+
+@router.get('/stream/{ident}')
+async def plex_stream(ident: int, request: Request, current_user: User = Depends(get_current_user)):
+    node = await plex_service.allowed_metadata(ident, current_user.profile_type)
+    try:
+        key = node['Media'][0]['Part'][0]['key']
+    except (KeyError, IndexError):
+        raise HTTPException(409, 'No hay un archivo reproducible')
+    if not key.startswith('/') or key.startswith('//'):
+        raise HTTPException(502, 'Ruta de Plex inválida')
+    client = httpx.AsyncClient(timeout=30)
+    headers = {'X-Plex-Token': settings.PLEX_TOKEN}
+    if request.headers.get('range'):
+        headers['Range'] = request.headers['range']
+    try:
+        response = await client.send(client.build_request('GET', settings.PLEX_BASE_URL.rstrip('/') + key, headers=headers), stream=True)
+        response.raise_for_status()
+    except httpx.HTTPError:
+        await client.aclose()
+        raise HTTPException(502, 'Plex no pudo reproducir el archivo')
+    async def chunks():
+        try:
+            async for chunk in response.aiter_raw():
                 yield chunk
+        finally:
+            await response.aclose()
             await client.aclose()
-            
-        return StreamingResponse(
-            stream_generator(), 
-            media_type=res.headers.get("content-type", "image/jpeg"),
-            headers={"Cache-Control": "public, max-age=604800"} # Cache natively!
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Image fetch failed")
+    passthrough = {k: response.headers[k] for k in ('content-length', 'content-range', 'accept-ranges') if k in response.headers}
+    return StreamingResponse(chunks(), status_code=response.status_code, media_type=response.headers.get('content-type', 'video/mp4'), headers=passthrough)

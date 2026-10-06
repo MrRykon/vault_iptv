@@ -12,4 +12,4 @@ class IPTVChannelResponse(BaseModel):
     is_kids_safe: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True

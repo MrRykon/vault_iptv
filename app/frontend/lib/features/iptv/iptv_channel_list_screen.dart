@@ -11,7 +11,7 @@ class IptvChannelListScreen extends StatefulWidget {
   const IptvChannelListScreen({Key? key, required this.categoryName, required this.channels, this.fallbackIcon}) : super(key: key);
 
   @override
-  _IptvChannelListScreenState createState() => _IptvChannelListScreenState();
+  State<IptvChannelListScreen> createState() => _IptvChannelListScreenState();
 }
 
 class _IptvChannelListScreenState extends State<IptvChannelListScreen> {
