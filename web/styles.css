@@ -187,3 +187,5 @@ dialog video{width:100%;margin-top:14px;border-radius:8px;background:black}
 
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}
 }
+
+.channel-main{display:flex;align-items:center;gap:13px;background:transparent;text-align:left;flex:1;min-width:0;padding:0}.channel-main strong{display:block;font-size:12px;margin-bottom:5px}.channel-main small{display:block}.favorite-button{background:transparent;padding:6px;color:#9690a8;font-size:24px;border-radius:5px}.favorite-button.saved{color:#e7c98a}.channel{padding:13px;gap:6px}

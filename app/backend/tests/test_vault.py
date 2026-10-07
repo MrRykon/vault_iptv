@@ -69,6 +69,13 @@ class VaultTests(unittest.TestCase):
         self.client.post('/auth/logout', headers=user)
         self.assertEqual(self.client.get('/auth/me', headers=user).status_code, 401)
 
+    def test_html_fallback_does_not_need_a_versioned_flutter_bundle(self):
+        for path in ('/', '/styles.css', '/app.js', '/preview/', '/preview/styles.css'):
+            self.assertEqual(self.client.get(path).status_code, 200, path)
+        self.assertIn('Entrar en demostración', self.client.get('/').text)
+        response = self.client.get('/iptv/channels', headers={**self.token('viewer'), 'Origin':'https://mrrykon.github.io'})
+        self.assertIn('ETag', response.headers['access-control-expose-headers'])
+
     def test_expiration_is_utc_and_enforced_after_sqlite_roundtrip(self):
         from datetime import datetime, timedelta, timezone
         from app.services.auth_service import create_access_token
@@ -113,6 +120,90 @@ class VaultTests(unittest.TestCase):
                 self.assertTrue(await iptv_service.sync_iptv_channels(db))
                 self.assertEqual(db.query(IPTVChannelCache).count(), 0)
         asyncio.run(run())
+
+    def test_catalog_etag_avoids_reparse_and_preserves_auth_and_kids_filters(self):
+        path = ROOT / 'playlists' / 'etag.m3u'
+        async def run():
+            with SessionLocal() as db:
+                iptv_service.sync_status['revision'] = ''
+                path.write_text('#EXTM3U\n#EXTINF:-1 group-title="News",News\nhttps://example.org/news\n')
+                self.assertTrue(await iptv_service.sync_iptv_channels(db))
+                adult = self.token('viewer')
+                first = self.client.get('/iptv/channels', headers=adult)
+                etag = first.headers['etag']
+                self.assertEqual(first.status_code, 200)
+                with patch.object(iptv_service, 'parse_m3u', side_effect=AssertionError('unchanged catalogue was parsed')):
+                    self.assertTrue(await iptv_service.sync_iptv_channels(db))
+                cached = self.client.get('/iptv/channels', headers={**adult, 'If-None-Match': etag})
+                self.assertEqual(cached.status_code, 304)
+                self.assertEqual(cached.content, b'')
+                child = self.client.get('/iptv/channels', headers={**self.token('child'), 'If-None-Match': etag})
+                self.assertEqual(child.status_code, 200)
+                self.assertEqual(child.json(), [])
+                self.assertNotEqual(child.headers['etag'], etag)
+                self.assertEqual(self.client.get('/iptv/channels', headers={'If-None-Match': etag}).status_code, 401)
+                self.client.post('/auth/logout', headers=adult)
+                self.assertEqual(self.client.get('/iptv/channels', headers={**adult, 'If-None-Match': etag}).status_code, 401)
+                path.write_text('#EXTM3U\n#EXTINF:-1 group-title="Kids",Cartoon\nhttps://example.org/cartoon\n')
+                self.assertTrue(await iptv_service.sync_iptv_channels(db))
+                changed = self.client.get('/iptv/channels', headers={**self.token('child'),'If-None-Match':child.headers['etag']})
+                self.assertEqual(changed.status_code,200)
+                self.assertEqual(changed.json()[0]['channel_name'],'Cartoon')
+                path.unlink()
+                await iptv_service.sync_iptv_channels(db)
+        try:
+            asyncio.run(run())
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_remote_playlists_conditional_download_and_cache_eviction(self):
+        import httpx
+        original = httpx.AsyncClient
+        requests = []
+        def handler(request):
+            requests.append(request)
+            if len(requests) == 1:
+                return httpx.Response(200, text='#EXTM3U\n#EXTINF:-1,Remote\nhttps://example.org/live\n', headers={'etag':'"remote-one"'})
+            self.assertEqual(request.headers['if-none-match'], '"remote-one"')
+            return httpx.Response(304)
+        async def run():
+            iptv_service.remote_cache.clear()
+            with patch.object(settings, 'IPTV_SOURCE_URL','https://remote.example/list'), patch('httpx.AsyncClient',side_effect=lambda **kwargs: original(transport=httpx.MockTransport(handler),**kwargs)):
+                first = await iptv_service.collect_playlists()
+                self.assertEqual(await iptv_service.collect_playlists(), first)
+            await iptv_service.collect_playlists()
+            self.assertEqual(iptv_service.remote_cache,{})
+        asyncio.run(run())
+
+    def test_cleanup_summary_and_diagnostics_preserve_data_and_external_symlinks(self):
+        import sys
+        maintenance = tool('maintenance')
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside:
+            root = Path(directory)
+            (root/'frontend').mkdir()
+            (root/'backend').mkdir()
+            (root/'backend/.env').write_text('PRIVATE_TEST_VALUE=never-report')
+            (root/'backend/vault.db').write_bytes(b'database')
+            external = Path(outside)
+            (external/'build').mkdir()
+            (external/'build/keep').write_bytes(b'do not delete')
+            (root/'frontend').rmdir()
+            (root/'frontend').symlink_to(external, target_is_directory=True)
+            summary = maintenance.clean(root)
+            self.assertEqual(summary['bytes'],0)
+            self.assertTrue((external/'build/keep').exists())
+            (root/'frontend').unlink()
+            (root/'frontend/build').mkdir(parents=True)
+            (root/'frontend/build/generated').write_bytes(b'12345')
+            dry = maintenance.clean(root,dry_run=True)
+            self.assertEqual(dry['bytes'],5)
+            self.assertTrue((root/'frontend/build/generated').exists())
+            with patch.dict(sys.modules, {'maintenance':maintenance}):
+                diagnostic = tool('diagnostics').report(root)
+            self.assertEqual(diagnostic['cache_bytes'],5)
+            self.assertNotIn('never-report',str(diagnostic))
+            self.assertEqual(maintenance.clean(root)['bytes'],5)
+            self.assertTrue((root/'backend/vault.db').exists())
 
     def test_plex_placeholder_and_child_restriction(self):
         self.assertEqual(len(self.client.get('/plex/library', headers=self.token()).json()), 3)

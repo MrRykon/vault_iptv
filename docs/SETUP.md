@@ -1,6 +1,6 @@
 # Vault
 
-App privada para Android: biblioteca Plex, Live TV por listas M3U y un espacio independiente para Xtream Codes. Backend FastAPI + SQLite y cliente Flutter. La versión de trabajo es **0.1.0+1**.
+App privada para Android: biblioteca Plex, Live TV por listas M3U y un espacio independiente para Xtream Codes. Backend FastAPI + SQLite y cliente Flutter. La versión de trabajo es **0.2.0+2**.
 
 ## Arrancar en Windows
 
@@ -66,9 +66,13 @@ La API anuncia sólo un APK existente y con checksum válido. La app compara ver
 
 ## Mantenimiento y Raspberry Pi 5
 
+`app/diagnostics.bat` comprueba Python, herramientas en PATH, configuración, listas, compilaciones, espacio libre y servidor local. No lee ni muestra contraseñas. Desde Linux: `python app/tools/diagnostics.py --check-server`; `--json` produce un informe estructurado. El mantenimiento muestra cuántos elementos y MB puede recuperar y omite rutas que resuelvan fuera de la carpeta de la app.
+
+Live TV permite guardar favoritos y los últimos 20 canales abiertos, filtrarlos por categoría y ordenar por nombre. Android y HTML guardan estas preferencias por servidor/cuenta en el dispositivo; no se sincronizan entre dispositivos. Los canales retirados del catálogo no aparecen aunque su ID siga guardado. Android construye las filas visibles y pausa la consulta periódica de Live TV mientras la pantalla de la app está en segundo plano. El servidor usa ETag por perfil para evitar reenviar un catálogo sin cambios y solicitudes condicionales a las fuentes remotas cuando admiten ETag/Last-Modified, con hasta cuatro descargas simultáneas.
+
 Con la app/build detenidos ejecuta `app/maintenance.bat` para borrar caches Python, resultados de compilación Flutter, `.dart_tool`, caché local Gradle y temporales de publicación. `maintenance.bat --dry-run` muestra qué borraría. Conserva SQLite, `.env`, listas, APK publicados, código y contenido multimedia; no intenta adivinar qué archivos fuente «ya no se usan».
 
-En Raspberry Pi, copia la carpeta `app` junto con una copia segura de `.env`, SQLite, listas y publicaciones; instala Python 3.12+ y ejecuta `bash start_server.sh --skip-build`. Compila APK en Windows y transfiere los APK publicados al Pi. Reserva una dirección de red o configura un dominio para evitar reconfigurar todos los dispositivos. Este lanzador Linux se comparte con Windows; el despliegue en hardware Pi aún debe comprobarse allí.
+En Raspberry Pi, copia el repositorio completo (incluidas `app` y `web`) junto con una copia segura de `.env`, SQLite, listas y publicaciones; instala Python 3.12+ y ejecuta `bash start_server.sh --skip-build`. Compila APK en Windows y transfiere los APK publicados al Pi. Reserva una dirección de red o configura un dominio para evitar reconfigurar todos los dispositivos. Este lanzador Linux se comparte con Windows; el despliegue en hardware Pi aún debe comprobarse allí.
 
 ## Vista HTML y publicación web
 
@@ -84,4 +88,4 @@ Desde `app/backend`: `.venv/bin/python -m unittest discover -s tests -v` (Window
 
 Desde `app/frontend`: `flutter pub get --enforce-lockfile`, `flutter analyze`, `flutter test`, `flutter build web --no-pub`. Prueban autenticación offline, aislamiento de cuentas/servidores, rechazo de cuentas suspendidas, lectura M3U, comparación OTA y pantalla de login.
 
-No conectamos todavía servidores Plex/Xtream reales ni instalamos en un dispositivo Android. En el navegador, el almacenamiento seguro necesita HTTPS o localhost; para uso en LAN sin HTTPS utiliza la app Android. El cliente web generado se puede servir con `WEB_CLIENT_DIR` o mediante el lanzador, sin sobrescribir el bundle antiguo versionado en `backend/app/web_client`.
+No conectamos todavía servidores Plex/Xtream reales ni instalamos en un dispositivo Android. En el navegador, el almacenamiento seguro necesita HTTPS o localhost; para uso en LAN sin HTTPS utiliza la app Android. El cliente Flutter web generado se sirve con `WEB_CLIENT_DIR` o mediante el lanzador. Sin compilación, el servidor ofrece la vista HTML de la carpeta `web`; los bundles generados se excluyen de Git.

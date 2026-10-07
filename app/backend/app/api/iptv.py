@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, Request, Response
+import hashlib
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -10,7 +11,17 @@ from app.schemas.iptv import IPTVChannelResponse
 router = APIRouter()
 
 @router.get("/channels", response_model=List[IPTVChannelResponse])
-def get_channels(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_channels(request: Request, response: Response, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    revision = iptv_service.sync_status['revision']
+    headers = {'Cache-Control': 'private, no-cache', 'Vary': 'Authorization'}
+    if revision:
+        # Authentication happens before checking validators. Child catalogues have their own ETag.
+        etag = '"' + hashlib.sha256(f'{revision}:{current_user.profile_type}'.encode()).hexdigest() + '"'
+        headers['ETag'] = etag
+        validators = [value.strip().removeprefix('W/') for value in request.headers.get('if-none-match', '').split(',')]
+        if etag in validators or '*' in validators:
+            return Response(status_code=304, headers=headers)
+    response.headers.update(headers)
     query = db.query(IPTVChannelCache).filter(IPTVChannelCache.is_active == True)
     
     # Enforce kids filter securely at db query level

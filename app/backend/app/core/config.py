@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -27,10 +28,10 @@ class Settings(BaseSettings):
     PLAYLIST_REFRESH_SECONDS: int = 30
     RELEASES_DIR: str = "../releases"
     ALLOW_PUBLIC_REGISTRATION: bool = False
-    WEB_CLIENT_DIR: str = "app/web_client"
+    WEB_CLIENT_DIR: str = str(Path(__file__).resolve().parents[4] / "web")
 
     # Updates
-    LATEST_VERSION: str = "0.1.0"
+    LATEST_VERSION: str = "0.2.0"
     UPDATE_MESSAGE: str = "Auto-play Live TV Random Channels and skipped-update logic fixes!"
     MINIMUM_SUPPORTED_VERSION: str = "0.9.0"
     APK_SHA256: str = ""

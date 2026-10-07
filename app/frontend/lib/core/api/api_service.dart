@@ -381,14 +381,49 @@ class ApiService {
   Future<List<dynamic>?> getIptvChannels() async {
     if (sessionRejected || _sessionProfile == null) return null;
     final prefs = await SharedPreferences.getInstance();
+    final key = cacheKey;
+    final cached = prefs.getString(key);
     if (serverOnline.value) {
       try {
-        final data = await requestJson('/iptv/channels') as List<dynamic>;
-        await prefs.setString(cacheKey, jsonEncode(data));
-        return data;
+        final token = await getToken();
+        final etag = prefs.getString('${key}_etag');
+        final response =
+            await transport.get(Uri.parse('$baseUrl/iptv/channels'), headers: {
+          'Authorization': 'Bearer $token',
+          if (cached != null && etag != null) 'If-None-Match': etag,
+        }).timeout(const Duration(seconds: 15));
+        if (key != cacheKey) return null;
+        if ([401, 403].contains(response.statusCode)) {
+          sessionRejected = true;
+          if (_sessionUser != null) {
+            await OfflineAccount.forget(baseUrl, _sessionUser!);
+          }
+          _sessionProfile = null;
+          await deleteToken();
+          await prefs.remove(key);
+          await prefs.remove('${key}_etag');
+          return null;
+        }
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body) as List<dynamic>;
+          if (cached != response.body) {
+            await prefs.setString(key, response.body);
+          }
+          final freshEtag = response.headers['etag'];
+          if (freshEtag != null) {
+            if (etag != freshEtag) {
+              await prefs.setString('${key}_etag', freshEtag);
+            }
+          } else {
+            await prefs.remove('${key}_etag');
+          }
+          return _sessionProfile?['profile_type'] == 'kids'
+              ? data.where((c) => c['is_kids_safe'] == true).toList()
+              : data;
+        }
+        if (response.statusCode != 304) serverOnline.value = false;
       } catch (_) {}
     }
-    final cached = prefs.getString(cacheKey);
     if (cached != null) {
       final data = jsonDecode(cached) as List<dynamic>;
       return _sessionProfile?['profile_type'] == 'kids'

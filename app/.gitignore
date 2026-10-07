@@ -5,3 +5,4 @@ releases/release.json
 tools/__pycache__/
 
 artifacts/
+backend/app/web_client/

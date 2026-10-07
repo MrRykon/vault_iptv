@@ -16,9 +16,26 @@ const demoChannels = [
   {channel_name:'Music Sessions', category:'Música', initials:'MS'},
   {channel_name:'Noticias 24', category:'Noticias', initials:'N24'}
 ];
-const state = {demo:true, device:'web', tab:'home', filter:'Todos', online:true, server:'', token:'', user:null, channels:demoChannels, library:movies, notes:[], xtream:[], previewNotice:''};
+const state = {demo:true, device:'web', tab:'home', filter:'Todos', online:true, server:'', token:'', user:null, channels:demoChannels, library:movies, notes:[], xtream:[], previewNotice:'', favorites:new Set(), recent:[], channelView:'Todos', query:'', alphabetical:false, channelEtag:''};
 let toastTimer;
 let syncing = false;
+function channelId(channel) { return String(channel.channel_id || channel.channel_name); }
+function preferenceKey() { return 'vault_channels_' + JSON.stringify(state.demo ? ['demo'] : [state.server,state.user?.custom_username]); }
+function loadChannelPreferences() {
+  state.favorites = new Set(); state.recent = []; state.channelView = 'Todos'; state.query = ''; state.channelEtag = '';
+  try {
+    const saved = JSON.parse(localStorage.getItem(preferenceKey()) || '{}');
+    if (Array.isArray(saved.favorites)) state.favorites = new Set(saved.favorites.filter(id => typeof id === 'string'));
+    if (Array.isArray(saved.recent)) state.recent = saved.recent.filter(id => typeof id === 'string').slice(0,20);
+  } catch { /* Private browsing or malformed preferences must not block the app. */ }
+}
+function saveChannelPreferences() {
+  try { localStorage.setItem(preferenceKey(),JSON.stringify({favorites:[...state.favorites],recent:state.recent})); }
+  catch { toast('No se pudieron guardar las preferencias en este navegador.'); }
+}
+function markRecent(channel) {
+  const id = channelId(channel); state.recent = [id,...state.recent.filter(value => value !== id)].slice(0,20); saveChannelPreferences();
+}
 function toast(message) { $('#toast').textContent = message; $('#toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').hidden = true, 4500); }
 function safeURL(value) { try { const url = new URL(value); return ['http:','https:'].includes(url.protocol) && !url.username && !url.password ? url.href : ''; } catch { return ''; } }
 function serverURL(value) {
@@ -28,7 +45,10 @@ function serverURL(value) {
   return url.origin;
 }
 async function api(path, options = {}) {
-  const response = await fetch(state.server + path, {...options, signal:AbortSignal.timeout(12000), headers:{...(state.token ? {Authorization:`Bearer ${state.token}`} : {}), ...options.headers}});
+  const server = state.server, token = state.token;
+  const response = await fetch(server + path, {...options, signal:AbortSignal.timeout(12000), headers:{...(token ? {Authorization:`Bearer ${token}`} : {}), ...options.headers}});
+  if (server !== state.server || token !== state.token) throw new Error('La sesión cambió mientras se cargaba el contenido.');
+  if (path === '/iptv/channels' && response.status === 304) return state.channels;
   if (!response.ok) {
     if (state.token && [401,403].includes(response.status) && !path.startsWith('/xtream/')) {
       state.token = ''; state.user = null; showLogin();
@@ -37,12 +57,13 @@ async function api(path, options = {}) {
     const error = await response.json().catch(() => ({}));
     throw new Error(typeof error.detail === 'string' ? error.detail : `No se pudo completar la solicitud (${response.status}).`);
   }
+  if (path === '/iptv/channels') state.channelEtag = response.headers.get('etag') || '';
   return response.json();
 }
 function showLogin() { $('#login-view').hidden = false; $('#vault-view').hidden = true; $('#screen-toggle').textContent = 'Ver inicio'; }
 function showApp() { $('#login-view').hidden = true; $('#vault-view').hidden = false; $('#screen-toggle').textContent = 'Ver login'; render(); }
 function enterDemo() {
-  state.demo = true; state.token = ''; state.user = null; state.online = true; state.channels = demoChannels; state.library = movies; state.notes = []; state.xtream = []; state.tab = 'home'; state.filter = 'Todos'; showApp();
+  state.demo = true; state.token = ''; state.user = null; state.online = true; state.channels = demoChannels; state.library = movies; state.notes = []; state.xtream = []; state.tab = 'home'; state.filter = 'Todos'; loadChannelPreferences(); showApp();
 }
 function setDevice(device) {
   state.device = device; $('#device-frame').dataset.device = device;
@@ -67,8 +88,16 @@ function home() {
 }
 function live() {
   const categories = ['Todos', ...new Set(state.channels.map(c => c.category || 'General'))];
-  const visible = state.channels.map((channel,index) => ({channel,index})).filter(({channel}) => state.filter === 'Todos' || (channel.category || 'General') === state.filter);
-  return `<span class="eyebrow">TU TELEVISIÓN, A TU RITMO</span><h1 class="page-title">Live TV</h1><p class="page-subtitle">${state.demo ? 'Canales ilustrativos para explorar la interfaz.' : 'Catálogo IPTV de tu servidor Vault.'} ${!state.online ? 'Puedes intentar reproducir las fuentes cargadas mientras tengan Internet.' : ''}</p><label>Buscar canal<input id="channel-search" type="search" placeholder="Nombre del canal" autocomplete="off"></label><div class="filters">${categories.map(category => `<button data-filter="${escapeHTML(category)}" class="filter ${category === state.filter ? 'active' : ''}">${escapeHTML(category)}</button>`).join('')}</div><div class="channels">${visible.map(({channel:c,index}) => `<button class="channel" data-channel="${index}"><span class="channel-logo">${escapeHTML(c.initials || c.channel_name.slice(0,2).toUpperCase())}</span><div><h3>${escapeHTML(c.channel_name)}</h3><small>${escapeHTML(c.category || 'General')}</small></div><span class="live-dot">${state.demo ? 'DEMO' : '● IPTV'}</span></button>`).join('') || '<p class="empty-state">No hay canales en esta categoría.</p>'}</div>`;
+  let visible = state.channels.map((channel,index) => ({channel,index})).filter(({channel:c}) =>
+    (state.filter === 'Todos' || (c.category || 'General') === state.filter) &&
+    (state.channelView !== 'Favoritos' || state.favorites.has(channelId(c))) &&
+    (state.channelView !== 'Recientes' || state.recent.includes(channelId(c))));
+  if (state.channelView === 'Recientes') visible.sort((a,b) => state.recent.indexOf(channelId(a.channel)) - state.recent.indexOf(channelId(b.channel)));
+  else if (state.alphabetical) visible.sort((a,b) => a.channel.channel_name.localeCompare(b.channel.channel_name,'es'));
+  return `<span class="eyebrow">TU TELEVISIÓN, A TU RITMO</span><h1 class="page-title">Live TV</h1><p class="page-subtitle">${state.demo ? 'Canales ilustrativos para explorar la interfaz.' : 'Catálogo IPTV de tu servidor Vault.'} ${!state.online ? 'Puedes intentar reproducir las fuentes cargadas mientras tengan Internet.' : ''}</p><label>Buscar canal<input id="channel-search" type="search" value="${escapeHTML(state.query)}" placeholder="Nombre del canal" autocomplete="off"></label>
+  <div class="filters">${['Todos','Favoritos','Recientes'].map(view => `<button data-channel-view="${view}" class="filter ${view === state.channelView ? 'active' : ''}">${view}</button>`).join('')}<button id="sort-channels" class="filter ${state.alphabetical ? 'active' : ''}" aria-pressed="${state.alphabetical}">Ordenar A–Z</button></div>
+  <div class="filters">${categories.map(category => `<button data-filter="${escapeHTML(category)}" class="filter ${category === state.filter ? 'active' : ''}">${escapeHTML(category)}</button>`).join('')}</div>
+  <div class="channels">${visible.map(({channel:c,index}) => `<div class="channel" ${!`${c.channel_name} ${c.category || 'General'}`.toLocaleLowerCase('es').includes(state.query.toLocaleLowerCase('es')) ? 'hidden' : ''}><button class="channel-main" data-channel="${index}"><span class="channel-logo">${escapeHTML(c.initials || c.channel_name.slice(0,2).toUpperCase())}</span><span><strong>${escapeHTML(c.channel_name)}</strong><small>${escapeHTML(c.category || 'General')}</small></span></button><button class="favorite-button ${state.favorites.has(channelId(c)) ? 'saved' : ''}" data-star="${index}" aria-label="${state.favorites.has(channelId(c)) ? 'Quitar de favoritos' : 'Agregar a favoritos'}: ${escapeHTML(c.channel_name)}" aria-pressed="${state.favorites.has(channelId(c))}">${state.favorites.has(channelId(c)) ? '★' : '☆'}</button></div>`).join('') || '<p class="empty-state">No hay canales con estos filtros. Marca estrellas para crear tus favoritos; abre un canal para verlo en recientes.</p>'}</div>`;
 }
 function xtream() {
   if (!state.online) return '<h1 class="page-title">Xtream Codes</h1><div class="empty-state">Conecta el servidor Vault para usar Xtream Codes.</div>';
@@ -77,7 +106,7 @@ function xtream() {
 function profile() {
   const name = state.demo ? 'Explorador Vault' : state.user?.display_name || state.user?.custom_username || 'Usuario';
   const admin = state.demo || state.user?.admin_status;
-  return `<div class="profile-summary"><div class="profile-avatar">${escapeHTML(name.slice(0,1).toUpperCase())}</div><h1 class="page-title">${escapeHTML(name)}</h1><p class="page-subtitle">${state.demo ? 'Perfil de demostración' : state.user?.admin_status ? 'Administrador' : 'Tu espacio personal'}</p></div><div class="settings-card"><h2>Tu Vault</h2><div class="settings-row"><span>Servidor</span><small>${state.demo ? 'Simulado' : state.online ? 'Conectado' : 'Desconectado'}</small></div><div class="settings-row"><span>Versión de la app</span><small>0.1.0 · Vista HTML</small></div><div class="settings-row"><span>Formato de pantalla</span><small>${escapeHTML({web:'Web',phone:'Android',tv:'Chromecast / TV'}[state.device])}</small></div><div class="settings-row"><span>Actualizaciones OTA</span><small>Disponibles en Android</small></div>${state.demo ? '<div class="demo-banner">Puedes simular una desconexión y probar los avisos de administrador. Los cambios se borran al recargar.</div><button class="secondary-button" id="simulate-server">'+(state.online ? 'Simular servidor desconectado' : 'Reconectar servidor simulado')+'</button>' : ''}<div class="settings-actions"><button id="about-button">Información</button><button id="logout">Cerrar sesión</button></div></div>${admin && state.online ? `<div class="settings-card"><h2>Notificaciones ${state.demo ? '· Demo' : '· Admin'}</h2><p class="muted">${state.demo ? 'Prueba cómo se verá un aviso en la pantalla principal.' : 'Envía un aviso a los usuarios de Vault.'}</p><form id="notice-form"><label>Mensaje<input name="content" maxlength="500" placeholder="Escribe un aviso para tus usuarios" required></label><button class="primary-button">${state.demo ? 'Previsualizar aviso' : 'Enviar aviso'}</button></form></div>` : ''}`;
+  return `<div class="profile-summary"><div class="profile-avatar">${escapeHTML(name.slice(0,1).toUpperCase())}</div><h1 class="page-title">${escapeHTML(name)}</h1><p class="page-subtitle">${state.demo ? 'Perfil de demostración' : state.user?.admin_status ? 'Administrador' : 'Tu espacio personal'}</p></div><div class="settings-card"><h2>Tu Vault</h2><div class="settings-row"><span>Servidor</span><small>${state.demo ? 'Simulado' : state.online ? 'Conectado' : 'Desconectado'}</small></div><div class="settings-row"><span>Versión de la app</span><small>0.2.0 · Vista HTML</small></div><div class="settings-row"><span>Formato de pantalla</span><small>${escapeHTML({web:'Web',phone:'Android',tv:'Chromecast / TV'}[state.device])}</small></div><div class="settings-row"><span>Actualizaciones OTA</span><small>Disponibles en Android</small></div>${state.demo ? '<div class="demo-banner">Puedes simular una desconexión y probar los avisos de administrador. Los cambios se borran al recargar.</div><button class="secondary-button" id="simulate-server">'+(state.online ? 'Simular servidor desconectado' : 'Reconectar servidor simulado')+'</button>' : ''}<div class="settings-actions"><button id="about-button">Información</button><button id="logout">Cerrar sesión</button></div></div>${admin && state.online ? `<div class="settings-card"><h2>Notificaciones ${state.demo ? '· Demo' : '· Admin'}</h2><p class="muted">${state.demo ? 'Prueba cómo se verá un aviso en la pantalla principal.' : 'Envía un aviso a los usuarios de Vault.'}</p><form id="notice-form"><label>Mensaje<input name="content" maxlength="500" placeholder="Escribe un aviso para tus usuarios" required></label><button class="primary-button">${state.demo ? 'Previsualizar aviso' : 'Enviar aviso'}</button></form></div>` : ''}`;
 }
 function render() {
   connection();
@@ -100,7 +129,7 @@ async function sync() {
   try {
     await api('/health'); state.online = true;
     state.user = await api('/auth/me');
-    const results = await Promise.allSettled([api('/iptv/channels'),api('/plex/library'),api('/notifications/')]);
+    const results = await Promise.allSettled([api('/iptv/channels',{headers:state.channelEtag ? {'If-None-Match':state.channelEtag} : {}}),api('/plex/library'),api('/notifications/')]);
     if (!state.token) return;
     if (results[0].status === 'fulfilled') state.channels = results[0].value;
     if (results[1].status === 'fulfilled') state.library = results[1].value;
@@ -115,7 +144,7 @@ $('#login-form').addEventListener('submit', async event => {
   try {
     state.server = serverURL(form.elements.server.value.trim());
     const result = await api('/auth/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username:form.elements.username.value,password:form.elements.password.value})});
-    state.token = result.access_token; state.user = await api('/auth/me'); form.elements.password.value = ''; state.online = true; state.tab = 'home'; state.filter = 'Todos'; await sync(); if (state.token) showApp(); $('#login-message').textContent = '';
+    state.token = result.access_token; state.user = await api('/auth/me'); loadChannelPreferences(); form.elements.password.value = ''; state.online = true; state.tab = 'home'; state.filter = 'Todos'; await sync(); if (state.token) showApp(); $('#login-message').textContent = '';
   } catch (error) { state.token = ''; $('#login-message').textContent = error instanceof TypeError ? 'No se pudo conectar. Revisa la dirección, HTTPS y que el servidor esté encendido.' : error.message; }
   finally { button.disabled = false; }
 });
@@ -124,8 +153,16 @@ document.addEventListener('click', async event => {
   if (button.dataset.device) return setDevice(button.dataset.device);
   if (button.dataset.nav) { event.preventDefault(); return navigate(button.dataset.nav); }
   if (button.dataset.toast) return toast(button.dataset.toast);
+  if (button.dataset.channelView) { state.channelView = button.dataset.channelView; return render(); }
+  if (button.id === 'sort-channels') { state.alphabetical = !state.alphabetical; return render(); }
+  if (button.dataset.star !== undefined) {
+    const id = channelId(state.channels[Number(button.dataset.star)]);
+    if (!state.favorites.delete(id)) state.favorites.add(id);
+    saveChannelPreferences(); render();
+    document.querySelector(`[data-star="${button.dataset.star}"]`)?.focus(); return;
+  }
   if (button.dataset.filter) { state.filter = button.dataset.filter; return render(); }
-  if (button.dataset.channel !== undefined) return play(state.channels[Number(button.dataset.channel)]);
+  if (button.dataset.channel !== undefined) { const channel = state.channels[Number(button.dataset.channel)]; markRecent(channel); return play(channel); }
   if (button.dataset.xtream !== undefined) {
     const item = state.xtream[Number(button.dataset.xtream)];
     if (item.type === 'series') return toast('Para navegar los episodios utiliza la app Vault.');
@@ -148,7 +185,8 @@ document.addEventListener('click', async event => {
 });
 document.addEventListener('input', event => {
   if (event.target.id !== 'channel-search') return;
-  const query = event.target.value.toLocaleLowerCase('es');
+  state.query = event.target.value;
+  const query = state.query.toLocaleLowerCase('es');
   document.querySelectorAll('.channel').forEach(channel => channel.hidden = !channel.textContent.toLocaleLowerCase('es').includes(query));
 });
 document.addEventListener('submit', async event => {
@@ -186,7 +224,7 @@ document.addEventListener('keydown', event => {
 });
 try { if (/^https?:$/.test(location.protocol) && location.pathname.startsWith('/preview')) $('#login-form').elements.server.value = location.origin; } catch { /* File preview also works. */ }
 setInterval(async () => {
-  if (state.demo || !state.token || syncing) return;
+  if (document.hidden || state.demo || !state.token || syncing) return;
   await sync();
   if (!state.token || $('#vault-view').hidden || $('#detail-dialog').open || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
   const content = $('#app-content'); const scroll = content.scrollTop;
