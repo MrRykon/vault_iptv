@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/vault_reveal.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../core/api/api_service.dart';
 import '../settings/admin_settings_screen.dart';
@@ -89,25 +90,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: const Text('Mi perfil')),
       body: ListView(padding: const EdgeInsets.all(24), children: [
-        Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: const LinearGradient(
-                    colors: [Color(0xFF382B52), Color(0xFF18212D)])),
-            child: const Column(children: [
-              CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Color(0xFF6C548E),
-                  child: Icon(Icons.person_outline,
-                      size: 40, color: Colors.white)),
-              SizedBox(height: 12),
-              Text('TU ESPACIO PERSONAL',
-                  style: TextStyle(
-                      fontSize: 10,
-                      letterSpacing: 2,
-                      color: Color(0xFFDBC7FF))),
-            ])),
+        VaultReveal(
+            child: Container(
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                        colors: [Color(0xFF382B52), Color(0xFF18212D)])),
+                child: const Column(children: [
+                  CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Color(0xFF6C548E),
+                      child: Icon(Icons.person_outline,
+                          size: 40, color: Colors.white)),
+                  SizedBox(height: 12),
+                  Text('TU ESPACIO PERSONAL',
+                      style: TextStyle(
+                          fontSize: 10,
+                          letterSpacing: 2,
+                          color: Color(0xFFDBC7FF))),
+                ]))),
         const SizedBox(height: 20),
         Text(data['display_name'] ?? data['custom_username'],
             textAlign: TextAlign.center,
@@ -149,20 +151,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (data['admin_status'] == true)
           ValueListenableBuilder<bool>(
               valueListenable: ApiService.serverOnline,
-              builder: (context, online, _) => Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: FilledButton.icon(
-                    onPressed: online
-                        ? () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const AdminSettingsScreen()))
-                        : null,
-                    icon: const Icon(Icons.admin_panel_settings_outlined),
-                    label: Text(online
-                        ? 'Administrar usuarios y notificaciones'
-                        : 'Administración requiere servidor'),
-                  ))),
+              builder: (context, online, _) => Card(
+                    color: const Color(0xFF302A20),
+                    child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('CENTRO DE ADMINISTRACIÓN',
+                                  style: TextStyle(
+                                      color: Color(0xFFFFD58C),
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1)),
+                              Text(online
+                                  ? 'Gestiona tu comunidad Vault'
+                                  : 'Conecta el servidor para administrar'),
+                              for (final item in [
+                                (
+                                  Icons.people_outline,
+                                  'Usuarios y acceso',
+                                  'Crear cuentas, perfiles infantiles y vigencia'
+                                ),
+                                (
+                                  Icons.campaign_outlined,
+                                  'Publicar avisos',
+                                  'Comunícate con todos tus usuarios'
+                                ),
+                                (
+                                  Icons.sync,
+                                  'Sincronizar IPTV',
+                                  'Actualizar las fuentes del servidor'
+                                )
+                              ].indexed)
+                                ListTile(
+                                    enabled: online,
+                                    contentPadding: EdgeInsets.zero,
+                                    leading: Icon(item.$2.$1,
+                                        color: const Color(0xFFFFD58C)),
+                                    title: Text(item.$2.$2),
+                                    subtitle: Text(item.$2.$3),
+                                    trailing: const Icon(Icons.chevron_right),
+                                    onTap: online
+                                        ? () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    AdminSettingsScreen(
+                                                        initialTab: item.$1)))
+                                        : null),
+                            ])),
+                  )),
         const SizedBox(height: 24),
         OutlinedButton.icon(
             icon: const Icon(Icons.logout),

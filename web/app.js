@@ -16,7 +16,7 @@ const demoChannels = [
   {channel_name:'Music Sessions', category:'Música', initials:'MS'},
   {channel_name:'Noticias 24', category:'Noticias', initials:'N24'}
 ];
-const state = {demo:true, device:'web', tab:'home', filter:'Todos', online:true, server:'', token:'', user:null, channels:demoChannels, library:movies, notes:[], xtream:[], previewNotice:'', favorites:new Set(), recent:[], channelView:'Todos', query:'', alphabetical:false, channelEtag:'', saved:new Set(), readNotices:new Set(), compact:false, libraryType:'all', librarySavedOnly:false, libraryQuery:''};
+const state = {demo:true, demoAdmin:true, device:'web', tab:'home', filter:'Todos', online:true, server:'', token:'', user:null, channels:demoChannels, library:movies, notes:[], xtream:[], previewNotice:'', favorites:new Set(), recent:[], channelView:'Todos', query:'', alphabetical:false, channelEtag:'', saved:new Set(), readNotices:new Set(), compact:false, libraryType:'all', librarySavedOnly:false, libraryQuery:''};
 let toastTimer;
 let syncing = false;
 function channelId(channel) { return String(channel.channel_id || channel.channel_name); }
@@ -145,8 +145,8 @@ function xtream() {
 }
 function profile() {
   const name = state.demo ? (state.demoName || 'Explorador Vault') : state.user?.display_name || state.user?.custom_username || 'Usuario';
-  const admin = state.demo || state.user?.admin_status;
-  return `<div class="profile-summary"><div class="profile-avatar">${escapeHTML(name.slice(0,1).toUpperCase())}</div><h1 class="page-title">${escapeHTML(name)}</h1><p class="page-subtitle">${state.demo ? 'Perfil de demostración' : state.user?.admin_status ? 'Administrador' : 'Tu espacio personal'}</p><button id="edit-name" class="quiet-button" ${!state.demo && !state.online ? 'disabled' : ''}>Editar nombre</button></div><div class="settings-card"><h2>Tu Vault</h2><div class="settings-row"><span>Servidor</span><small>${state.demo ? 'Simulado' : state.online ? 'Conectado' : 'Desconectado'}</small></div><div class="settings-row"><span>Versión de la app</span><small>0.2.0 · Vista HTML</small></div><div class="settings-row"><span>Formato de pantalla</span><small>${escapeHTML({web:'Web',phone:'Android',tv:'Chromecast / TV'}[state.device])}</small></div><div class="settings-row"><span>Actualizaciones OTA</span><small>Disponibles en Android</small></div>${state.demo ? '<div class="demo-banner">Puedes simular una desconexión y probar los avisos de administrador. La conexión y los avisos simulados se restablecen al recargar.</div><button class="secondary-button" id="simulate-server">'+(state.online ? 'Simular servidor desconectado' : 'Reconectar servidor simulado')+'</button>' : ''}<div class="settings-actions"><button id="about-button">Información</button><button id="logout">Cerrar sesión</button></div></div>${admin && state.online ? `<div class="settings-card"><h2>Notificaciones ${state.demo ? '· Demo' : '· Admin'}</h2><p class="muted">${state.demo ? 'Prueba cómo se verá un aviso en la pantalla principal.' : 'Envía un aviso a los usuarios de Vault.'}</p><form id="notice-form"><label>Mensaje<input name="content" maxlength="500" placeholder="Escribe un aviso para tus usuarios" required></label><button class="primary-button">${state.demo ? 'Previsualizar aviso' : 'Enviar aviso'}</button></form></div>` : ''}`;
+  const admin = state.demo ? state.demoAdmin : state.user?.admin_status;
+  return `<div class="profile-summary"><div class="profile-avatar">${escapeHTML(name.slice(0,1).toUpperCase())}</div><h1 class="page-title">${escapeHTML(name)}</h1><p class="page-subtitle">${state.demo ? 'Perfil de demostración' : state.user?.admin_status ? 'Administrador' : 'Tu espacio personal'}</p><button id="edit-name" class="quiet-button" ${!state.demo && !state.online ? 'disabled' : ''}>Editar nombre</button></div><div class="settings-card"><h2>Tu Vault</h2>${state.demo ? `<button class="quiet-button" id="demo-role">Vista actual: ${state.demoAdmin ? 'administrador' : 'usuario'} · Cambiar</button>` : ''}<div class="settings-row"><span>Servidor</span><small>${state.demo ? 'Simulado' : state.online ? 'Conectado' : 'Desconectado'}</small></div><div class="settings-row"><span>Versión de la app</span><small>0.0.5 · Vista HTML</small></div><div class="settings-row"><span>Formato de pantalla</span><small>${escapeHTML({web:'Web',phone:'Android',tv:'Chromecast / TV'}[state.device])}</small></div><div class="settings-row"><span>Actualizaciones OTA</span><small>Disponibles en Android</small></div>${state.demo ? '<div class="demo-banner">Puedes simular una desconexión y probar los avisos de administrador. La conexión y los avisos simulados se restablecen al recargar.</div><button class="secondary-button" id="simulate-server">'+(state.online ? 'Simular servidor desconectado' : 'Reconectar servidor simulado')+'</button>' : ''}<div class="settings-actions"><button id="about-button">Información</button><button id="logout">Cerrar sesión</button></div></div>${admin && state.online ? `<div class="settings-card admin-hub"><span class="eyebrow">SOLO ADMINISTRADORES</span><h2>Centro de administración</h2><p>Tu comunidad, bajo control.</p><div class="admin-actions"><button data-admin="users"><strong>Usuarios y acceso →</strong><small>Crear cuentas, perfiles infantiles y sesiones</small></button><button data-admin="sync"><strong>Sincronizar IPTV ↻</strong><small>Leer los cambios en tus fuentes ahora</small></button></div></div><div class="settings-card"><h2>Notificaciones ${state.demo ? '· Demo' : '· Admin'}</h2><p class="muted">${state.demo ? 'Prueba cómo se verá un aviso en la pantalla principal.' : 'Envía un aviso a los usuarios de Vault.'}</p><form id="notice-form"><label>Mensaje<input name="content" maxlength="500" placeholder="Escribe un aviso para tus usuarios" required></label><button class="primary-button">${state.demo ? 'Previsualizar aviso' : 'Enviar aviso'}</button></form></div>` : ''}`;
 }
 function render() {
   const active = document.activeElement;
@@ -202,6 +202,8 @@ $('#login-form').addEventListener('submit', async event => {
 });
 document.addEventListener('click', async event => {
   const button = event.target.closest('button,a[data-nav]'); if (!button) return;
+  if (button.id === 'demo-role') { state.demoAdmin = !state.demoAdmin; return render(); }
+  if (button.dataset.admin || button.dataset.userAction) return handleAdmin(button);
   if (button.dataset.device) return setDevice(button.dataset.device);
   if (button.dataset.nav) { event.preventDefault(); return navigate(button.dataset.nav); }
   if (button.dataset.toast) return toast(button.dataset.toast);
@@ -263,10 +265,16 @@ document.addEventListener('input', event => {
 });
 document.addEventListener('submit', async event => {
   const form = event.target;
-  if (!['xtream-form','notice-form','profile-name-form'].includes(form.id)) return;
+  if (!['xtream-form','notice-form','profile-name-form','admin-create-form'].includes(form.id)) return;
   event.preventDefault(); const button = form.querySelector('button'); button.disabled = true;
   try {
-    if (form.id === 'profile-name-form') {
+    if (form.id === 'admin-create-form') {
+      if (!canAdmin()) throw new Error('Se necesita una cuenta de administrador conectada.');
+      const record = Object.fromEntries(new FormData(form));
+      if (state.demo) demoUsers.push({id:Date.now(),custom_username:record.custom_username,profile_type:record.profile_type,account_status:'active'});
+      else await api('/admin/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)});
+      form.reset(); await showAdminUsers(); toast(state.demo ? 'Cuenta de muestra creada; se borra al recargar.' : 'Usuario creado.');
+    } else if (form.id === 'profile-name-form') {
       const name = form.elements.display_name.value.trim(); if (!name) return;
       if (state.demo) state.demoName = name;
       else state.user = await api('/users/profile',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({display_name:name})});
@@ -309,3 +317,42 @@ setInterval(async () => {
   if (content.contains(document.activeElement)) return;
   render(); content.scrollTop = scroll;
 },30000);
+
+
+const demoUsers = [{id:1,custom_username:'Familia',profile_type:'standard',account_status:'active'}, {id:2,custom_username:'Pequeños',profile_type:'kids',account_status:'active'}];
+function canAdmin() { return state.online && (state.demo ? state.demoAdmin : state.user?.admin_status === true); }
+async function showAdminUsers() {
+  if (!canAdmin()) return;
+  const token = state.token, demo = state.demo;
+  const users = state.demo ? demoUsers : await api('/admin/users');
+  if (!canAdmin() || state.token !== token || state.demo !== demo) return;
+  dialog(`<span class="eyebrow">${state.demo ? 'ADMIN · DATOS SIMULADOS' : 'ADMINISTRACIÓN'}</span><h2>Usuarios y acceso</h2><p class="muted">${users.length} cuentas · ${users.filter(u=>u.account_status==='active').length} activas</p><label>Buscar usuario<input id="admin-search" type="search" placeholder="Nombre de usuario"></label><div class="admin-users">${users.map(user=>`<article class="admin-user" data-username="${escapeHTML(user.custom_username.toLocaleLowerCase('es'))}"><h3>${escapeHTML(user.custom_username)}</h3><p class="muted">${escapeHTML(user.profile_type)} · ${escapeHTML(user.account_status)}${user.admin_status ? ' · Administrador' : ''}</p>${!user.admin_status ? `<div class="settings-actions"><button data-user-action="${user.account_status==='suspended'?'activate':'suspend'}" data-user-id="${user.id}">${user.account_status==='suspended'?'Activar':'Suspender'}</button><button data-user-action="${user.profile_type==='kids'?'standard':'kids'}" data-user-id="${user.id}">${user.profile_type==='kids'?'Perfil normal':'Perfil infantil'}</button><button data-user-action="revoke-sessions" data-user-id="${user.id}">Cerrar sesiones</button></div>` : ''}</article>`).join('')}</div><h3>Crear usuario</h3><form id="admin-create-form"><label>Usuario<input name="custom_username" maxlength="80" required autocomplete="off"></label><label>Contraseña<input name="password" type="password" required autocomplete="new-password"></label><label>Perfil<select name="profile_type"><option value="standard">Normal</option><option value="kids">Infantil</option></select></label><button class="primary-button">Crear cuenta</button></form>`);
+}
+async function handleAdmin(button) {
+  if (!canAdmin() || button.disabled) return;
+  button.disabled = true;
+  try {
+    if (button.dataset.admin === 'users') return await showAdminUsers();
+    if (button.dataset.admin === 'sync') {
+      if (!state.demo) { await api('/iptv/refresh',{method:'POST'}); await sync(); }
+      return toast(state.demo ? 'Sincronización simulada. Conecta tu servidor para leer las fuentes.' : 'Fuentes IPTV actualizadas.');
+    }
+    const action = button.dataset.userAction, id = Number(button.dataset.userId);
+    if (action === 'revoke-sessions' && !confirm('¿Cerrar sus sesiones? Tendrá que iniciar sesión cuando se conecte. El acceso offline no se puede revocar a distancia.')) return;
+    if (state.demo) {
+      const user = demoUsers.find(u=>u.id===id);
+      if (['kids','standard'].includes(action)) user.profile_type = action;
+      else if (action !== 'revoke-sessions') user.account_status = action === 'activate' ? 'active' : 'suspended';
+    } else {
+      const profile = ['kids','standard'].includes(action);
+      await api(`/admin/users/${id}/${profile?'profile-type':action}`,{method:action==='revoke-sessions'?'POST':'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(profile?{profile_type:action}:{})});
+    }
+    await showAdminUsers(); toast(state.demo ? 'Cambio simulado.' : 'Cambios guardados.');
+  } catch(error) { toast(error.message); }
+  finally { button.disabled = false; }
+}
+document.addEventListener('input', event => {
+  if (event.target.id !== 'admin-search') return;
+  const query = event.target.value.trim().toLocaleLowerCase('es');
+  document.querySelectorAll('.admin-user').forEach(user => user.hidden = !user.dataset.username.includes(query));
+});

@@ -42,6 +42,8 @@ def suspend_user(user_id: int, db: Session = Depends(get_db), admin: User = Depe
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if user.admin_status:
+        raise HTTPException(status_code=400, detail="Cannot suspend administrators")
     user.account_status = "suspended"
     auth_service.revoke_all_user_sessions(db, user.id) # Kick them out
     db.commit()
@@ -124,3 +126,14 @@ def set_user_expiration(user_id: int, expr: ExpirationUpdate, db: Session = Depe
         
     db.commit()
     return {"message": "Account time bounds configured natively"}
+
+
+@router.post("/users/{user_id}/revoke-sessions")
+def close_user_sessions(user_id: int, db: Session = Depends(get_db), admin: User = Depends(require_admin)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.admin_status:
+        raise HTTPException(status_code=400, detail="Cannot disconnect administrators")
+    auth_service.revoke_all_user_sessions(db, user.id)
+    return {"success": True}

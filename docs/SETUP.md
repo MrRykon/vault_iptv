@@ -1,6 +1,6 @@
 # Vault
 
-App privada para Android: biblioteca Plex, Live TV por listas M3U y un espacio independiente para Xtream Codes. Backend FastAPI + SQLite y cliente Flutter. La versión de trabajo es **0.2.0+2**.
+App privada para Android: biblioteca Plex, Live TV por listas M3U y un espacio independiente para Xtream Codes. Backend FastAPI + SQLite y cliente Flutter. La versión de trabajo es **0.0.5+3**.
 
 ## Arrancar en Windows
 
@@ -80,7 +80,7 @@ La biblioteca admite búsqueda por título, filtros de películas/series y «Mi 
 
 El icono de avisos abre la bandeja completa y muestra un contador de mensajes pendientes. Puedes marcar uno o todos como leídos. Mi lista, el diseño compacto y la lectura de avisos se guardan por cuenta/servidor en el dispositivo, sin sincronización entre dispositivos. En Perfil → Editar nombre puedes modificar tu nombre visible cuando el servidor esté conectado; el usuario de login permanece igual. La web HTML ofrece estas mismas funciones, y en demostración permite simular el cambio de nombre.
 
-La versión declarada permanece en **0.2.0+2**. No se publica un APK OTA de producción como parte de estos cambios.
+La versión declarada es **0.0.5+3**. No se publica un APK OTA de producción como parte de estos cambios.
 
 ## Vista HTML y publicación web
 
@@ -97,3 +97,12 @@ Desde `app/backend`: `.venv/bin/python -m unittest discover -s tests -v` (Window
 Desde `app/frontend`: `flutter pub get --enforce-lockfile`, `flutter analyze`, `flutter test`, `flutter build web --no-pub`. Prueban autenticación offline, aislamiento de cuentas/servidores, rechazo de cuentas suspendidas, lectura M3U, comparación OTA y pantalla de login.
 
 No conectamos todavía servidores Plex/Xtream reales ni instalamos en un dispositivo Android. En el navegador, el almacenamiento seguro necesita HTTPS o localhost; para uso en LAN sin HTTPS utiliza la app Android. El cliente Flutter web generado se sirve con `WEB_CLIENT_DIR` o mediante el lanzador. Sin compilación, el servidor ofrece la vista HTML de la carpeta `web`; los bundles generados se excluyen de Git.
+
+
+## Centro de administración · 0.0.5
+
+El perfil de administrador abre usuarios, avisos y sincronización IPTV. Android ofrece búsqueda, cuentas infantiles, contraseña, suspensión/reactivación, vigencia de 7/30 días o sin vencimiento y cierre de sesiones. La web ofrece creación, búsqueda, perfiles infantiles, suspensión y cierre de sesiones; en demostración los cambios son simulados y se descartan al recargar. Un usuario normal no ve estos controles y la API también comprueba el rol.
+
+Cerrar sesiones invalida los tokens del usuario en el servidor sin suspender su cuenta. No puede revocar el acceso de un dispositivo que permanece offline; se aplica cuando vuelve a consultar el servidor. Los administradores están protegidos contra suspensión y cierre masivo de sesiones desde estos controles.
+
+La versión visible solicitada es **0.0.5**, con build interno **3**. No se publica una OTA de producción. Las instalaciones anteriores con versión semántica 0.2.0 rechazan 0.0.5 mediante la protección contra versiones anteriores: necesitarán una instalación manual o una futura versión superior para recibir OTA. Se mantiene esa protección.

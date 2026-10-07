@@ -31,9 +31,9 @@ class Settings(BaseSettings):
     WEB_CLIENT_DIR: str = str(Path(__file__).resolve().parents[4] / "web")
 
     # Updates
-    LATEST_VERSION: str = "0.2.0"
-    UPDATE_MESSAGE: str = "Auto-play Live TV Random Channels and skipped-update logic fixes!"
-    MINIMUM_SUPPORTED_VERSION: str = "0.9.0"
+    LATEST_VERSION: str = "0.0.5"
+    UPDATE_MESSAGE: str = "Centro de administración y mejoras de diseño."
+    MINIMUM_SUPPORTED_VERSION: str = "0.0.5"
     APK_SHA256: str = ""
     FORCE_UPDATE: bool = False
 

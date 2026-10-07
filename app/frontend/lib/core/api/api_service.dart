@@ -196,7 +196,8 @@ class ApiService {
     }
   }
 
-  Future<dynamic> requestJson(String path, {Map<String, dynamic>? body}) async {
+  Future<dynamic> requestJson(String path,
+      {Map<String, dynamic>? body, String method = 'POST'}) async {
     final token = await getToken();
     final headers = {
       'Authorization': 'Bearer $token',
@@ -204,8 +205,10 @@ class ApiService {
     };
     final response = await (body == null
             ? transport.get(Uri.parse('$baseUrl$path'), headers: headers)
-            : transport.post(Uri.parse('$baseUrl$path'),
-                headers: headers, body: jsonEncode(body)))
+            : (method == 'PUT' ? transport.put : transport.post)(
+                Uri.parse('$baseUrl$path'),
+                headers: headers,
+                body: jsonEncode(body)))
         .timeout(const Duration(seconds: 25));
     if (response.statusCode != 200) {
       String message =

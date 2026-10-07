@@ -69,6 +69,28 @@ class VaultTests(unittest.TestCase):
         self.client.post('/auth/logout', headers=user)
         self.assertEqual(self.client.get('/auth/me', headers=user).status_code, 401)
 
+    def test_admin_session_controls_enforce_roles_and_preserve_admin(self):
+        admin = self.token()
+        viewer = self.token('viewer')
+        viewer_id = self.client.get('/auth/me', headers=viewer).json()['id']
+        admin_id = self.client.get('/auth/me', headers=admin).json()['id']
+        path = f'/admin/users/{viewer_id}/revoke-sessions'
+        self.assertEqual(self.client.post(path).status_code, 401)
+        self.assertEqual(self.client.post(path, headers=viewer).status_code, 403)
+        self.assertEqual(self.client.post('/admin/users/999999/revoke-sessions', headers=admin).status_code, 404)
+        self.assertEqual(self.client.post(f'/admin/users/{admin_id}/revoke-sessions', headers=admin).status_code, 400)
+        self.assertEqual(self.client.put(f'/admin/users/{admin_id}/suspend', headers=admin).status_code, 400)
+        self.assertEqual(self.client.get('/auth/me', headers=admin).status_code, 200)
+        self.assertTrue(self.client.post(path, headers=admin).json()['success'])
+        self.assertEqual(self.client.get('/auth/me', headers=viewer).status_code, 401)
+        fresh = self.token('viewer')
+        self.assertEqual(self.client.get('/auth/me', headers=fresh).status_code, 200)
+        profile_path = f'/admin/users/{viewer_id}/profile-type'
+        self.assertEqual(self.client.put(profile_path, json={'profile_type':'kids'}, headers=fresh).status_code, 403)
+        self.assertEqual(self.client.put(profile_path, json={'profile_type':'kids'}, headers=admin).status_code, 200)
+        self.assertEqual(self.client.get('/auth/me', headers=fresh).json()['profile_type'], 'kids')
+        self.client.put(profile_path, json={'profile_type':'standard'}, headers=admin)
+
     def test_html_fallback_does_not_need_a_versioned_flutter_bundle(self):
         for path in ('/', '/styles.css', '/app.js', '/preview/', '/preview/styles.css'):
             self.assertEqual(self.client.get(path).status_code, 200, path)
