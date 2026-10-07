@@ -16,7 +16,7 @@ const demoChannels = [
   {channel_name:'Music Sessions', category:'Música', initials:'MS'},
   {channel_name:'Noticias 24', category:'Noticias', initials:'N24'}
 ];
-const state = {demo:true, device:'web', tab:'home', filter:'Todos', online:true, server:'', token:'', user:null, channels:demoChannels, library:movies, notes:[], xtream:[], previewNotice:'', favorites:new Set(), recent:[], channelView:'Todos', query:'', alphabetical:false, channelEtag:''};
+const state = {demo:true, device:'web', tab:'home', filter:'Todos', online:true, server:'', token:'', user:null, channels:demoChannels, library:movies, notes:[], xtream:[], previewNotice:'', favorites:new Set(), recent:[], channelView:'Todos', query:'', alphabetical:false, channelEtag:'', saved:new Set(), readNotices:new Set(), compact:false, libraryType:'all', librarySavedOnly:false, libraryQuery:''};
 let toastTimer;
 let syncing = false;
 function channelId(channel) { return String(channel.channel_id || channel.channel_name); }
@@ -35,6 +35,42 @@ function saveChannelPreferences() {
 }
 function markRecent(channel) {
   const id = channelId(channel); state.recent = [id,...state.recent.filter(value => value !== id)].slice(0,20); saveChannelPreferences();
+}
+function libraryId(item) { return String(item.id || item.title); }
+function notificationId(note) {
+  if (note.id != null) return String(note.id);
+  let hash = 2166136261;
+  for (const character of `${note.subject}\n${note.content}`) hash = Math.imul(hash ^ character.charCodeAt(0),16777619);
+  return 'notice-' + (hash >>> 0).toString(16);
+}
+function libraryPreferenceKey() { return 'vault_library_' + JSON.stringify(state.demo ? ['demo'] : [state.server,state.user?.custom_username]); }
+function loadLibraryPreferences() {
+  state.saved = new Set(); state.readNotices = new Set(); state.compact = false;
+  state.libraryType = 'all'; state.librarySavedOnly = false; state.libraryQuery = '';
+  try {
+    const record = JSON.parse(localStorage.getItem(libraryPreferenceKey()) || '{}');
+    if (Array.isArray(record.saved)) state.saved = new Set(record.saved.filter(value => typeof value === 'string'));
+    if (Array.isArray(record.read)) state.readNotices = new Set(record.read.filter(value => typeof value === 'string'));
+    state.compact = record.compact === true;
+  } catch { /* Preferences are optional. */ }
+}
+function saveLibraryPreferences() {
+  try { localStorage.setItem(libraryPreferenceKey(),JSON.stringify({saved:[...state.saved],read:[...state.readNotices],compact:state.compact})); }
+  catch { toast('No se pudieron guardar las preferencias en este navegador.'); }
+}
+function visibleLibrary() { return state.library.map((item,index) => ({item,index})).filter(({item}) =>
+  (state.libraryType === 'all' || item.type === state.libraryType) &&
+  (!state.librarySavedOnly || state.saved.has(libraryId(item))) &&
+  item.title.toLocaleLowerCase('es').includes(state.libraryQuery.trim().toLocaleLowerCase('es'))); }
+function activeNotes() { return state.demo ? [{id:'demo-welcome',subject:'Novedades de Vault',content:state.previewNotice || 'Bienvenido a tu nuevo espacio de entretenimiento.'}] : state.notes; }
+function unreadNotes() { return activeNotes().filter(note => !state.readNotices.has(notificationId(note))); }
+function inbox() {
+  dialog(`<span class="eyebrow">TU BANDEJA</span><h2>Avisos de Vault</h2><p class="muted">${unreadNotes().length} sin leer</p><button id="read-all-notes" class="secondary-button" ${unreadNotes().length ? '' : 'disabled'}>Marcar todos como leídos</button><div class="inbox-list">${activeNotes().map((note,index) => `<article class="inbox-note ${state.readNotices.has(notificationId(note)) ? 'read' : ''}"><h3>${escapeHTML(note.subject)}</h3><p>${escapeHTML(note.content)}</p><button data-read-note="${index}" class="quiet-button" ${state.readNotices.has(notificationId(note)) ? 'disabled' : ''}>${state.readNotices.has(notificationId(note)) ? 'Leído' : 'Marcar como leído'}</button></article>`).join('') || '<p class="muted">No hay avisos por ahora.</p>'}</div>`);
+}
+function updateLibraryResults() {
+  const visible = visibleLibrary();
+  $('#library-count').textContent = `${visible.length} títulos`;
+  $('#library-results').innerHTML = visible.map(({item,index}) => card(item,index)).join('') || '<div class="empty-state">No hay títulos con estos filtros. Guarda tus historias con el marcador para crear Mi lista.</div>';
 }
 function toast(message) { $('#toast').textContent = message; $('#toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').hidden = true, 4500); }
 function safeURL(value) { try { const url = new URL(value); return ['http:','https:'].includes(url.protocol) && !url.username && !url.password ? url.href : ''; } catch { return ''; } }
@@ -63,7 +99,7 @@ async function api(path, options = {}) {
 function showLogin() { $('#login-view').hidden = false; $('#vault-view').hidden = true; $('#screen-toggle').textContent = 'Ver inicio'; }
 function showApp() { $('#login-view').hidden = true; $('#vault-view').hidden = false; $('#screen-toggle').textContent = 'Ver login'; render(); }
 function enterDemo() {
-  state.demo = true; state.token = ''; state.user = null; state.online = true; state.channels = demoChannels; state.library = movies; state.notes = []; state.xtream = []; state.tab = 'home'; state.filter = 'Todos'; loadChannelPreferences(); showApp();
+  state.demo = true; state.token = ''; state.user = null; state.online = true; state.channels = demoChannels; state.library = movies; state.notes = []; state.xtream = []; state.tab = 'home'; state.filter = 'Todos'; loadChannelPreferences(); loadLibraryPreferences(); showApp();
 }
 function setDevice(device) {
   state.device = device; $('#device-frame').dataset.device = device;
@@ -77,14 +113,18 @@ function connection() {
 }
 function card(item, index) {
   const fallback = movies[index % movies.length];
-  return `<button class="movie-card" data-movie="${index}" aria-label="Ver ${escapeHTML(item.title)}"><div class="poster" style="--poster:${fallback.color}">${item.mock || state.demo ? '<span class="badge">PRÓXIMAMENTE</span>' : ''}<span class="poster-title">${escapeHTML(item.title)}</span></div><h3>${escapeHTML(item.title)}</h3><p>${escapeHTML(item.genre || (item.type === 'show' ? 'Serie' : 'Película'))} · ${escapeHTML(item.year || 'Plex')}</p></button>`;
+  return `<article class="library-tile"><button class="movie-card" data-movie="${index}" aria-label="Ver ${escapeHTML(item.title)}"><div class="poster" style="--poster:${fallback.color}">${item.mock || state.demo ? '<span class="badge">PRÓXIMAMENTE</span>' : ''}<span class="poster-title">${escapeHTML(item.title)}</span></div><h3>${escapeHTML(item.title)}</h3><p>${escapeHTML(item.genre || (item.type === 'show' ? 'Serie' : 'Película'))} · ${escapeHTML(item.year || 'Plex')}</p></button><button class="save-movie ${state.saved.has(libraryId(item)) ? 'saved' : ''}" data-save-movie="${index}" aria-pressed="${state.saved.has(libraryId(item))}" aria-label="${state.saved.has(libraryId(item)) ? 'Quitar de Mi lista' : 'Agregar a Mi lista'}: ${escapeHTML(item.title)}">${state.saved.has(libraryId(item)) ? '✓' : '+'}</button></article>`;
 }
 function home() {
-  const note = state.previewNotice || (state.demo ? 'Bienvenido a tu nuevo espacio de entretenimiento.' : state.notes[0]?.content || 'Tu biblioteca se actualiza cuando el servidor está conectado.');
+  const latest = unreadNotes()[0] || activeNotes()[0];
+  const note = latest?.content || 'Tu biblioteca se actualiza cuando el servidor está conectado.';
   const hero = state.library[0] || movies[0];
-  return `<div class="notice"><span aria-hidden="true">✧</span><div><strong>${escapeHTML(state.demo ? 'Novedades de Vault' : state.notes[0]?.subject || 'Vault')}</strong><br>${escapeHTML(note)}</div><span class="tag">${state.demo ? 'DEMO' : 'AVISOS'}</span></div>
+  return `<div class="home-welcome"><h1>Hola, ${escapeHTML(state.demo ? state.demoName || 'explorador' : state.user?.display_name || state.user?.custom_username || 'bienvenido')}</h1><p>Haz espacio para lo que te gusta.</p></div><div class="notice"><span aria-hidden="true">✧</span><div><strong>${escapeHTML(latest?.subject || 'Vault')}</strong><br>${escapeHTML(note)}</div><button id="notice-open" class="notice-action">${unreadNotes().length ? `${unreadNotes().length} sin leer` : 'Ver avisos'} →</button></div>
   <section class="hero"><div class="hero-moon"></div><div class="hero-landscape"></div><div class="hero-copy"><span class="eyebrow">${state.demo || hero.mock ? 'TU PRÓXIMA HISTORIA · PRÓXIMAMENTE' : 'EN TU BIBLIOTECA PLEX'}</span><h2>${escapeHTML(hero.title)}</h2><p>${state.demo || hero.mock ? 'Hay historias que nos llevan más lejos. Descubre lo que te espera en tu biblioteca.' : 'Películas y series de tu servidor, reunidas en tu espacio.'}</p><div class="hero-buttons"><button data-movie="0">▷ Ver detalles</button><button data-nav="live">▣ Ir a Live TV</button></div></div></section>
-  <div class="section-heading"><h2>Tu biblioteca</h2><small>${state.demo ? 'Plex · contenido ilustrativo' : `${state.library.length} títulos · Plex`}</small></div><div class="cards">${state.library.map(card).join('') || '<p class="empty-state">No hay contenido disponible en Plex.</p>'}</div>`;
+  <div class="section-heading"><h2>Tu biblioteca</h2><button id="compact-library" class="filter" aria-pressed="${state.compact}">${state.compact ? 'Vista cómoda' : 'Vista compacta'}</button></div>
+  <label class="library-search-label"><span class="sr-only">Buscar películas y series</span><input id="library-search" type="search" placeholder="Buscar películas y series" value="${escapeHTML(state.libraryQuery)}" autocomplete="off"></label>
+  <div class="filters library-filters">${[['all','Todo'],['movie','Películas'],['show','Series']].map(([value,label]) => `<button class="filter ${state.libraryType === value ? 'active' : ''}" data-library-type="${value}">${label}</button>`).join('')}<button id="watchlist-filter" class="filter ${state.librarySavedOnly ? 'active' : ''}" aria-pressed="${state.librarySavedOnly}">Mi lista</button><small id="library-count">${visibleLibrary().length} títulos</small></div>
+  <div class="cards" id="library-results">${visibleLibrary().map(({item,index}) => card(item,index)).join('') || '<p class="empty-state">No hay títulos con estos filtros.</p>'}</div>`;
 }
 function live() {
   const categories = ['Todos', ...new Set(state.channels.map(c => c.category || 'General'))];
@@ -104,14 +144,26 @@ function xtream() {
   return `<span class="eyebrow">UN ESPACIO PARA TU PROVEEDOR</span><h1 class="page-title">Xtream Codes</h1><p class="page-subtitle">Conecta tu TV, películas y series en una sección independiente.</p><div class="settings-card"><h2>Tu conexión Xtream</h2><p class="muted">${state.demo ? 'Vista de diseño. No escribas credenciales reales en la demostración.' : 'Las credenciales se envían a tu servidor Vault y no se guardan en esta web.'}</p><form id="xtream-form"><label>URL del proveedor<input name="server" type="url" placeholder="https://proveedor.com:puerto" required ${state.demo ? 'disabled' : ''}></label><label>Usuario<input name="username" autocomplete="off" required placeholder="Usuario del proveedor" ${state.demo ? 'disabled' : ''}></label><label>Contraseña<input name="password" type="password" autocomplete="off" required placeholder="Contraseña del proveedor" ${state.demo ? 'disabled' : ''}></label><label>Contenido<select name="section"><option value="live">Televisión en vivo</option><option value="vod">Películas</option><option value="series">Series</option></select></label><button class="primary-button" ${state.demo ? 'type="button" data-toast="Conecta un servidor Vault desde el login para usar Xtream."' : 'type="submit"'}>Conectar proveedor <span>→</span></button></form></div><div class="channels">${state.xtream.map((item,index) => `<button class="channel" data-xtream="${index}"><span class="channel-logo">ϟ</span><div><h3>${escapeHTML(item.title)}</h3><small>${escapeHTML(item.type)}</small></div></button>`).join('')}</div>`;
 }
 function profile() {
-  const name = state.demo ? 'Explorador Vault' : state.user?.display_name || state.user?.custom_username || 'Usuario';
+  const name = state.demo ? (state.demoName || 'Explorador Vault') : state.user?.display_name || state.user?.custom_username || 'Usuario';
   const admin = state.demo || state.user?.admin_status;
-  return `<div class="profile-summary"><div class="profile-avatar">${escapeHTML(name.slice(0,1).toUpperCase())}</div><h1 class="page-title">${escapeHTML(name)}</h1><p class="page-subtitle">${state.demo ? 'Perfil de demostración' : state.user?.admin_status ? 'Administrador' : 'Tu espacio personal'}</p></div><div class="settings-card"><h2>Tu Vault</h2><div class="settings-row"><span>Servidor</span><small>${state.demo ? 'Simulado' : state.online ? 'Conectado' : 'Desconectado'}</small></div><div class="settings-row"><span>Versión de la app</span><small>0.2.0 · Vista HTML</small></div><div class="settings-row"><span>Formato de pantalla</span><small>${escapeHTML({web:'Web',phone:'Android',tv:'Chromecast / TV'}[state.device])}</small></div><div class="settings-row"><span>Actualizaciones OTA</span><small>Disponibles en Android</small></div>${state.demo ? '<div class="demo-banner">Puedes simular una desconexión y probar los avisos de administrador. Los cambios se borran al recargar.</div><button class="secondary-button" id="simulate-server">'+(state.online ? 'Simular servidor desconectado' : 'Reconectar servidor simulado')+'</button>' : ''}<div class="settings-actions"><button id="about-button">Información</button><button id="logout">Cerrar sesión</button></div></div>${admin && state.online ? `<div class="settings-card"><h2>Notificaciones ${state.demo ? '· Demo' : '· Admin'}</h2><p class="muted">${state.demo ? 'Prueba cómo se verá un aviso en la pantalla principal.' : 'Envía un aviso a los usuarios de Vault.'}</p><form id="notice-form"><label>Mensaje<input name="content" maxlength="500" placeholder="Escribe un aviso para tus usuarios" required></label><button class="primary-button">${state.demo ? 'Previsualizar aviso' : 'Enviar aviso'}</button></form></div>` : ''}`;
+  return `<div class="profile-summary"><div class="profile-avatar">${escapeHTML(name.slice(0,1).toUpperCase())}</div><h1 class="page-title">${escapeHTML(name)}</h1><p class="page-subtitle">${state.demo ? 'Perfil de demostración' : state.user?.admin_status ? 'Administrador' : 'Tu espacio personal'}</p><button id="edit-name" class="quiet-button" ${!state.demo && !state.online ? 'disabled' : ''}>Editar nombre</button></div><div class="settings-card"><h2>Tu Vault</h2><div class="settings-row"><span>Servidor</span><small>${state.demo ? 'Simulado' : state.online ? 'Conectado' : 'Desconectado'}</small></div><div class="settings-row"><span>Versión de la app</span><small>0.2.0 · Vista HTML</small></div><div class="settings-row"><span>Formato de pantalla</span><small>${escapeHTML({web:'Web',phone:'Android',tv:'Chromecast / TV'}[state.device])}</small></div><div class="settings-row"><span>Actualizaciones OTA</span><small>Disponibles en Android</small></div>${state.demo ? '<div class="demo-banner">Puedes simular una desconexión y probar los avisos de administrador. La conexión y los avisos simulados se restablecen al recargar.</div><button class="secondary-button" id="simulate-server">'+(state.online ? 'Simular servidor desconectado' : 'Reconectar servidor simulado')+'</button>' : ''}<div class="settings-actions"><button id="about-button">Información</button><button id="logout">Cerrar sesión</button></div></div>${admin && state.online ? `<div class="settings-card"><h2>Notificaciones ${state.demo ? '· Demo' : '· Admin'}</h2><p class="muted">${state.demo ? 'Prueba cómo se verá un aviso en la pantalla principal.' : 'Envía un aviso a los usuarios de Vault.'}</p><form id="notice-form"><label>Mensaje<input name="content" maxlength="500" placeholder="Escribe un aviso para tus usuarios" required></label><button class="primary-button">${state.demo ? 'Previsualizar aviso' : 'Enviar aviso'}</button></form></div>` : ''}`;
 }
 function render() {
+  const active = document.activeElement;
+  let focusSelector = '';
+  if ($('#app-content').contains(active) && active.tagName === 'BUTTON') {
+    if (active.id) focusSelector = '#' + CSS.escape(active.id);
+    else {
+      const attribute = [...active.attributes].find(attr => attr.name.startsWith('data-'));
+      if (attribute) focusSelector = `[${attribute.name}="${CSS.escape(attribute.value)}"]`;
+    }
+  }
   connection();
+  $('#app-screen').classList.toggle('compact-library',state.compact);
+  $('#unread-count').textContent = String(unreadNotes().length); $('#unread-count').hidden = !unreadNotes().length;
   document.querySelectorAll('.bottom-nav [data-nav]').forEach(button => { if (button.dataset.nav === state.tab) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current'); });
   $('#app-content').innerHTML = ({home,live,xtream,profile}[state.tab] || home)();
+  if (focusSelector) ($('#app-content').querySelector(focusSelector) || $('#app-content .filter.active'))?.focus({preventScroll:true});
 }
 function navigate(tab) { state.tab = tab; render(); $('#app-content').scrollTop = 0; if (state.device === 'tv') $('#app-content button, #app-content input')?.focus(); }
 function dialog(html) { $('#dialog-content').innerHTML = html; $('#detail-dialog').showModal(); }
@@ -144,7 +196,7 @@ $('#login-form').addEventListener('submit', async event => {
   try {
     state.server = serverURL(form.elements.server.value.trim());
     const result = await api('/auth/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username:form.elements.username.value,password:form.elements.password.value})});
-    state.token = result.access_token; state.user = await api('/auth/me'); loadChannelPreferences(); form.elements.password.value = ''; state.online = true; state.tab = 'home'; state.filter = 'Todos'; await sync(); if (state.token) showApp(); $('#login-message').textContent = '';
+    state.token = result.access_token; state.user = await api('/auth/me'); loadChannelPreferences(); loadLibraryPreferences(); form.elements.password.value = ''; state.online = true; state.tab = 'home'; state.filter = 'Todos'; await sync(); if (state.token) showApp(); $('#login-message').textContent = '';
   } catch (error) { state.token = ''; $('#login-message').textContent = error instanceof TypeError ? 'No se pudo conectar. Revisa la dirección, HTTPS y que el servidor esté encendido.' : error.message; }
   finally { button.disabled = false; }
 });
@@ -153,6 +205,25 @@ document.addEventListener('click', async event => {
   if (button.dataset.device) return setDevice(button.dataset.device);
   if (button.dataset.nav) { event.preventDefault(); return navigate(button.dataset.nav); }
   if (button.dataset.toast) return toast(button.dataset.toast);
+  if (button.id === 'edit-name') {
+    const name = state.demo ? state.demoName || 'Explorador Vault' : state.user?.display_name || state.user?.custom_username || '';
+    return dialog(`<span class="eyebrow">TU PERFIL</span><h2>Editar nombre</h2><form id="profile-name-form"><label>Nombre visible<input name="display_name" value="${escapeHTML(name)}" maxlength="80" required autocomplete="nickname"></label><button class="primary-button">Guardar</button><p class="muted">${state.demo ? 'Este cambio es una demostración y se borra al recargar.' : 'Tu usuario de inicio de sesión seguirá siendo el mismo.'}</p></form>`);
+  }
+  if (button.dataset.saveMovie !== undefined) {
+    const id = libraryId(state.library[Number(button.dataset.saveMovie)]);
+    if (!state.saved.delete(id)) state.saved.add(id);
+    saveLibraryPreferences(); updateLibraryResults();
+    document.querySelector(`[data-save-movie="${button.dataset.saveMovie}"]`)?.focus(); return;
+  }
+  if (button.dataset.libraryType) { state.libraryType = button.dataset.libraryType; return render(); }
+  if (button.id === 'watchlist-filter') { state.librarySavedOnly = !state.librarySavedOnly; return render(); }
+  if (button.id === 'compact-library') { state.compact = !state.compact; saveLibraryPreferences(); return render(); }
+  if (['inbox-button','notice-open'].includes(button.id)) return inbox();
+  if (button.dataset.readNote !== undefined || button.id === 'read-all-notes') {
+    const notes = button.id === 'read-all-notes' ? activeNotes() : [activeNotes()[Number(button.dataset.readNote)]];
+    notes.forEach(note => state.readNotices.add(notificationId(note)));
+    saveLibraryPreferences(); render(); closeDialog(); inbox(); return;
+  }
   if (button.dataset.channelView) { state.channelView = button.dataset.channelView; return render(); }
   if (button.id === 'sort-channels') { state.alphabetical = !state.alphabetical; return render(); }
   if (button.dataset.star !== undefined) {
@@ -184,6 +255,7 @@ document.addEventListener('click', async event => {
   }
 });
 document.addEventListener('input', event => {
+  if (event.target.id === 'library-search') { state.libraryQuery = event.target.value; updateLibraryResults(); return; }
   if (event.target.id !== 'channel-search') return;
   state.query = event.target.value;
   const query = state.query.toLocaleLowerCase('es');
@@ -191,12 +263,17 @@ document.addEventListener('input', event => {
 });
 document.addEventListener('submit', async event => {
   const form = event.target;
-  if (!['xtream-form','notice-form'].includes(form.id)) return;
+  if (!['xtream-form','notice-form','profile-name-form'].includes(form.id)) return;
   event.preventDefault(); const button = form.querySelector('button'); button.disabled = true;
   try {
-    if (form.id === 'notice-form') {
+    if (form.id === 'profile-name-form') {
+      const name = form.elements.display_name.value.trim(); if (!name) return;
+      if (state.demo) state.demoName = name;
+      else state.user = await api('/users/profile',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({display_name:name})});
+      closeDialog(); render(); toast('Nombre actualizado.');
+    } else if (form.id === 'notice-form') {
       const content = form.elements.content.value.trim(); if (!content) return;
-      if (state.demo) state.previewNotice = content;
+      if (state.demo) { state.previewNotice = content; state.readNotices.delete('demo-welcome'); }
       else { await api('/notifications/?'+new URLSearchParams({subject:'Novedades de Vault',content}),{method:'POST'}); await sync(); }
       toast(state.demo ? 'Aviso de demostración actualizado.' : 'Aviso enviado.'); navigate('home');
     } else {

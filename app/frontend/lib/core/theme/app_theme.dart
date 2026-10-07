@@ -1,83 +1,64 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color neonPurple = Color(0xFFB026FF);
-  static const Color neonRed = Color(0xFFFF003C);
-  
+  static const Color neonPurple = Color(0xFFB49EFF);
+  static const Color neonRed = Color(0xFFF08CA1);
   static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
     brightness: Brightness.dark,
-    primaryColor: neonPurple,
-    scaffoldBackgroundColor: Colors.black, // True Black
-    cardColor: const Color(0xFF111111), // Almost black
-    colorScheme: const ColorScheme.dark(
-      primary: neonPurple,
-      secondary: neonRed,
-    ),
+    colorScheme: ColorScheme.fromSeed(
+        seedColor: neonPurple,
+        brightness: Brightness.dark,
+        surface: const Color(0xFF14151F)),
+    scaffoldBackgroundColor: const Color(0xFF0B0C14),
+    cardTheme: CardThemeData(
+        color: const Color(0xFF171823),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0xFF292A3B)))),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.black,
-      elevation: 0,
-      centerTitle: true,
-      iconTheme: IconThemeData(color: neonPurple),
-    ),
+        backgroundColor: Color(0xFF0B0C14),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false),
+    navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: const Color(0xFF10111B),
+        indicatorColor: const Color(0xFF382D54),
+        height: 76,
+        labelTextStyle: WidgetStateProperty.all(const TextStyle(fontSize: 12))),
+    chipTheme: ChipThemeData(
+        side: const BorderSide(color: Color(0xFF323347)),
+        selectedColor: const Color(0xFF382D54),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+    filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)))),
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: neonPurple,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-      ),
-    ),
+        style: ElevatedButton.styleFrom(
+            backgroundColor: neonPurple,
+            foregroundColor: const Color(0xFF20172F),
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)))),
     inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: const Color(0xFF1C1C1E),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: neonPurple, width: 2),
-      ),
-      labelStyle: const TextStyle(color: Colors.white70),
-    ),
+        filled: true,
+        fillColor: const Color(0xFF181925),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF303144))),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF303144))),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: neonPurple, width: 2))),
   );
-
   static final ThemeData lightTheme = ThemeData(
-    brightness: Brightness.light, // Generally, vault relies on dark theme, but keeping this linked just in case.
-    primaryColor: neonPurple,
-    scaffoldBackgroundColor: const Color(0xFFF5F5F5), // Soft white
-    cardColor: Colors.white,
-    colorScheme: const ColorScheme.light(
-      primary: neonPurple,
-      secondary: neonRed,
-    ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFFF5F5F5),
-      elevation: 0,
-      centerTitle: true,
-      iconTheme: IconThemeData(color: neonPurple),
-      titleTextStyle: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold)
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: neonPurple,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-      ),
-    ),
-     inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: const Color(0xFFE0E0E0),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: neonPurple, width: 2),
-      ),
-      labelStyle: const TextStyle(color: Colors.black54),
-    ),
-  );
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(seedColor: neonPurple));
 }

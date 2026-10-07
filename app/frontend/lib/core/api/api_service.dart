@@ -238,13 +238,14 @@ class ApiService {
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
       bodyPayload['avatar_url'] = avatarUrl;
     }
-    final res = await transport.put(
-        Uri.parse('${ApiService.baseUrl}/users/profile'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode(bodyPayload));
+    final res = await transport
+        .put(Uri.parse('${ApiService.baseUrl}/users/profile'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json'
+            },
+            body: jsonEncode(bodyPayload))
+        .timeout(const Duration(seconds: 8));
     return res.statusCode == 200;
   }
 

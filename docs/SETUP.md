@@ -74,6 +74,14 @@ Con la app/build detenidos ejecuta `app/maintenance.bat` para borrar caches Pyth
 
 En Raspberry Pi, copia el repositorio completo (incluidas `app` y `web`) junto con una copia segura de `.env`, SQLite, listas y publicaciones; instala Python 3.12+ y ejecuta `bash start_server.sh --skip-build`. Compila APK en Windows y transfiere los APK publicados al Pi. Reserva una dirección de red o configura un dominio para evitar reconfigurar todos los dispositivos. Este lanzador Linux se comparte con Windows; el despliegue en hardware Pi aún debe comprobarse allí.
 
+## Biblioteca, perfil y avisos
+
+La biblioteca admite búsqueda por título, filtros de películas/series y «Mi lista». Guarda un título con el marcador de su tarjeta; solo se muestran títulos del catálogo permitido a la cuenta. El botón de vista compacta cambia la densidad y se recuerda en el dispositivo. En pantallas amplias el cliente Flutter utiliza navegación lateral; en teléfono mantiene Inicio / Live TV / Xtream en la barra inferior.
+
+El icono de avisos abre la bandeja completa y muestra un contador de mensajes pendientes. Puedes marcar uno o todos como leídos. Mi lista, el diseño compacto y la lectura de avisos se guardan por cuenta/servidor en el dispositivo, sin sincronización entre dispositivos. En Perfil → Editar nombre puedes modificar tu nombre visible cuando el servidor esté conectado; el usuario de login permanece igual. La web HTML ofrece estas mismas funciones, y en demostración permite simular el cambio de nombre.
+
+La versión declarada permanece en **0.2.0+2**. No se publica un APK OTA de producción como parte de estos cambios.
+
 ## Vista HTML y publicación web
 
 `web/index.html` funciona sin compilación ni dependencias externas. Para servirla localmente: desde la raíz del repositorio ejecuta `python -m http.server 8080 --directory web`. El backend también sirve esta vista en `/preview/`, manteniendo el cliente Flutter en `/`.
