@@ -28,3 +28,8 @@ vault.db
 # Temporary scratch files
 scratch/
 scratch_*.html
+
+bats/Lib/
+bats/Include/
+bats/Scripts/
+bats/pyvenv.cfg
