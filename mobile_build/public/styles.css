@@ -3218,3 +3218,111 @@ body.native-app .device-frame[data-device=phone] .app-header {
   font-weight: 700;
 }
 
+/* ==========================================================================
+   QUICK RESUME & FAVORITES STRIPS (WEB, MOBILE & TV)
+   ========================================================================== */
+.quick-strip-section {
+  margin: 14px 0 8px;
+}
+.quick-strip-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+  scrollbar-width: thin;
+}
+.quick-channel-pill {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 195px;
+  max-width: 245px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.quick-channel-pill:hover {
+  background: rgba(168, 85, 247, 0.16);
+  border-color: rgba(192, 132, 252, 0.45);
+  transform: translateY(-1px);
+}
+.quick-pill-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #c084fc;
+}
+.quick-pill-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.quick-pill-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.quick-pill-text strong {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.quick-pill-text small {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.quick-pill-play {
+  font-size: 11px;
+  color: #c084fc;
+  opacity: 0.85;
+}
+
+.tv-quick-strip .quick-channel-pill {
+  min-width: 230px;
+  padding: 13px 16px;
+  border-radius: 16px;
+}
+.tv-quick-strip .quick-pill-text strong {
+  font-size: 15px;
+}
+
+/* Clear Filters Chip */
+.filter.clear-filter-chip,
+.tv-filter-btn.clear-btn {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #fca5a5;
+}
+.filter.clear-filter-chip:hover,
+.tv-filter-btn.clear-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fff;
+}
+
+/* 60fps Virtualized Rendering for Large Channel Lists */
+.channel-card-rich,
+.tv-channel-tile {
+  content-visibility: auto;
+  contain-intrinsic-size: 96px;
+}
+
+

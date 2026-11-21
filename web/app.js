@@ -1925,11 +1925,55 @@ function renderListCountText(list) {
   return `${count} canales`;
 }
 
+function getQuickChannelsFromIds(idList, limit = 8) {
+  if (!idList || !idList.length || !state.channels.length) return [];
+  const lookup = new Map();
+  for (let i = 0; i < state.channels.length; i++) {
+    const id = channelId(state.channels[i]);
+    if (!lookup.has(id)) lookup.set(id, { channel: state.channels[i], index: i });
+  }
+  const results = [];
+  for (const id of idList) {
+    const hit = lookup.get(id);
+    if (hit) results.push(hit);
+    if (results.length >= limit) break;
+  }
+  return results;
+}
+
+function renderQuickStrip(title, icon, items, isTv = false) {
+  if (!items.length) return '';
+  return `
+    <section class="quick-strip-section ${isTv ? 'tv-quick-strip' : ''}" aria-label="${escapeHTML(title)}">
+      <div class="section-heading">
+        <h2>${icon} ${escapeHTML(title)}</h2>
+        <small>${items.length}</small>
+      </div>
+      <div class="quick-strip-row">
+        ${items.map(({ channel: c, index }) => `
+          <button type="button" class="quick-channel-pill" data-channel="${index}">
+            <span class="quick-pill-avatar">
+              ${c.logo_url ? `<img src="${escapeHTML(c.logo_url)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span style="display:none">${c.type?.startsWith('web_') ? '🌐' : escapeHTML(c.channel_name.slice(0, 2).toUpperCase())}</span>` : `<span>${c.type?.startsWith('web_') ? '🌐' : escapeHTML(c.channel_name.slice(0, 2).toUpperCase())}</span>`}
+            </span>
+            <span class="quick-pill-text">
+              <strong>${escapeHTML(c.channel_name)}</strong>
+              <small>${escapeHTML(c.listName || c.country || 'En vivo')}</small>
+            </span>
+            <span class="quick-pill-play">▶</span>
+          </button>
+        `).join('')}
+      </div>
+    </section>
+  `;
+}
+
 function home() {
   const userName = state.user ? (state.user.display_name || state.user.custom_username) : '';
   const greeting = userName ? `Hola, ${escapeHTML(userName)}` : 'Bienvenido a Vault';
   const totalChannels = state.channels.length;
   const hasLists = state.userLists.length > 0;
+  const recentItems = getQuickChannelsFromIds(state.recent, 8);
+  const favItems = getQuickChannelsFromIds([...state.favorites], 8);
 
   if (state.device === 'tv') {
     return `
@@ -1954,6 +1998,9 @@ function home() {
             </button>
           </div>
         </div>
+
+        ${renderQuickStrip('Seguir viendo', '🕒', recentItems, true)}
+        ${renderQuickStrip('Favoritos', '★', favItems, true)}
 
         ${!state.noAds ? `
           <section class="ad-container-section tv-ad-strip" aria-label="Espacio Publicitario">
@@ -1992,7 +2039,8 @@ function home() {
                   </button>
                   <div class="tv-list-footer-btns">
                     <button type="button" class="secondary-button compact" data-refresh-list="${escapeHTML(list.id)}" title="Actualizar">↻ Actualizar</button>
-                    <button type="button" class="secondary-button compact danger" data-delete-list="${escapeHTML(list.id)}" title="Eliminar">🗑 Eliminar</button>
+                    <button type="button" class="secondary-button compact" data-rename-list="${escapeHTML(list.id)}" title="Renombrar">✏️ Nombre</button>
+                    <button type="button" class="secondary-button compact danger" data-delete-list="${escapeHTML(list.id)}" title="Eliminar">🗑</button>
                   </div>
                 </div>
               `).join('')}
@@ -2055,6 +2103,9 @@ function home() {
       </section>
     `}
 
+    ${renderQuickStrip('Seguir viendo', '🕒', recentItems, false)}
+    ${renderQuickStrip('Tus favoritos', '★', favItems, false)}
+
     ${!state.noAds ? `
       <!-- SECCIÓN 1 DE MONETIZACIÓN: BANNER PRINCIPAL (INICIO) -->
       <section class="ad-container-section" aria-label="Espacio Publicitario">
@@ -2102,6 +2153,7 @@ function home() {
               </p>
               <div class="list-card-actions">
                 <button type="button" class="primary-button list-open-btn" data-open-list="${escapeHTML(list.id)}">▶ ${list.type === 'web_playlist' ? 'Ver playlist' : 'Ver canales'}</button>
+                <button type="button" class="secondary-button list-icon-btn" data-rename-list="${escapeHTML(list.id)}" title="Renombrar lista">✏️</button>
                 <button type="button" class="secondary-button list-icon-btn" data-refresh-list="${escapeHTML(list.id)}" title="Actualizar lista">↻</button>
                 <button type="button" class="secondary-button list-icon-btn danger" data-delete-list="${escapeHTML(list.id)}" title="Eliminar lista">🗑</button>
               </div>
@@ -2115,18 +2167,28 @@ function home() {
 
 function live() {
   const activeListId = state.listFilter || 'all';
-  const listScopedChannels = state.channels.map((channel, index) => ({ channel, index }))
-    .filter(({ channel }) => activeListId === 'all' || channel.listId === activeListId);
+  const listScopedChannels = [];
+  const countryCounts = new Map();
+  const categoryCounts = new Map();
 
-  const allCountries = [...new Set(listScopedChannels.map(({ channel: c }) => c.country || 'Internacional').filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, 'es'));
+  for (let index = 0; index < state.channels.length; index++) {
+    const channel = state.channels[index];
+    if (activeListId !== 'all' && channel.listId !== activeListId) continue;
+    listScopedChannels.push({ channel, index });
+    const ctry = channel.country || 'Internacional';
+    const cat = channel.category || 'General';
+    countryCounts.set(ctry, (countryCounts.get(ctry) || 0) + 1);
+    categoryCounts.set(cat, (categoryCounts.get(cat) || 0) + 1);
+  }
+
+  const allCountries = [...countryCounts.keys()].sort((a, b) => a.localeCompare(b, 'es'));
   const countries = ['Todos', ...allCountries];
 
-  const allCategories = [...new Set(listScopedChannels.map(({ channel: c }) => c.category || 'General').filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, 'es'));
+  const allCategories = [...categoryCounts.keys()].sort((a, b) => a.localeCompare(b, 'es'));
   const categories = ['Todas', ...allCategories];
 
   const query = state.query.trim().toLocaleLowerCase('es');
+  const hasActiveFilters = Boolean(query) || activeListId !== 'all' || state.countryFilter !== 'Todos' || state.categoryFilter !== 'Todas' || state.channelView !== 'Todos';
 
   let visible = listScopedChannels.filter(({ channel: c }) => {
     const matchesCountry = (state.countryFilter === 'Todos' || (c.country || 'Internacional') === state.countryFilter);
@@ -2134,9 +2196,10 @@ function live() {
     const matchesView = (state.channelView === 'Todos') ||
       (state.channelView === 'Favoritos' && state.favorites.has(channelId(c))) ||
       (state.channelView === 'Recientes' && state.recent.includes(channelId(c)));
+    if (!matchesCountry || !matchesCategory || !matchesView) return false;
+    if (!query) return true;
     const targetText = `${c.channel_name} ${c.country || ''} ${c.category || ''} ${c.listName || ''}`.toLocaleLowerCase('es');
-    const matchesQuery = !query || targetText.includes(query);
-    return matchesCountry && matchesCategory && matchesView && matchesQuery;
+    return targetText.includes(query);
   });
 
   if (state.channelView === 'Recientes') visible.sort((a, b) => state.recent.indexOf(channelId(a.channel)) - state.recent.indexOf(channelId(b.channel)));
@@ -2146,8 +2209,8 @@ function live() {
   const pageLimit = state.channelPageLimit || 60;
   const pagedVisible = visible.slice(0, pageLimit);
 
-  const countForCountry = (c) => c === 'Todos' ? listScopedChannels.length : listScopedChannels.filter(({ channel: ch }) => (ch.country || 'Internacional') === c).length;
-  const countForCategory = (cat) => cat === 'Todas' ? listScopedChannels.length : listScopedChannels.filter(({ channel: ch }) => (ch.category || 'General') === cat).length;
+  const countForCountry = (c) => c === 'Todos' ? listScopedChannels.length : (countryCounts.get(c) || 0);
+  const countForCategory = (cat) => cat === 'Todas' ? listScopedChannels.length : (categoryCounts.get(cat) || 0);
 
   // TV: 10-foot simplified UI for remote control
   if (state.device === 'tv') {
@@ -2172,6 +2235,7 @@ function live() {
             <button type="button" class="tv-filter-btn" id="tv-search-btn">
               🔍 ${state.query ? `"${escapeHTML(state.query)}"` : 'Buscar'}
             </button>
+            ${hasActiveFilters ? `<button type="button" class="tv-filter-btn clear-btn" id="clear-live-filters-btn">✕ Limpiar</button>` : ''}
           </div>
         </div>
 
@@ -2258,6 +2322,7 @@ function live() {
     <div class="filters">
       ${['Todos', 'Favoritos', 'Recientes'].map(view => `<button data-channel-view="${view}" class="filter ${view === state.channelView ? 'active' : ''}">${view === 'Favoritos' ? '★ Favoritos' : view === 'Recientes' ? '🕒 Recientes' : 'Todos'}</button>`).join('')}
       <button id="sort-channels" class="filter ${state.alphabetical ? 'active' : ''}" aria-pressed="${state.alphabetical}">A–Z</button>
+      ${hasActiveFilters ? `<button id="clear-live-filters-btn" class="filter clear-filter-chip">✕ Limpiar filtros</button>` : ''}
     </div>
 
     ${!state.noAds ? `
@@ -2875,6 +2940,11 @@ function player() {
             <span class="deck-icon">↻</span> Reconectar
           </button>
         `}
+        ${!isWebItem || !item.embed_url ? `
+          <button type="button" id="player-speed-toggle" class="player-deck-btn" title="Cambiar velocidad de reproducción">
+            <span class="deck-icon">⏩</span> ${state.playerSpeed || 1}x
+          </button>
+        ` : ''}
         <button type="button" id="player-aspect-toggle" class="player-deck-btn" title="Cambiar escala de video">
           <span class="deck-icon">📐</span> ${aspectMode === 'contain' ? 'Ajuste 16:9' : (aspectMode === 'cover' ? 'Zoom' : 'Estirar')}
         </button>
@@ -3969,11 +4039,13 @@ document.addEventListener('change', event => {
   }
 });
 
+let _channelSearchTimer = null;
 document.addEventListener('input', event => {
   if (event.target.id === 'channel-search') {
     state.query = event.target.value;
     state.channelPageLimit = 60;
-    render();
+    clearTimeout(_channelSearchTimer);
+    _channelSearchTimer = setTimeout(() => render(), 150);
   }
   if (event.target.id === 'player-guide-search') {
     state.playerQuery = event.target.value;
@@ -3989,13 +4061,58 @@ document.addEventListener('input', event => {
 
 document.addEventListener('submit', async event => {
   const form = event.target;
-  const handled = ['login-form', 'register-form', 'add-m3u-form', 'add-xtream-modal-form', 'xtream-form', 'notice-form', 'profile-name-form', 'admin-create-form', 'checkout-purchase-form', 'web-extractor-form', 'tv-search-form'];
+  const handled = ['login-form', 'register-form', 'add-m3u-form', 'add-xtream-modal-form', 'xtream-form', 'notice-form', 'profile-name-form', 'admin-create-form', 'checkout-purchase-form', 'web-extractor-form', 'tv-search-form', 'rename-list-form', 'import-backup-form'];
   if (!handled.includes(form.id)) return;
   event.preventDefault();
   const button = form.querySelector('button[type="submit"]') || form.querySelector('button');
   if (button) button.disabled = true;
 
   try {
+    if (form.id === 'rename-list-form') {
+      const listId = form.dataset.listId;
+      const newName = (form.elements.new_name?.value || '').trim();
+      const list = state.userLists.find(l => l.id === listId);
+      if (list && newName) {
+        list.name = newName;
+        saveUserLists();
+        rebuildChannelsFromLists();
+        closeDialog();
+        render();
+        toast(`✓ Lista renombrada a "${newName}"`);
+      }
+      return;
+    }
+    if (form.id === 'import-backup-form') {
+      const fileInput = $('#import-backup-file');
+      let rawText = (form.elements.backup_json?.value || '').trim();
+      if (!rawText && fileInput?.files?.[0]) {
+        rawText = await fileInput.files[0].text();
+      }
+      if (!rawText) throw new Error('Selecciona un archivo JSON o pega el contenido del respaldo.');
+      const parsed = JSON.parse(rawText);
+      const importedLists = Array.isArray(parsed.userLists) ? parsed.userLists : (Array.isArray(parsed) ? parsed : []);
+      if (!importedLists.length) throw new Error('El respaldo no contiene listas válidas.');
+      let added = 0;
+      for (const l of importedLists) {
+        if (!l || typeof l.id !== 'string' || !Array.isArray(l.channels)) continue;
+        const idx = state.userLists.findIndex(x => x.id === l.id);
+        if (idx >= 0) state.userLists[idx] = l;
+        else { state.userLists.push(l); added++; }
+      }
+      if (Array.isArray(parsed.favorites)) {
+        parsed.favorites.forEach(id => { if (typeof id === 'string') state.favorites.add(id); });
+      }
+      if (Array.isArray(parsed.recent)) {
+        state.recent = [...new Set([...parsed.recent.filter(id => typeof id === 'string'), ...state.recent])].slice(0, 20);
+      }
+      saveUserLists();
+      saveChannelPreferences();
+      rebuildChannelsFromLists();
+      closeDialog();
+      render();
+      toast(`✓ Respaldo importado (${importedLists.length} listas restauradas, ${added} nuevas)`);
+      return;
+    }
     if (form.id === 'tv-search-form') {
       state.query = ($('#tv-search-modal-input')?.value || '').trim();
       state.channelPageLimit = 60;
