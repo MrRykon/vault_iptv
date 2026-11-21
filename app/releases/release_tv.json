@@ -1,0 +1,8 @@
+{
+  "latest_version": "0.0.7",
+  "latest_build": 4,
+  "filename": "VaultTV_0.0.7+4.apk",
+  "apk_sha256": "3cfceb0d4ff2bf930a2afe5224456f1538a31948ded52a1e2982e3aa93f212b4",
+  "release_notes": "Pantalla de inicio de sesion sin credenciales visibles. Registro de usuarios, deteccion automatica del servidor, animacion de inicio, guia de programacion en vivo y estado de senal.",
+  "force_update": false
+}

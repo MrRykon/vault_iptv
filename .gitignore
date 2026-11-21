@@ -1,0 +1,30 @@
+# Java JDK local portable bundle
+jdk-*/
+
+# Gradle and Android build outputs
+.gradle/
+**/build/
+**/.gradle/
+**/android/.gradle/
+**/android/app/build/
+**/android/capacitor-cordova-android-plugins/build/
+
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# IDE and Editor configurations
+.idea/
+.vscode/
+*.swp
+*.DS_Store
+Thumbs.db
+
+# Python caches and local db
+__pycache__/
+*.pyc
+vault.db
+
+# Temporary scratch files
+scratch/
+scratch_*.html

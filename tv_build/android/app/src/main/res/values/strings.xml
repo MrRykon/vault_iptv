@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vault IPTV TV</string>
+    <string name="title_activity_main">Vault IPTV TV</string>
+    <string name="package_name">com.vault.iptv.tv</string>
+    <string name="custom_url_scheme">com.vault.iptv.tv</string>
+</resources>

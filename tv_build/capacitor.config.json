@@ -1,0 +1,17 @@
+{
+  "appId": "com.vault.iptv.tv",
+  "appName": "Vault IPTV TV",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true,
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

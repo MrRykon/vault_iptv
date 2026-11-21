@@ -1,0 +1,24 @@
+======================================================================
+         VAULT IPTV - CARPETA PARA TUS LISTAS DE CANALES (.M3U)
+======================================================================
+
+¡Aquí es donde debes colocar tus archivos de listas IPTV!
+
+1. ¿QUÉ FORMATOS PUEDES PONER AQUÍ?
+   - Archivos con extensión .m3u o .m3u8 (por ejemplo: canales.m3u)
+   - Archivos de texto .txt que contengan enlaces web HTTP/HTTPS directos
+     a listas M3U remotas (un enlace por línea).
+
+2. ¿CÓMO SE CARGAN EN LA APLICACIÓN?
+   - Si el servidor ya está abierto con "activate.bat", detecta las
+     nuevas listas automáticamente cada 30 segundos.
+   - O puedes pulsar el botón "Sincronizar IPTV ↻" en el panel o reiniciar
+     con "bats\activate.bat".
+   - Todos los canales aparecerán clasificados por sus categorías
+     (Películas, Deportes, Noticias, etc.) en la pestaña "Live TV"
+     tanto en la Web, como en tu Móvil y en el Chromecast / Google TV.
+
+3. ARCHIVO DE PRUEBA:
+   - Ya te dejamos incluido "ejemplo_canales.m3u" con canales activos
+     para que verifiques la reproducción de inmediato.
+======================================================================

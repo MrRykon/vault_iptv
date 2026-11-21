@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c0c12">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Vault: tu biblioteca, televisión en vivo y Xtream. Vista web con previsualización Android y TV.">
+  <title>Vault · Tu espacio de entretenimiento</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="hls.min.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Pantalla de inicio animada (Splash Screen) -->
+  <div id="splash-screen" class="splash-screen" aria-live="polite">
+    <div class="splash-container">
+      <div class="splash-logo-wrap">
+        <div class="splash-pulse-ring"></div>
+        <div class="splash-pulse-ring delay"></div>
+        <span class="splash-brand-mark">V</span>
+      </div>
+      <h1 class="splash-title">VAULT</h1>
+      <p class="splash-subtitle">TU UNIVERSO DE ENTRETENIMIENTO</p>
+      <div class="splash-loading-bar"><div class="splash-loading-fill"></div></div>
+      <span class="splash-status" id="splash-status">Iniciando Vault…</span>
+    </div>
+  </div>
+  <script>
+    // Failsafe: el splash nunca debe quedarse pegado bajo ninguna circunstancia
+    setTimeout(function() {
+      var s = document.getElementById('splash-screen');
+      if (s && !s.classList.contains('splash-fade-out')) {
+        s.classList.add('splash-fade-out');
+        setTimeout(function() { try { s.remove(); } catch(e) { s.hidden = true; } }, 500);
+      }
+    }, 2000);
+  </script>
+
+  <header class="preview-toolbar">
+    <a class="wordmark" href="./" aria-label="Vault, inicio"><span class="brand-mark">V</span> VAULT <span class="preview-label">VISTA WEB</span></a>
+    <div class="device-switch" role="group" aria-label="Formato de visualización">
+      <button data-device="web" aria-pressed="true">Web</button>
+      <button data-device="phone" aria-pressed="false">Android</button>
+      <button data-device="tv" aria-pressed="false">Chromecast / TV</button>
+    </div>
+  </header>
+  <main class="preview-stage">
+    <div class="device-caption" id="device-caption">Vista web adaptable</div>
+    <div class="device-frame" data-device="web" id="device-frame">
+      <div class="phone-camera" aria-hidden="true"></div>
+      <div class="app-screen" id="app-screen">
+        <section class="vault-view" id="vault-view">
+          <header class="app-header">
+            <a href="#home" class="wordmark" data-nav="home"><span class="brand-mark">V</span> VAULT</a>
+            <span class="connection" id="connection"><i></i>Servidor</span>
+            <button id="inbox-button" class="inbox-button" aria-label="Abrir avisos"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="unread-count" hidden></span></button>
+            <button class="profile-button" id="header-profile-btn" data-nav="profile" aria-label="Abrir perfil e iniciar sesión">
+              <span class="profile-avatar-mini" id="header-profile-avatar">👤</span>
+              <span class="profile-btn-label" id="header-profile-label">Iniciar sesión</span>
+            </button>
+          </header>
+          <div class="app-content" id="app-content" tabindex="-1"></div>
+          <nav class="bottom-nav" aria-label="Navegación principal">
+            <button data-nav="home" aria-current="page"><span>⌂</span>Inicio</button>
+            <button data-nav="live"><span>▣</span>Live TV</button>
+            <button data-nav="xtream"><span>ϟ</span>Xtream</button>
+          </nav>
+        </section>
+      </div>
+      <div class="phone-home" aria-hidden="true"></div>
+    </div>
+    <p class="preview-help" id="preview-help">Vault: tu plataforma IPTV con todos tus canales organizados por país y género.</p>
+  </main>
+  <dialog id="detail-dialog"><button id="close-dialog" class="dialog-close" aria-label="Cerrar">×</button><div id="dialog-content"></div></dialog>
+  <!-- Rich Floating Notification / Banner Host -->
+  <aside class="vault-notification-host" id="vault-notification-host" aria-live="polite">
+    <div class="vault-notification-card" id="vault-notification" hidden>
+      <div class="notif-accent-bar" id="notif-accent-bar"></div>
+      <div class="notif-icon-box" id="notif-icon-box">
+        <span class="notif-icon-symbol" id="notif-icon-symbol">✓</span>
+      </div>
+      <div class="notif-content-col">
+        <div class="notif-header-row">
+          <strong class="notif-title" id="notif-title">Notificación</strong>
+          <span class="notif-badge" id="notif-badge">Vault</span>
+        </div>
+        <p class="notif-desc" id="notif-desc"></p>
+        <div class="notif-actions-row" id="notif-actions-row" hidden></div>
+      </div>
+      <button type="button" class="notif-dismiss-btn" id="notif-dismiss-btn" aria-label="Cerrar notificación">×</button>
+    </div>
+  </aside>
+
+  <!-- Network Offline Persistent Floating Pill -->
+  <div class="offline-status-banner" id="offline-status-banner" hidden>
+    <div class="offline-pill-inner">
+      <span class="offline-pulse-dot"></span>
+      <span class="offline-text">Sin conexión a Internet · Modo local activo</span>
+      <button type="button" class="offline-retry-chip" id="offline-retry-btn">↻ Reintentar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>

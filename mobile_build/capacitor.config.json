@@ -1,0 +1,17 @@
+{
+  "appId": "com.vault.iptv.mobile",
+  "appName": "Vault IPTV Mobile",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true,
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}
