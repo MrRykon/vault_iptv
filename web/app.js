@@ -396,6 +396,7 @@ const state = {
   playerGuideMode: 'country', playerGuideValue: '', playerAspectRatio: 'contain',
   sleepTimer: null, sleepTimerMinutes: 0,
   webEpisodes: [], webSeries: [], webHistory: [], webExtractorLoading: false,
+  adBlockEnabled: true, adBlockCount: 0, tvPlayerGuideOpen: false,
   noAds: false
 };
 
@@ -1133,6 +1134,141 @@ function openCheckoutDialog() {
    reproductores embebidos (iframes) y listas de capitulos para reproducirlos.
    ========================================================================== */
 
+const VAULT_AD_DOMAINS = [
+  'doubleclick.net', 'googlesyndication.com', 'googleadservices.com', 'adservice.google.com',
+  'adnxs.com', 'adsrvr.org', 'popads.net', 'popcash.net', 'propellerads.com',
+  'propellerclick.com', 'exoclick.com', 'exosrv.com', 'juicyads.com', 'trafficjunky.com',
+  'adsterra.com', 'highperformanceformat.com', 'mgid.com', 'taboola.com', 'outbrain.com',
+  'amazon-adsystem.com', 'pubmatic.com', 'openx.net', 'rubiconproject.com', 'criteo.com',
+  'criteo.net', 'smartadserver.com', 'bidswitch.net', 'casalemedia.com', 'advertising.com',
+  'scorecardresearch.com', 'quantserve.com', 'histats.com', 'mc.yandex.ru', 'acscdn.com',
+  'onclickalgo.com', 'onclkds.com', 'dolohen.com', 'tsyndicate.com', 'realsrv.com',
+  'adsco.re', 'admaven.com', 'ad-maven.com', 'adtng.com', 'clickadu.com',
+  'hilltopads.net', 'monetag.com', 'richpush.co', 'pushengage.com', 'revcontent.com',
+  'zergnet.com', 'teads.tv', 'spotxchange.com', 'springserve.com', 'lijit.com',
+  'sovrn.com', 'sharethrough.com', 'triplelift.com', 'indexexchange.com', 'media.net',
+  'yieldmo.com', 'amung.us', 'statcounter.com', 'hotjar.com', 'clarity.ms',
+  'topcreativeformat.com', 'effectivegatecpm.com', 'profitablegatecpm.com', 'wayfarerorthodox.com'
+];
+
+const VAULT_AD_KEYWORDS = [
+  '/vast', '/vmap', 'preroll', 'midroll', 'popunder', 'popup.js',
+  'adserver', '/pagead/', '/adview', 'banner_ad', 'clicktrack',
+  'googlesyndication', 'doubleclick', 'adsystem'
+];
+
+function isAdUrl(rawUrl) {
+  if (!rawUrl || !state.adBlockEnabled) return false;
+  try {
+    const parsed = new URL(rawUrl, location.href);
+    const host = parsed.hostname.toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.') || host.startsWith('10.')) {
+      return false;
+    }
+    if (VAULT_AD_DOMAINS.some(d => host === d || host.endsWith('.' + d))) {
+      state.adBlockCount = (state.adBlockCount || 0) + 1;
+      return true;
+    }
+    const full = rawUrl.toLowerCase();
+    if (VAULT_AD_KEYWORDS.some(kw => full.includes(kw))) {
+      state.adBlockCount = (state.adBlockCount || 0) + 1;
+      return true;
+    }
+  } catch (_) {}
+  return false;
+}
+
+function getDomainLabel(rawUrl) {
+  try {
+    return new URL(rawUrl).hostname.replace(/^www\./, '');
+  } catch (_) {
+    return 'Web';
+  }
+}
+
+function saveWebPlaylist({ name, url, items, poster = '' }) {
+  const cleanUrl = String(url || '').trim();
+  const domain = getDomainLabel(cleanUrl);
+  const listId = 'web_' + hashStr(cleanUrl);
+  const playlistName = (name || domain || 'Playlist Web').trim().slice(0, 80);
+
+  const channels = (items || []).map((ep, idx) => {
+    const epUrl = ep.url || ep.page_url || ep.stream_url || cleanUrl;
+    const isDirect = /\.(m3u8|mp4|webm|ts)(\?|$)/i.test(ep.stream_url || '');
+    return {
+      channel_id: `${listId}_ep_${idx}_${hashStr(epUrl)}`,
+      channel_name: ep.title || ep.channel_name || `Video ${idx + 1}`,
+      title: ep.title || ep.channel_name || `Video ${idx + 1}`,
+      type: ep.embed_url ? 'web_embed' : (isDirect ? 'web_video' : 'web_episode'),
+      stream_url: ep.stream_url || ep.embed_url || epUrl,
+      embed_url: ep.embed_url || '',
+      page_url: epUrl,
+      logo_url: ep.poster || poster || '',
+      country: domain,
+      category: 'Playlist Web',
+      current_program: playlistName,
+      program_time: `Ep. ${idx + 1}`,
+      listId,
+      listName: playlistName,
+      is_online: true
+    };
+  });
+
+  const record = {
+    id: listId,
+    name: playlistName,
+    type: 'web_playlist',
+    url: cleanUrl,
+    domain,
+    poster,
+    addedAt: Date.now(),
+    channels
+  };
+
+  const existingIdx = state.userLists.findIndex(l => l.id === listId);
+  if (existingIdx >= 0) {
+    state.userLists[existingIdx] = record;
+  } else {
+    state.userLists.unshift(record);
+  }
+  saveUserLists();
+  rebuildChannelsFromLists();
+  return record;
+}
+
+async function refreshWebPlaylist(listId) {
+  const list = state.userLists.find(l => l.id === listId && l.type === 'web_playlist');
+  if (!list) throw new Error('Playlist web no encontrada.');
+  const html = await fetchHtmlWithCorsFallback(list.url);
+  const extracted = extractMediaFromHtml(list.url, html);
+  let items = [];
+  if (extracted.episodes && extracted.episodes.length > 0) {
+    items = extracted.episodes;
+  } else if (extracted.directVideos.length > 0 || extracted.iframes.length > 0) {
+    const vids = extracted.directVideos.map((v, i) => ({
+      title: extracted.pageTitle ? `${extracted.pageTitle} (${i + 1})` : `Stream ${i + 1}`,
+      url: list.url,
+      stream_url: v
+    }));
+    const embeds = extracted.iframes.filter(f => f.isPlayer).map((f, i) => ({
+      title: extracted.pageTitle ? `${extracted.pageTitle} · Reproductor ${i + 1}` : `Reproductor ${i + 1}`,
+      url: list.url,
+      embed_url: f.src,
+      stream_url: f.src
+    }));
+    items = [...vids, ...embeds];
+  }
+  if (!items.length) {
+    throw new Error('No se encontraron nuevos videos o capítulos en esta página.');
+  }
+  return saveWebPlaylist({
+    name: list.name || extracted.pageTitle,
+    url: list.url,
+    items,
+    poster: extracted.ogImage || list.poster || ''
+  });
+}
+
 function resolveFullUrl(base, relative) {
   if (!relative) return '';
   try {
@@ -1163,8 +1299,6 @@ async function resolveCubeEmbed(url, parentReferer = '') {
   if (!fileId) return url;
   try {
     const apiTarget = `https://cubeembed.rpmvid.com/api/public/resolve?file1=${encodeURIComponent(fileId)}`;
-    
-    // Probar con servidor local /proxy si está disponible
     const srv = state.server || 'http://localhost:8000';
     try {
       const res = await fetch(`${srv}/proxy?url=${encodeURIComponent(apiTarget)}`, { signal: AbortSignal.timeout(4000) });
@@ -1174,7 +1308,6 @@ async function resolveCubeEmbed(url, parentReferer = '') {
       }
     } catch (_) {}
 
-    // CapacitorHttp en APK nativo
     const capHttp = window.Capacitor?.Plugins?.CapacitorHttp || window.CapacitorHttp;
     if (capHttp && typeof capHttp.get === 'function') {
       const res = await capHttp.get({
@@ -1196,7 +1329,6 @@ async function resolveCubeEmbed(url, parentReferer = '') {
 function normalizeWebVideoUrl(rawUrl) {
   if (!rawUrl) return '';
   const url = rawUrl.trim();
-  // YouTube watch / share normalization
   const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
   if (ytMatch) {
     return {
@@ -1205,7 +1337,6 @@ function normalizeWebVideoUrl(rawUrl) {
       stream_url: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`
     };
   }
-  // Vimeo
   const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
   if (vimeoMatch) {
     return {
@@ -1214,7 +1345,6 @@ function normalizeWebVideoUrl(rawUrl) {
       stream_url: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`
     };
   }
-  // Dailymotion
   const dmMatch = url.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/i);
   if (dmMatch) {
     return {
@@ -1227,7 +1357,6 @@ function normalizeWebVideoUrl(rawUrl) {
 }
 
 async function fetchHtmlWithCorsFallback(targetUrl) {
-  // 1. En Android / TV nativo (CapacitorHttp con responseType text y cabeceras completas)
   const capHttp = window.Capacitor?.Plugins?.CapacitorHttp || window.CapacitorHttp;
   if (capHttp && typeof capHttp.get === 'function') {
     try {
@@ -1248,7 +1377,6 @@ async function fetchHtmlWithCorsFallback(targetUrl) {
     }
   }
 
-  // 2. Servidor Vault Backend (/proxy - soporte tanto en state.server como en localhost:8000)
   const localEndpoints = [state.server, 'http://localhost:8000', 'http://127.0.0.1:8000'].filter(Boolean);
   for (const srv of [...new Set(localEndpoints)]) {
     try {
@@ -1260,7 +1388,6 @@ async function fetchHtmlWithCorsFallback(targetUrl) {
     } catch (_) {}
   }
 
-  // 3. Fetch directo estándar (para endpoints que admiten CORS o descargas directas)
   try {
     const res = await fetch(targetUrl, { signal: AbortSignal.timeout(3000) });
     if (res.ok) {
@@ -1269,7 +1396,6 @@ async function fetchHtmlWithCorsFallback(targetUrl) {
     }
   } catch (_) {}
 
-  // 4. Proxies CORS públicos probados con validación anti-bloqueo
   const publicProxies = [
     u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
     u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
@@ -1297,57 +1423,73 @@ async function fetchHtmlWithCorsFallback(targetUrl) {
 
 function extractMediaFromHtml(baseUrl, html) {
   let pageTitle = '';
+  const ogTitle = html.match(/<meta[^>]+property=['"]og:title['"][^>]+content=['"]([^'"]+)['"]/i) ||
+                  html.match(/<meta[^>]+content=['"]([^'"]+)['"][^>]+property=['"]og:title['"]/i);
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  if (titleMatch) {
+  if (ogTitle && ogTitle[1]) {
+    pageTitle = ogTitle[1].trim();
+  } else if (titleMatch) {
     pageTitle = titleMatch[1].replace(/<[^>]+>/g, '').trim().replace(/\s+/g, ' ');
   }
 
-  // 1. Videos directos y tags <source>
+  const ogImgMatch = html.match(/<meta[^>]+property=['"]og:image['"][^>]+content=['"]([^'"]+)['"]/i) ||
+                     html.match(/<meta[^>]+content=['"]([^'"]+)['"][^>]+property=['"]og:image['"]/i);
+  const ogImage = ogImgMatch ? resolveFullUrl(baseUrl, ogImgMatch[1]) : '';
+
+  // 1. Videos directos, OpenGraph video, JSON-LD y <source>
   const directVideos = [];
-  const videoSrcRegex = /<video[^>]+src=['"]([^'"]+)['"]/gi;
+  const pushVideo = (raw) => {
+    if (!raw || raw.startsWith('blob:') || raw.startsWith('data:')) return;
+    const full = resolveFullUrl(baseUrl, raw.replace(/\\\//g, '/'));
+    if (!isAdUrl(full)) directVideos.push(full);
+  };
+
+  const ogVidRegex = /<meta[^>]+(?:property|name)=['"]og:video(?::url|:secure_url)?['"][^>]+content=['"]([^'"]+)['"]/gi;
   let m;
-  while ((m = videoSrcRegex.exec(html)) !== null) {
-    if (!m[1].startsWith('blob:')) directVideos.push(resolveFullUrl(baseUrl, m[1]));
-  }
+  while ((m = ogVidRegex.exec(html)) !== null) pushVideo(m[1]);
+
+  const videoSrcRegex = /<video[^>]+(?:src|data-src|data-video)=['"]([^'"]+)['"]/gi;
+  while ((m = videoSrcRegex.exec(html)) !== null) pushVideo(m[1]);
+
   const sourceSrcRegex = /<source[^>]+src=['"]([^'"]+)['"]/gi;
-  while ((m = sourceSrcRegex.exec(html)) !== null) {
-    if (!m[1].startsWith('blob:')) directVideos.push(resolveFullUrl(baseUrl, m[1]));
-  }
+  while ((m = sourceSrcRegex.exec(html)) !== null) pushVideo(m[1]);
 
-  // URLs de streams .m3u8 y .mp4 en scripts o atributos
-  const streamRegex = /['"](https?:\/\/[^\s'"<>]+\.(?:m3u8|mp4|webm)[^\s'"<>]*)['"]/gi;
-  while ((m = streamRegex.exec(html)) !== null) {
-    directVideos.push(m[1].replace(/\\\//g, '/'));
-  }
+  const streamRegex = /['"](https?:\/\/[^\s'"<>]+\.(?:m3u8|mp4|webm|mpd)(?:\?[^\s'"<>]*)?)['"]/gi;
+  while ((m = streamRegex.exec(html)) !== null) pushVideo(m[1]);
 
-  // 2. Reproductores embebidos iframes
+  // 2. Reproductores embebidos iframes (filtrando anuncios)
   const iframes = [];
   const seenIframes = new Set();
-  const iframeRegex = /<iframe[^>]+src=['"]([^'"]+)['"][^>]*>/gi;
+  const iframeRegex = /<iframe[^>]+(?:src|data-src)=['"]([^'"]+)['"][^>]*>/gi;
   while ((m = iframeRegex.exec(html)) !== null) {
     const rawSrc = m[1].trim();
     if (!rawSrc || rawSrc.startsWith('javascript:') || rawSrc.startsWith('about:') || rawSrc.startsWith('data:')) continue;
     const fullSrc = resolveFullUrl(baseUrl, rawSrc);
+    if (isAdUrl(fullSrc)) continue;
     if (!seenIframes.has(fullSrc)) {
       seenIframes.add(fullSrc);
-      const isPlayer = /embed|player|video|stream|rpmvid|ok\.ru|youtube|vimeo|dailymotion|tape|cloud|vid|mp4upload/i.test(fullSrc) ||
+      const isPlayer = /embed|player|video|stream|rpmvid|ok\.ru|youtube|vimeo|dailymotion|tape|cloud|vid|mp4upload|filemoon|dood|mixdrop|voe/i.test(fullSrc) ||
                        /allowfullscreen/i.test(m[0]);
       iframes.push({ src: fullSrc, isPlayer, tag: m[0] });
     }
   }
 
-  // 3. Enlaces a capitulos / episodios
+  // 3. Enlaces a capítulos / episodios
   const episodes = [];
   const seenEps = new Set();
-  const epRegex = /<a[^>]+href=['"]([^'"]*(?:capitulo|episodio|episode|chapter|\/ver\/|\/watch\/|\/video\/)[^'"]*)['"][^>]*>([\s\S]*?)<\/a>/gi;
+  const epRegex = /<a[^>]+href=['"]([^'"]*(?:capitulo|episodio|episode|chapter|\/ver\/|\/watch\/|\/video\/|\/cap-|\/ep-|\?ep=|\?cap=)[^'"]*)['"][^>]*>([\s\S]*?)<\/a>/gi;
   while ((m = epRegex.exec(html)) !== null) {
     const href = m[1].trim();
     const fullHref = resolveFullUrl(baseUrl, href);
-    if (!seenEps.has(fullHref) && !/\.(?:jpg|png|css|js|webp)$/i.test(fullHref)) {
+    if (isAdUrl(fullHref)) continue;
+    if (!seenEps.has(fullHref) && !/\.(?:jpg|jpeg|png|css|js|webp|gif|svg)$/i.test(fullHref)) {
       seenEps.add(fullHref);
-      let text = m[2].replace(/<[^>]+>/g, ' ').trim().replace(/\s+/g, ' ');
+      const inner = m[2];
+      const imgM = inner.match(/src=['"]([^'"]+)['"]/i);
+      const epPoster = imgM ? resolveFullUrl(baseUrl, imgM[1]) : '';
+      let text = inner.replace(/<[^>]+>/g, ' ').trim().replace(/\s+/g, ' ');
       if (!text) text = `Capítulo ${episodes.length + 1}`;
-      episodes.push({ url: fullHref, title: text });
+      episodes.push({ url: fullHref, title: text, poster: epPoster || ogImage });
     }
   }
 
@@ -1359,24 +1501,20 @@ function extractMediaFromHtml(baseUrl, html) {
     const href = m[1].trim();
     if (/\/capitulo\/|\/episode\//i.test(href)) continue;
     const fullHref = resolveFullUrl(baseUrl, href);
+    if (isAdUrl(fullHref)) continue;
     if (!seenSeries.has(fullHref)) {
       seenSeries.add(fullHref);
       const inner = m[2];
-      
-      // Clean series title
       const titleP = inner.match(/<p[^>]*class=['"][^'"]*nombre-serie[^'"]*['"][^>]*>([\s\S]*?)<\/p>/i) ||
                      inner.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/i);
       let cleanTitle = titleP ? titleP[1].replace(/<[^>]+>/g, '').trim() : '';
       if (!cleanTitle) {
         cleanTitle = inner.replace(/<[^>]+>/g, ' ').trim().replace(/\s+/g, ' ');
       }
-
-      // Network & Year tags
       const networkM = inner.match(/<span[^>]*class=['"][^'"]*marcadorSeries[^'"]*['"][^>]*>([\s\S]*?)<\/span>/i);
       const network = networkM ? networkM[1].replace(/<[^>]+>/g, '').trim() : '';
       const yearM = inner.match(/<span[^>]*class=['"][^'"]*marcador-ano[^'"]*['"][^>]*>([\s\S]*?)<\/span>/i);
       const year = yearM ? yearM[1].replace(/<[^>]+>/g, '').trim() : '';
-
       const imgMatch = inner.match(/src=['"]([^'"]+)['"]/i);
       const poster = imgMatch ? resolveFullUrl(baseUrl, imgMatch[1]) : null;
 
@@ -1392,6 +1530,7 @@ function extractMediaFromHtml(baseUrl, html) {
 
   return {
     pageTitle,
+    ogImage,
     directVideos: [...new Set(directVideos)],
     iframes,
     episodes,
@@ -1401,28 +1540,32 @@ function extractMediaFromHtml(baseUrl, html) {
 
 function openWebExtractorDialog(initialUrl = '') {
   dialog(`
-    <span class="eyebrow">REPRODUCTOR UNIVERSAL · WEB EXTRACTOR</span>
-    <h2>🌐 Reproducir desde la Web</h2>
-    <p class="muted">Ingresa el enlace de cualquier página web (como portales de caricaturas, series, videos o transmisiones). Vault analizará el sitio para extraer sus reproductores, streams o capítulos.</p>
+    <span class="eyebrow">PLAYLIST WEB · ADBLOCK INTEGRADO 🛡️</span>
+    <h2>🌐 Crear Playlist desde Web</h2>
+    <p class="muted">Pega el enlace de cualquier página web (series, anime, películas o videos). Vault creará una <strong>Playlist Web</strong> limpia y bloqueará anuncios/popups externos automáticamente.</p>
     
     <form id="web-extractor-form">
       <div class="web-extractor-input-box">
-        <label for="web-extractor-url-input">Dirección web o enlace de video</label>
+        <label for="web-extractor-url-input">Enlace de la página web o video</label>
         <div class="web-extractor-input-row">
-          <input type="url" id="web-extractor-url-input" name="web_url" placeholder="https://lacartoons.com/ o cualquier URL..." value="${escapeHTML(initialUrl)}" required autofocus>
+          <input type="url" id="web-extractor-url-input" name="web_url" placeholder="https://lacartoons.com/serie/2 o cualquier URL..." value="${escapeHTML(initialUrl)}" required autofocus>
           <button type="button" id="web-extractor-paste-btn" class="secondary-button" title="Pegar del portapapeles">📋 Pegar</button>
         </div>
       </div>
+      <div class="web-extractor-input-box" style="margin-top:8px">
+        <label for="web-extractor-name-input">Nombre de la Playlist (opcional)</label>
+        <input type="text" id="web-extractor-name-input" name="playlist_name" placeholder="Se detectará automáticamente del título de la web…" maxlength="80">
+      </div>
       <div class="web-extractor-shortcuts">
-        <span class="web-shortcut-label">Accesos rápidos de prueba:</span>
+        <span class="web-shortcut-label">Ejemplos rápidos:</span>
         <button type="button" class="web-shortcut-btn" data-fill-url="https://lacartoons.com/">🌐 Portada</button>
         <button type="button" class="web-shortcut-btn" data-fill-url="https://lacartoons.com/serie/2">📺 Caballeros del Zodiaco</button>
-        <button type="button" class="web-shortcut-btn" data-fill-url="https://lacartoons.com/serie/capitulo/13?t=1">🎬 Cap. 1 Turbovio</button>
+        <button type="button" class="web-shortcut-btn" data-fill-url="https://lacartoons.com/serie/capitulo/13?t=1">🎬 Cap. 1</button>
       </div>
       
       <div class="web-extractor-submit-row">
         <button type="submit" class="primary-button" id="web-extractor-submit-btn" style="flex:1">
-          <span>🔍 Explorar y Reproducir</span>
+          <span>🔍 Extraer y Guardar Playlist</span>
         </button>
         <button type="button" id="close-dialog" class="secondary-button" style="width:auto">Cancelar</button>
       </div>
@@ -1435,6 +1578,7 @@ function openWebExtractorDialog(initialUrl = '') {
 async function runWebExtractor(targetUrl, parentTitle = '') {
   const resultsEl = $('#web-extractor-results');
   const submitBtn = $('#web-extractor-submit-btn');
+  const customName = ($('#web-extractor-name-input')?.value || '').trim();
   if (submitBtn) submitBtn.disabled = true;
 
   if (resultsEl) {
@@ -1442,7 +1586,7 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
       <div class="web-extractor-spinner">
         <div class="theater-spinner-ring"></div>
         <div class="web-spinner-info">
-          <strong>Analizando sitio web…</strong>
+          <strong>Analizando página y creando Playlist Web…</strong>
           <small>${escapeHTML(targetUrl)}</small>
         </div>
       </div>
@@ -1450,24 +1594,36 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
   }
 
   try {
+    // 0. YouTube / Vimeo / Dailymotion normalization
+    const normalized = normalizeWebVideoUrl(targetUrl);
+    if (normalized) {
+      const domain = getDomainLabel(targetUrl);
+      const plName = customName || `Video ${domain}`;
+      const record = saveWebPlaylist({
+        name: plName,
+        url: targetUrl,
+        items: [{ title: plName, url: targetUrl, embed_url: normalized.embed_url, stream_url: normalized.stream_url }]
+      });
+      toast(`✓ Playlist Web "${record.name}" guardada`);
+      closeDialog();
+      return play(record.channels[0]);
+    }
+
     // 1. Detección rápida de archivo de video directo
     const cleanLower = targetUrl.toLowerCase();
     if (cleanLower.endsWith('.mp4') || cleanLower.endsWith('.m3u8') || cleanLower.endsWith('.webm') || cleanLower.endsWith('.ts')) {
-      const fileName = targetUrl.split('/').pop().split('?')[0] || 'Video Web';
-      toast('✓ Stream directo detectado');
-      closeDialog();
-      return play({
-        channel_name: fileName,
-        title: fileName,
-        type: 'web_video',
-        stream_url: targetUrl,
-        country: 'Web',
-        category: 'Video Web',
-        page_url: targetUrl
+      const fileName = customName || targetUrl.split('/').pop().split('?')[0] || 'Video Web';
+      const record = saveWebPlaylist({
+        name: fileName,
+        url: targetUrl,
+        items: [{ title: fileName, url: targetUrl, stream_url: targetUrl }]
       });
+      toast('✓ Stream directo guardado en Playlist Web');
+      closeDialog();
+      return play(record.channels[0]);
     }
 
-    // 2. Descargar y analizar el HTML con fallback a reproducción directa si CORS lo restringe
+    // 2. Descargar y analizar el HTML
     let html = '';
     try {
       html = await fetchHtmlWithCorsFallback(targetUrl);
@@ -1478,10 +1634,10 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
           <div class="web-extractor-empty">
             <span class="empty-icon">📺</span>
             <h4>Reproducir Sitio Web Directamente</h4>
-            <p class="muted">No fue posible extraer los capítulos automáticamente debido a políticas CORS del navegador, pero <strong>puedes reproducir esta página web directamente</strong> en Vault IPTV con pantalla completa:</p>
+            <p class="muted">No se pudo leer el HTML por restricciones CORS, pero puedes cargar y guardar esta página directamente con AdBlock:</p>
             <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
               <button type="button" class="primary-button" id="web-extractor-fallback-play" data-target-url="${escapeHTML(targetUrl)}" style="width:auto">
-                ▶ Cargar en Reproductor de Vault
+                ▶ Cargar en Reproductor (AdBlock)
               </button>
             </div>
           </div>
@@ -1492,13 +1648,12 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
     }
 
     const extracted = extractMediaFromHtml(targetUrl, html);
-    const title = parentTitle || extracted.pageTitle || 'Video Web';
+    const title = customName || parentTitle || extracted.pageTitle || getDomainLabel(targetUrl);
 
-    // Priorizar iframes que sean players
     const playerIframe = extracted.iframes.find(i => i.isPlayer) || extracted.iframes[0];
     const directVid = extracted.directVideos[0];
 
-    // Caso A: Si la página tiene un reproductor directo o iframe
+    // Caso A: Reproductor directo o iframe (+ posible lista de capítulos en la misma página)
     if (playerIframe || directVid) {
       let embedUrl = playerIframe ? playerIframe.src : '';
       if (embedUrl && embedUrl.includes('cubeembed.rpmvid.com')) {
@@ -1506,58 +1661,95 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
       }
       const streamUrl = directVid || embedUrl;
 
-      // Si además la página tiene lista de capítulos (ej. lacartoons capitulo 889 que tiene iframe + los 46 capítulos)
+      let playlistRecord = null;
       if (extracted.episodes && extracted.episodes.length > 0) {
         state.webEpisodes = extracted.episodes.map((ep, idx) => ({
           channel_name: ep.title,
           title: ep.title,
           url: ep.url,
-          country: 'Web',
-          category: 'Capítulos',
+          poster: ep.poster,
+          country: getDomainLabel(targetUrl),
+          category: 'Playlist Web',
           index: idx
         }));
+        playlistRecord = saveWebPlaylist({
+          name: title,
+          url: targetUrl,
+          items: extracted.episodes,
+          poster: extracted.ogImage
+        });
+      } else {
+        playlistRecord = saveWebPlaylist({
+          name: title,
+          url: targetUrl,
+          items: [{
+            title,
+            url: targetUrl,
+            stream_url: streamUrl,
+            embed_url: directVid ? '' : embedUrl,
+            poster: extracted.ogImage
+          }],
+          poster: extracted.ogImage
+        });
       }
 
-      toast('🎬 ¡Reproductor detectado! Iniciando video…');
+      toast(`🛡️ ¡Playlist "${playlistRecord.name}" lista! (${playlistRecord.channels.length} ${playlistRecord.channels.length === 1 ? 'video' : 'episodios'})`);
       closeDialog();
       return play({
         channel_name: title,
         title: title,
-        type: embedUrl ? 'web_embed' : 'web_video',
+        type: directVid ? 'web_video' : (embedUrl ? 'web_embed' : 'web_video'),
         stream_url: streamUrl,
-        embed_url: embedUrl,
+        embed_url: directVid ? '' : embedUrl,
         page_url: targetUrl,
-        country: 'Web',
-        category: 'Video Web'
+        country: getDomainLabel(targetUrl),
+        category: 'Playlist Web',
+        listId: playlistRecord.id,
+        listName: playlistRecord.name
       });
     }
 
-    // Caso B: Si la página contiene lista de capítulos (ej. serie / temporada)
+    // Caso B: Lista de capítulos / episodios -> Guardar automáticamente como Playlist Web
     if (extracted.episodes && extracted.episodes.length > 0) {
+      const playlistRecord = saveWebPlaylist({
+        name: title,
+        url: targetUrl,
+        items: extracted.episodes,
+        poster: extracted.ogImage
+      });
+
       state.webEpisodes = extracted.episodes.map((ep, idx) => ({
         channel_name: ep.title,
         title: ep.title,
         url: ep.url,
-        country: 'Web',
-        category: 'Capítulos',
+        poster: ep.poster,
+        country: getDomainLabel(targetUrl),
+        category: 'Playlist Web',
+        listId: playlistRecord.id,
+        listName: playlistRecord.name,
         index: idx
       }));
 
+      toast(`✓ Playlist Web guardada: ${playlistRecord.name} (${extracted.episodes.length} episodios)`);
+
       if (resultsEl) {
-        window._activeWebEpisodes = extracted.episodes;
+        window._activeWebEpisodes = state.webEpisodes;
         resultsEl.innerHTML = `
           <div class="web-extracted-header">
             <div>
-              <h3>🎬 Capítulos encontrados (${extracted.episodes.length})</h3>
-              <p class="muted">${escapeHTML(title)}</p>
+              <h3>🎬 Playlist guardada (${extracted.episodes.length} capítulos)</h3>
+              <p class="muted">${escapeHTML(playlistRecord.name)} · Disponible en "Mis listas agregadas"</p>
             </div>
-            ${parentTitle ? `<button type="button" class="secondary-button compact" id="web-extractor-back-to-series">← Volver a series</button>` : ''}
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" class="primary-button compact" data-open-list="${escapeHTML(playlistRecord.id)}" onclick="closeDialog()">📺 Abrir en Live TV</button>
+              ${parentTitle ? `<button type="button" class="secondary-button compact" id="web-extractor-back-to-series">← Series</button>` : ''}
+            </div>
           </div>
           <div class="web-chapter-search-box">
             <input type="search" id="web-chapter-filter-input" placeholder="🔍 Filtrar capítulo por número o título…">
           </div>
           <div class="web-episodes-scroll-list" id="web-episodes-scroll-container">
-            ${extracted.episodes.map((ep, idx) => `
+            ${state.webEpisodes.map((ep, idx) => `
               <div class="web-episode-card" data-play-web-ep="${encodeURIComponent(JSON.stringify(ep))}">
                 <div class="web-ep-badge">${idx + 1}</div>
                 <div class="web-ep-text">
@@ -1570,17 +1762,18 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
           </div>
         `;
       }
+      render();
       return;
     }
 
-    // Caso C: Si la página contiene catálogo de series (ej. lacartoons.com portada)
+    // Caso C: Catálogo de series (ej. portada)
     if (extracted.series && extracted.series.length > 0) {
       state.webSeries = extracted.series;
       if (resultsEl) {
         resultsEl.innerHTML = `
           <div class="web-extracted-header">
-            <h3>📺 Series y contenidos encontrados (${extracted.series.length})</h3>
-            <p class="muted">Selecciona una serie para ver sus capítulos y reproducir:</p>
+            <h3>📺 Series encontradas en ${escapeHTML(getDomainLabel(targetUrl))} (${extracted.series.length})</h3>
+            <p class="muted">Elige una serie para crear su Playlist Web y ver sus capítulos:</p>
           </div>
           <div class="web-series-grid">
             ${extracted.series.map(s => `
@@ -1592,7 +1785,7 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
                     ${s.network ? `<span class="serie-tag">${escapeHTML(s.network)}</span>` : ''}
                     ${s.year ? `<span class="serie-year">${escapeHTML(s.year)}</span>` : ''}
                   </div>
-                  <button type="button" class="primary-button compact" style="margin-top:4px">Ver capítulos →</button>
+                  <button type="button" class="primary-button compact" style="margin-top:4px">Crear Playlist →</button>
                 </div>
               </div>
             `).join('')}
@@ -1602,16 +1795,16 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
       return;
     }
 
-    // Caso D: Nada reconocido automáticamente -> ofrecer reproducir la página directamente
+    // Caso D: Nada reconocido automáticamente -> ofrecer reproducir y guardar
     if (resultsEl) {
       resultsEl.innerHTML = `
         <div class="web-extractor-empty">
           <span class="empty-icon">📺</span>
           <h4>Reproducir esta página web</h4>
-          <p class="muted">No se reconocieron listas de capítulos de catálogo, pero puedes reproducir esta página web directamente dentro del reproductor de Vault:</p>
+          <p class="muted">No se detectaron listas de capítulos, pero puedes abrir esta página directamente en el reproductor con AdBlock:</p>
           <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
             <button type="button" class="primary-button" id="web-extractor-fallback-play" data-target-url="${escapeHTML(targetUrl)}" style="width:auto">
-              ▶ Cargar en Reproductor de Vault
+              ▶ Cargar en Reproductor (AdBlock)
             </button>
           </div>
         </div>
@@ -1626,7 +1819,7 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
           <p class="muted">${escapeHTML(err.message)}</p>
           <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
             <button type="button" class="primary-button" id="web-extractor-fallback-play" data-target-url="${escapeHTML(targetUrl)}" style="width:auto">
-              ▶ Cargar en Reproductor de Vault
+              ▶ Cargar en Reproductor (AdBlock)
             </button>
           </div>
         </div>
@@ -1638,7 +1831,11 @@ async function runWebExtractor(targetUrl, parentTitle = '') {
 }
 
 async function loadAndPlayWebEpisode(ep) {
-  if (ep.embed_url || (ep.stream_url && ep.stream_url.startsWith('http') && !ep.stream_url.includes('/serie/capitulo/'))) {
+  const epUrl = ep.url || ep.page_url || ep.stream_url;
+  const hasResolvedStream = (ep.embed_url && !ep.embed_url.includes('/capitulo/')) ||
+    (ep.stream_url && /\.(m3u8|mp4|webm|ts)(\?|$)/i.test(ep.stream_url));
+
+  if (hasResolvedStream) {
     closeDialog();
     return play({
       channel_name: ep.title || ep.channel_name,
@@ -1646,68 +1843,86 @@ async function loadAndPlayWebEpisode(ep) {
       type: ep.embed_url ? 'web_embed' : 'web_video',
       stream_url: ep.stream_url || ep.embed_url,
       embed_url: ep.embed_url || '',
-      page_url: ep.url || ep.page_url,
-      country: 'Web',
-      category: 'Capítulos'
+      page_url: epUrl,
+      country: ep.country || getDomainLabel(epUrl),
+      category: ep.category || 'Playlist Web',
+      listId: ep.listId || '',
+      listName: ep.listName || ''
     });
   }
 
-  toast(`Conectando con capítulo: ${ep.title}…`);
+  toast(`Conectando con ${ep.title || ep.channel_name}…`);
   try {
-    const epUrl = ep.url || ep.page_url;
     const html = await fetchHtmlWithCorsFallback(epUrl);
     const extracted = extractMediaFromHtml(epUrl, html);
     let playerIframe = extracted.iframes.find(i => i.isPlayer) || extracted.iframes[0];
     let directVid = extracted.directVideos[0];
 
     let embedUrl = playerIframe ? playerIframe.src : '';
-    // Resolve CubeEmbed directly if needed
     if (embedUrl && embedUrl.includes('cubeembed.rpmvid.com')) {
       embedUrl = await resolveCubeEmbed(embedUrl, epUrl);
     }
     const streamUrl = directVid || embedUrl || epUrl;
-    const finalEmbed = embedUrl || epUrl;
+    const finalEmbed = directVid ? '' : (embedUrl || epUrl);
 
-    ep.embed_url = embedUrl;
+    ep.embed_url = finalEmbed;
     ep.stream_url = streamUrl;
 
-    // Si tiene capítulos adicionales, sincronizarlos
     if (extracted.episodes && extracted.episodes.length > 0 && (!state.webEpisodes || state.webEpisodes.length < extracted.episodes.length)) {
       state.webEpisodes = extracted.episodes.map((e, idx) => ({
         channel_name: e.title,
         title: e.title,
         url: e.url,
-        country: 'Web',
-        category: 'Capítulos',
+        poster: e.poster,
+        country: ep.country || getDomainLabel(epUrl),
+        category: 'Playlist Web',
+        listId: ep.listId || '',
+        listName: ep.listName || '',
         index: idx
       }));
     }
 
     closeDialog();
     play({
-      channel_name: ep.title,
-      title: ep.title,
-      type: 'web_embed',
+      channel_name: ep.title || ep.channel_name,
+      title: ep.title || ep.channel_name,
+      type: directVid ? 'web_video' : 'web_embed',
       stream_url: streamUrl,
       embed_url: finalEmbed,
       page_url: epUrl,
-      country: 'Web',
-      category: 'Capítulos'
+      country: ep.country || getDomainLabel(epUrl),
+      category: 'Playlist Web',
+      listId: ep.listId || '',
+      listName: ep.listName || ''
     });
   } catch (err) {
     console.warn('Fallback loading web episode:', err);
     closeDialog();
     play({
-      channel_name: ep.title,
-      title: ep.title,
+      channel_name: ep.title || ep.channel_name,
+      title: ep.title || ep.channel_name,
       type: 'web_embed',
       stream_url: epUrl,
       embed_url: epUrl,
       page_url: epUrl,
-      country: 'Web',
-      category: 'Capítulos'
+      country: ep.country || getDomainLabel(epUrl),
+      category: 'Playlist Web',
+      listId: ep.listId || '',
+      listName: ep.listName || ''
     });
   }
+}
+
+function renderListTypeBadge(list) {
+  if (list.type === 'xtream') return '<span class="list-type-badge xtream">ϟ XTREAM CODES</span>';
+  if (list.type === 'web_playlist') return '<span class="list-type-badge web">🌐 PLAYLIST WEB</span>';
+  return '<span class="list-type-badge m3u">🔗 IPTV URL</span>';
+}
+
+function renderListCountText(list) {
+  const count = (list.channels || []).length;
+  if (list.type === 'web_playlist') return `${count} ${count === 1 ? 'video' : 'episodios'}`;
+  return `${count} canales`;
 }
 
 function home() {
@@ -1716,10 +1931,82 @@ function home() {
   const totalChannels = state.channels.length;
   const hasLists = state.userLists.length > 0;
 
+  if (state.device === 'tv') {
+    return `
+      <div class="tv-home-view">
+        <div class="tv-hero-header">
+          <div>
+            <span class="eyebrow">VAULT TV · CONTROL REMOTO</span>
+            <h1>${greeting}</h1>
+          </div>
+          <div class="tv-hero-actions">
+            <button type="button" data-add-m3u="1" class="tv-action-tile">
+              <span class="tv-tile-icon">🔗</span>
+              <span class="tv-tile-label">Agregar IPTV</span>
+            </button>
+            <button type="button" data-open-web-extractor="1" class="tv-action-tile web">
+              <span class="tv-tile-icon">🌐</span>
+              <span class="tv-tile-label">Playlist Web</span>
+            </button>
+            <button type="button" data-nav="xtream" class="tv-action-tile">
+              <span class="tv-tile-icon">⚡</span>
+              <span class="tv-tile-label">Xtream</span>
+            </button>
+          </div>
+        </div>
+
+        ${!state.noAds ? `
+          <section class="ad-container-section tv-ad-strip" aria-label="Espacio Publicitario">
+            <div class="ad-banner-card compact" id="ad-banner-home">
+              <div class="ad-banner-content">
+                <div class="ad-banner-icon">📡</div>
+                <div class="ad-banner-info">
+                  <strong>Espacio Publicitario Vault</strong>
+                  <small>Anuncio oficial de la app · Sin anuncios externos</small>
+                </div>
+                <button type="button" class="ad-cta-btn" data-open-buy-no-ads="1">Quitar Ads ($2.99)</button>
+              </div>
+            </div>
+          </section>
+        ` : ''}
+
+        <section class="tv-lists-section">
+          <div class="section-heading">
+            <h2>Mis Listas y Playlists (${state.userLists.length})</h2>
+          </div>
+          ${state.userLists.length === 0 ? `
+            <div class="tv-empty-box">
+              <p>No tienes listas todavía. Selecciona <strong>Agregar IPTV</strong> o <strong>Playlist Web</strong> arriba con tu control remoto.</p>
+            </div>
+          ` : `
+            <div class="tv-lists-grid">
+              ${state.userLists.map(list => `
+                <div class="tv-list-tile">
+                  <button type="button" class="tv-list-main-btn" data-open-list="${escapeHTML(list.id)}">
+                    <div class="tv-list-top">
+                      ${renderListTypeBadge(list)}
+                      <span class="list-count-pill">${renderListCountText(list)}</span>
+                    </div>
+                    <strong class="tv-list-name">${escapeHTML(list.name)}</strong>
+                    <small class="tv-list-sub">${escapeHTML(list.domain || list.url)}</small>
+                  </button>
+                  <div class="tv-list-footer-btns">
+                    <button type="button" class="secondary-button compact" data-refresh-list="${escapeHTML(list.id)}" title="Actualizar">↻ Actualizar</button>
+                    <button type="button" class="secondary-button compact danger" data-delete-list="${escapeHTML(list.id)}" title="Eliminar">🗑 Eliminar</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </section>
+      </div>
+    `;
+  }
+
   return `
     <div class="home-welcome">
       <h1>${greeting}</h1>
-      <p>Tu reproductor IPTV limpio y directo. Agrega tus listas por URL o conecta tus cuentas en la sección Xtream.</p>
+      <p>Tu reproductor IPTV y Playlists Web limpio, directo y con AdBlock integrado.</p>
     </div>
 
     ${hasLists ? `
@@ -1735,8 +2022,8 @@ function home() {
           <button type="button" data-open-web-extractor="1" class="compact-add-card web">
             <span class="compact-add-icon">🌐</span>
             <div class="compact-add-text">
-              <strong>Reproducir desde Web</strong>
-              <small>Extraer videos o series web</small>
+              <strong>+ Playlist desde Web</strong>
+              <small>Series, videos y AdBlock</small>
             </div>
           </button>
         </div>
@@ -1745,7 +2032,7 @@ function home() {
       <section class="add-source-section" aria-label="Agregar fuentes IPTV y Web">
         <div class="section-heading" style="margin-top:8px">
           <h2>Agregar contenido</h2>
-          <small>${totalChannels} canales cargados</small>
+          <small>${totalChannels} elementos cargados</small>
         </div>
         <div class="add-source-grid" style="grid-template-columns:repeat(auto-fit, minmax(260px, 1fr))">
           <button type="button" data-add-m3u="1" class="source-action-card">
@@ -1759,8 +2046,8 @@ function home() {
           <button type="button" data-open-web-extractor="1" class="source-action-card web">
             <span class="source-action-icon">🌐</span>
             <div class="source-action-body">
-              <strong>Reproducir desde Web</strong>
-              <small>Pega el enlace de cualquier web para reproducir sus videos o capítulos</small>
+              <strong>Crear Playlist desde Web</strong>
+              <small>Pega el enlace de cualquier web para guardar sus videos/episodios y verlos sin anuncios</small>
             </div>
             <span class="source-action-plus">▶</span>
           </button>
@@ -1792,31 +2079,29 @@ function home() {
 
     <section class="user-lists-section" aria-label="Mis listas agregadas">
       <div class="section-heading">
-        <h2>Mis listas agregadas</h2>
+        <h2>Mis listas y playlists</h2>
         <small>${state.userLists.length} ${state.userLists.length === 1 ? 'lista' : 'listas'}</small>
       </div>
       ${state.userLists.length === 0 ? `
         <div class="empty-lists-box">
           <div class="empty-lists-icon">📺</div>
           <h3>Todavía no has agregado ninguna lista</h3>
-          <p class="muted">La aplicación está limpia y lista para ti. Usa uno de los botones de arriba para agregar tu primera lista IPTV o cuenta Xtream Codes.</p>
+          <p class="muted">La aplicación está limpia y lista para ti. Usa uno de los botones de arriba para agregar tu primera lista IPTV, Playlist Web o cuenta Xtream.</p>
         </div>
       ` : `
         <div class="user-lists-grid">
           ${state.userLists.map(list => `
-            <article class="user-list-card">
+            <article class="user-list-card ${list.type === 'web_playlist' ? 'is-web-playlist' : ''}">
               <div class="user-list-top">
-                <span class="list-type-badge ${list.type === 'xtream' ? 'xtream' : 'm3u'}">
-                  ${list.type === 'xtream' ? 'ϟ XTREAM CODES' : '🔗 IPTV URL'}
-                </span>
-                <span class="list-count-pill">${(list.channels || []).length} canales</span>
+                ${renderListTypeBadge(list)}
+                <span class="list-count-pill">${renderListCountText(list)}</span>
               </div>
               <h3 class="user-list-title" title="${escapeHTML(list.name)}">${escapeHTML(list.name)}</h3>
               <p class="user-list-meta" title="${escapeHTML(list.url)}">
-                ${escapeHTML(list.url)}${list.type === 'xtream' && list.username ? ` · Usuario: ${escapeHTML(list.username)}` : ''}
+                ${escapeHTML(list.domain || list.url)}${list.type === 'xtream' && list.username ? ` · Usuario: ${escapeHTML(list.username)}` : ''}
               </p>
               <div class="list-card-actions">
-                <button type="button" class="primary-button list-open-btn" data-open-list="${escapeHTML(list.id)}">▶ Ver canales</button>
+                <button type="button" class="primary-button list-open-btn" data-open-list="${escapeHTML(list.id)}">▶ ${list.type === 'web_playlist' ? 'Ver playlist' : 'Ver canales'}</button>
                 <button type="button" class="secondary-button list-icon-btn" data-refresh-list="${escapeHTML(list.id)}" title="Actualizar lista">↻</button>
                 <button type="button" class="secondary-button list-icon-btn danger" data-delete-list="${escapeHTML(list.id)}" title="Eliminar lista">🗑</button>
               </div>
@@ -1864,14 +2149,69 @@ function live() {
   const countForCountry = (c) => c === 'Todos' ? listScopedChannels.length : listScopedChannels.filter(({ channel: ch }) => (ch.country || 'Internacional') === c).length;
   const countForCategory = (cat) => cat === 'Todas' ? listScopedChannels.length : listScopedChannels.filter(({ channel: ch }) => (ch.category || 'General') === cat).length;
 
+  // TV: 10-foot simplified UI for remote control
+  if (state.device === 'tv') {
+    const activeListObj = state.userLists.find(l => l.id === activeListId);
+    return `
+      <div class="tv-live-view">
+        <div class="tv-live-header">
+          <div>
+            <span class="eyebrow">TV EN VIVO &amp; PLAYLISTS WEB</span>
+            <h1>${activeListObj ? escapeHTML(activeListObj.name) : 'Todos los canales'} <small class="tv-count-sub">(${totalMatches})</small></h1>
+          </div>
+          <div class="tv-filter-bar">
+            <button type="button" class="tv-filter-btn ${activeListId !== 'all' ? 'active' : ''}" id="tv-pick-list-btn">
+              📋 ${activeListObj ? escapeHTML(activeListObj.name) : 'Lista: Todas'}
+            </button>
+            <button type="button" class="tv-filter-btn ${state.countryFilter !== 'Todos' ? 'active' : ''}" id="tv-pick-country-btn">
+              🌎 ${state.countryFilter === 'Todos' ? 'País: Todos' : escapeHTML(state.countryFilter)}
+            </button>
+            <button type="button" class="tv-filter-btn ${state.channelView === 'Favoritos' ? 'active' : ''}" data-channel-view="${state.channelView === 'Favoritos' ? 'Todos' : 'Favoritos'}">
+              ★ Favoritos
+            </button>
+            <button type="button" class="tv-filter-btn" id="tv-search-btn">
+              🔍 ${state.query ? `"${escapeHTML(state.query)}"` : 'Buscar'}
+            </button>
+          </div>
+        </div>
+
+        ${state.channels.length === 0 ? `
+          <div class="tv-empty-box">
+            <p>No hay canales o playlists cargados. Ve a Inicio para agregar una lista IPTV o Playlist Web.</p>
+            <button type="button" data-nav="home" class="primary-button" style="width:auto;margin-top:12px">Ir a Inicio</button>
+          </div>
+        ` : `
+          <div class="tv-channels-grid">
+            ${pagedVisible.map(({ channel: c, index }) => `
+              <button type="button" class="tv-channel-tile" data-channel="${index}">
+                <div class="tv-ch-logo">
+                  ${c.logo_url ? `<img src="${escapeHTML(c.logo_url)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="tv-ch-fallback" style="display:none">${c.type?.startsWith('web_') ? '🌐' : escapeHTML(c.channel_name.slice(0, 2).toUpperCase())}</span>` : `<span class="tv-ch-fallback">${c.type?.startsWith('web_') ? '🌐' : escapeHTML(c.channel_name.slice(0, 2).toUpperCase())}</span>`}
+                </div>
+                <div class="tv-ch-info">
+                  <strong class="tv-ch-name">${escapeHTML(c.channel_name)}</strong>
+                  <small class="tv-ch-meta">${escapeHTML(c.listName || c.country || 'En vivo')}</small>
+                </div>
+              </button>
+            `).join('') || '<div class="tv-empty-box"><p>No hay coincidencias con estos filtros.</p></div>'}
+          </div>
+          ${totalMatches > pageLimit ? `
+            <div class="load-more-container">
+              <button id="load-more-channels-btn" class="primary-button">Cargar más (+60)</button>
+            </div>
+          ` : ''}
+        `}
+      </div>
+    `;
+  }
+
   return `<div class="iptv-toolbar">
     <div>
-      <span class="eyebrow">TELEVISIÓN EN VIVO · STREAMING</span>
+      <span class="eyebrow">TELEVISIÓN EN VIVO · PLAYLISTS WEB</span>
       <h1 class="page-title" style="margin:2px 0 4px">Live TV</h1>
-      <p class="page-subtitle" style="margin:0">${state.channels.length} canales disponibles · ${totalMatches} coincidentes</p>
+      <p class="page-subtitle" style="margin:0">${state.channels.length} elementos disponibles · ${totalMatches} coincidentes</p>
     </div>
     <div class="iptv-actions">
-      <button type="button" data-open-web-extractor="1" class="action-chip web-chip" title="Reproducir video desde cualquier enlace web">🌐 Reproducir Web</button>
+      <button type="button" data-open-web-extractor="1" class="action-chip web-chip" title="Crear Playlist desde enlace web">🌐 + Playlist Web</button>
       ${state.user?.admin_status ? `
         <button id="refresh-iptv-btn" class="action-chip" title="Sincronizar listas del servidor">↻ Servidor</button>
       ` : ''}
@@ -1882,26 +2222,27 @@ function live() {
     <div class="empty-lists-box" style="margin-top:20px">
       <div class="empty-lists-icon">📡</div>
       <h3>No hay canales cargados</h3>
-      <p class="muted">Agrega una lista IPTV por URL para empezar a ver canales (o conecta tu proveedor en la sección Xtream).</p>
+      <p class="muted">Agrega una lista IPTV por URL o una Playlist Web para empezar a ver contenido.</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px">
         <button type="button" data-add-m3u="empty" class="primary-button" style="width:auto">🔗 Agregar IPTV con URL</button>
+        <button type="button" data-open-web-extractor="1" class="secondary-button" style="width:auto">🌐 Crear Playlist Web</button>
       </div>
     </div>
   ` : `
     ${state.userLists.length > 0 ? `
       <div class="iptv-filter-section user-lists-filter-block">
         <div class="filter-section-header">
-          <span class="filter-title-label">📋 Mis Listas Agregadas (${state.userLists.length})</span>
+          <span class="filter-title-label">📋 Mis Listas y Playlists (${state.userLists.length})</span>
         </div>
         <div class="filter-scroll-row user-lists-pills-row">
           <button data-list-filter="all" class="user-list-pill ${activeListId === 'all' ? 'active' : ''}">
             <span class="pill-dot">●</span>
-            <span class="pill-name">Todas las listas</span>
+            <span class="pill-name">Todas</span>
             <span class="pill-badge">${state.channels.length}</span>
           </button>
           ${state.userLists.map(l => `
             <button data-list-filter="${escapeHTML(l.id)}" class="user-list-pill ${activeListId === l.id ? 'active' : ''}">
-              <span class="pill-icon">${l.type === 'xtream' ? '⚡' : '🔗'}</span>
+              <span class="pill-icon">${l.type === 'xtream' ? '⚡' : (l.type === 'web_playlist' ? '🌐' : '🔗')}</span>
               <span class="pill-name">${escapeHTML(l.name)}</span>
               <span class="pill-badge">${(l.channels || []).length}</span>
             </button>
@@ -1910,11 +2251,13 @@ function live() {
       </div>
     ` : ''}
 
-    <label>Buscar canal, país o subcategoría<input id="channel-search" type="search" value="${escapeHTML(state.query)}" placeholder="Buscar por nombre, país o género..." autocomplete="off"></label>
+    <div class="live-search-row">
+      <input id="channel-search" type="search" value="${escapeHTML(state.query)}" placeholder="🔍 Buscar canal, episodio, país o género..." autocomplete="off">
+    </div>
 
     <div class="filters">
       ${['Todos', 'Favoritos', 'Recientes'].map(view => `<button data-channel-view="${view}" class="filter ${view === state.channelView ? 'active' : ''}">${view === 'Favoritos' ? '★ Favoritos' : view === 'Recientes' ? '🕒 Recientes' : 'Todos'}</button>`).join('')}
-      <button id="sort-channels" class="filter ${state.alphabetical ? 'active' : ''}" aria-pressed="${state.alphabetical}">Ordenar A–Z</button>
+      <button id="sort-channels" class="filter ${state.alphabetical ? 'active' : ''}" aria-pressed="${state.alphabetical}">A–Z</button>
     </div>
 
     ${!state.noAds ? `
@@ -1942,9 +2285,9 @@ function live() {
     ${allCountries.length > 1 ? `
       <div class="iptv-filter-section">
         <div class="filter-section-header">
-          <span>🌎 Categoría por País (${countries.length - 1} países)</span>
+          <span>🌎 País / Fuente (${countries.length - 1})</span>
           <select id="country-select" class="country-select-dropdown" aria-label="Seleccionar país">
-            ${countries.map(c => `<option value="${escapeHTML(c)}" ${c === state.countryFilter ? 'selected' : ''}>${c === 'Todos' ? '🌐 Todos los países' : `${getCountryFlag(c)} ${escapeHTML(c)}`} (${countForCountry(c)})</option>`).join('')}
+            ${countries.map(c => `<option value="${escapeHTML(c)}" ${c === state.countryFilter ? 'selected' : ''}>${c === 'Todos' ? '🌐 Todos' : `${getCountryFlag(c)} ${escapeHTML(c)}`} (${countForCountry(c)})</option>`).join('')}
           </select>
         </div>
         <div class="filter-scroll-row">
@@ -1956,8 +2299,8 @@ function live() {
     ${allCategories.length > 1 ? `
       <div class="iptv-filter-section">
         <div class="filter-section-header">
-          <span class="filter-title-label">🏷️ Subcategorías de Contenido</span>
-          <small class="subcat-counter">${categories.length - 1} subcategorías</small>
+          <span class="filter-title-label">🏷️ Categorías</span>
+          <small class="subcat-counter">${categories.length - 1}</small>
         </div>
         <div class="filter-scroll-row subcat-pills-row">
           ${categories.map(cat => {
@@ -1978,7 +2321,7 @@ function live() {
         <div class="channel-card-rich" data-channel="${index}" tabindex="0" role="button" aria-label="Canal ${escapeHTML(c.channel_name)}">
           <div class="channel-card-top">
             <div class="channel-logo-rich">
-              ${c.logo_url ? `<img src="${escapeHTML(c.logo_url)}" alt="${escapeHTML(c.channel_name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="fallback-text" style="display:none">${escapeHTML(c.channel_name.slice(0, 2).toUpperCase())}</span>` : `<span class="fallback-text">${escapeHTML(c.initials || c.channel_name.slice(0, 2).toUpperCase())}</span>`}
+              ${c.logo_url ? `<img src="${escapeHTML(c.logo_url)}" alt="${escapeHTML(c.channel_name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="fallback-text" style="display:none">${c.type?.startsWith('web_') ? '🌐' : escapeHTML(c.channel_name.slice(0, 2).toUpperCase())}</span>` : `<span class="fallback-text">${c.type?.startsWith('web_') ? '🌐' : escapeHTML(c.initials || c.channel_name.slice(0, 2).toUpperCase())}</span>`}
             </div>
             <div class="channel-title-group">
               <div class="channel-name-rich" title="${escapeHTML(c.channel_name)}">${escapeHTML(c.channel_name)}</div>
@@ -1993,29 +2336,19 @@ function live() {
             </button>
           </div>
 
-          <div class="channel-epg-box">
-            <div class="epg-header-row">
-              <span class="epg-broadcasting-label"><span style="color:#00ffaa;font-size:11px">●</span> EN EMISIÓN</span>
-              <span class="epg-time-badge">⏱️ ${escapeHTML(c.program_time || 'En vivo')}</span>
-            </div>
-            <div class="epg-program-name" title="${escapeHTML(c.current_program || 'Programación habitual')}">
-              ${escapeHTML(c.current_program || 'Programación habitual')}
-            </div>
-          </div>
-
           <div class="channel-bottom-bar">
             <span class="signal-status-pill ${c.is_online !== false ? 'online' : 'offline'}">
-              <i></i> ${c.is_online !== false ? 'En línea' : 'Sin señal'}
+              <i></i> ${c.type?.startsWith('web_') ? (c.program_time || 'Web AdBlock') : (c.is_online !== false ? 'En línea' : 'Sin señal')}
             </span>
-            <span class="play-quick-chip">Ver canal ▶</span>
+            <span class="play-quick-chip">${c.type?.startsWith('web_') ? 'Reproducir ▶' : 'Ver canal ▶'}</span>
           </div>
         </div>
-      `).join('') || '<p class="empty-state">No hay canales con estos filtros. Prueba cambiando la lista, país o subcategoría.</p>'}
+      `).join('') || '<p class="empty-state">No hay canales con estos filtros. Prueba cambiando la lista, país o categoría.</p>'}
     </div>
     ${totalMatches > pageLimit ? `
       <div class="load-more-container">
         <button id="load-more-channels-btn" class="primary-button">
-          Cargar más canales (+60) · Mostrando ${pagedVisible.length} de ${totalMatches}
+          Cargar más (+60) · Mostrando ${pagedVisible.length} de ${totalMatches}
         </button>
       </div>
     ` : ''}
@@ -2296,16 +2629,26 @@ function getPlayerGroupChannels() {
   const item = state.playingItem || state.channels[currentChannelIndex];
   if (!item) return state.channels;
 
-  if ((item.type === 'web_embed' || item.type === 'web_video') && state.webEpisodes && state.webEpisodes.length > 0) {
+  // If playing from a saved Web Playlist, return all items in that playlist
+  if (item.listId) {
+    const parentList = state.userLists.find(l => l.id === item.listId);
+    if (parentList && parentList.type === 'web_playlist' && parentList.channels?.length) {
+      return parentList.channels;
+    }
+  }
+
+  if ((item.type === 'web_embed' || item.type === 'web_video' || item.type === 'web_episode') && state.webEpisodes && state.webEpisodes.length > 0) {
     return state.webEpisodes.map((ep, idx) => ({
-      channel_name: ep.title,
-      title: ep.title,
-      country: 'Web',
-      category: 'Capítulos',
+      channel_name: ep.title || ep.channel_name,
+      title: ep.title || ep.channel_name,
+      country: ep.country || 'Web',
+      category: ep.category || 'Playlist Web',
       stream_url: ep.stream_url || ep.embed_url || ep.url,
       embed_url: ep.embed_url || '',
-      page_url: ep.url,
-      type: ep.embed_url ? 'web_embed' : 'web_video',
+      page_url: ep.url || ep.page_url,
+      listId: ep.listId || '',
+      listName: ep.listName || '',
+      type: ep.embed_url ? 'web_embed' : (ep.type || 'web_episode'),
       epIdx: idx
     }));
   }
@@ -2325,7 +2668,6 @@ function getPlayerGroupChannels() {
     return state.channels;
   }
 
-  // Fallback / Auto: match playing channel's country or category
   if (item.country && item.country !== 'Internacional') {
     const list = state.channels.filter(c => (c.country || 'Internacional') === item.country);
     if (list.length) return list;
@@ -2342,23 +2684,21 @@ function player() {
   const channelName = item.channel_name || item.title || 'Canal en vivo';
   const isFav = state.favorites.has(channelId(item));
 
-  // Determine scoped channel group
   const groupChannels = getPlayerGroupChannels();
-  const currentIdxInGroup = groupChannels.findIndex(c => channelId(c) === channelId(item));
-  
-  // Category & Country info for chips
+  const currentIdxInGroup = groupChannels.findIndex(c => channelId(c) === channelId(item) || (c.page_url && c.page_url === item.page_url));
+
   const channelCountry = item.country || 'Internacional';
   const channelCategory = item.category || 'General';
   const countryChannelsCount = state.channels.filter(c => (c.country || 'Internacional') === channelCountry).length;
   const categoryChannelsCount = state.channels.filter(c => (c.category || 'General') === channelCategory).length;
 
-  const isWebItem = item.type === 'web_embed' || item.type === 'web_video';
+  const isWebItem = item.type === 'web_embed' || item.type === 'web_video' || item.type === 'web_episode' || Boolean(item.embed_url);
   const mode = state.playerGuideMode;
   let groupTitle = 'Canales';
   let groupBadge = '📺';
-  if (isWebItem && state.webEpisodes && state.webEpisodes.length > 0) {
-    groupTitle = `Capítulos disponibles (${state.webEpisodes.length})`;
-    groupBadge = '🎬';
+  if (isWebItem) {
+    groupTitle = item.listName ? `${item.listName} (${groupChannels.length})` : `Playlist Web (${groupChannels.length})`;
+    groupBadge = '🌐';
   } else if (mode === 'country') {
     groupTitle = `Canales de ${state.playerGuideValue || channelCountry}`;
     groupBadge = getCountryFlag(state.playerGuideValue || channelCountry);
@@ -2370,7 +2710,6 @@ function player() {
     groupBadge = '🌐';
   }
 
-  // Filter scoped group with search query
   const q = (state.playerQuery || '').trim().toLowerCase();
   const visibleGuideChannels = groupChannels.filter(c => {
     if (!q) return true;
@@ -2383,11 +2722,106 @@ function player() {
   const aspectMode = state.playerAspectRatio || 'contain';
   const aspectLabel = aspectMode === 'contain' ? 'Ajustar 16:9' : (aspectMode === 'cover' ? 'Zoom / Llenar' : 'Estirar');
 
+  const iframeSandboxAttr = state.adBlockEnabled
+    ? 'sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media"'
+    : '';
+
+  const videoStageHTML = `
+    <div class="player-video-box" id="player-video-box">
+      <div class="player-overlay-badges">
+        <span class="player-overlay-badge live-badge">${isWebItem ? '🌐 WEB' : '● EN VIVO'}</span>
+        ${isWebItem && state.adBlockEnabled ? `<span class="player-overlay-badge adblock-badge" title="Bloqueador de anuncios y popups activo">🛡️ AdBlock</span>` : ''}
+        <span class="player-overlay-badge quality-badge" id="player-quality-badge" hidden>HD</span>
+        <span class="player-overlay-badge aspect-badge" id="player-aspect-badge">${aspectLabel}</span>
+      </div>
+
+      ${isWebItem ? `
+        <button type="button" class="player-exit-ad-pill" data-exit-web-ad="1" title="Cerrar anuncio o redirección sin salir de la app y seguir viendo el video">
+          ✕ Salir del anuncio
+        </button>
+      ` : ''}
+
+      ${item.type === 'web_embed' || item.embed_url ? `
+        <iframe id="vault-iframe-player"
+                src="${escapeHTML(item.embed_url)}"
+                ${iframeSandboxAttr}
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                allowfullscreen="true"
+                webkitallowfullscreen="true"
+                mozallowfullscreen="true"
+                referrerpolicy="no-referrer"
+                style="width:100%;height:100%;border:none;background:#000;display:block;">
+        </iframe>
+      ` : `
+        <video id="vault-video-player" controls autoplay playsinline style="object-fit:${aspectMode}"></video>
+      `}
+
+      <div id="player-spinner" class="player-theater-spinner" hidden>
+        <div class="theater-spinner-ring"></div>
+        <span>Conectando con la señal…</span>
+      </div>
+
+      <div id="player-video-retry" class="player-theater-retry" hidden>
+        <span class="retry-icon">⚠️</span>
+        <p>Señal interrumpida o no disponible en este momento</p>
+        <button type="button" id="player-retry-stream-btn" class="primary-button retry-btn">↻ Reintentar conexión</button>
+      </div>
+    </div>
+  `;
+
+  // Dedicated 10-foot TV Theater Player (Remote Control First)
+  if (state.device === 'tv') {
+    return `
+      <div class="tv-player-view">
+        <div class="tv-player-stage">
+          ${videoStageHTML}
+          ${state.tvPlayerGuideOpen ? `
+            <aside class="tv-player-drawer" id="tv-player-drawer">
+              <div class="tv-drawer-head">
+                <strong>${groupBadge} ${escapeHTML(groupTitle)}</strong>
+                <button type="button" id="tv-toggle-guide-btn" class="secondary-button compact">✕</button>
+              </div>
+              <div class="tv-drawer-list">
+                ${visibleGuideChannels.slice(0, 80).map((c) => {
+                  const isPlayingThis = isWebItem
+                    ? (c.page_url === (item.page_url || item.url) || c.channel_name === (item.channel_name || item.title))
+                    : channelId(c) === channelId(item);
+                  const globalIdx = state.channels.indexOf(c);
+                  return `
+                    <button type="button" class="tv-drawer-item ${isPlayingThis ? 'playing' : ''}"
+                            ${isWebItem && (c.page_url || c.url) ? `data-guide-web-ep="${encodeURIComponent(JSON.stringify(c))}"` : `data-zap="${globalIdx >= 0 ? globalIdx : 0}"`}>
+                      <span>${isPlayingThis ? '▶' : '•'} ${escapeHTML(c.channel_name)}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </aside>
+          ` : ''}
+        </div>
+        <div class="tv-player-osd">
+          <div class="tv-osd-info">
+            <strong>${escapeHTML(channelName)}</strong>
+            <small id="playback-message">${isWebItem ? '🌐 Web · 🛡️ AdBlock Activo' : '● En vivo'}</small>
+          </div>
+          <div class="tv-osd-controls">
+            <button type="button" id="player-back-btn" class="tv-osd-btn">← Salir</button>
+            <button type="button" id="player-zap-prev" class="tv-osd-btn">⏮ Anterior</button>
+            <button type="button" id="player-zap-next" class="tv-osd-btn">Siguiente ⏭</button>
+            <button type="button" id="tv-toggle-guide-btn" class="tv-osd-btn ${state.tvPlayerGuideOpen ? 'active' : ''}">📋 Guía (${groupChannels.length})</button>
+            ${isWebItem ? `<button type="button" class="tv-osd-btn exit-ad-btn" data-exit-web-ad="1">✕ Salir anuncio</button>` : ''}
+            ${isWebItem ? `<button type="button" id="player-adblock-toggle" class="tv-osd-btn ${state.adBlockEnabled ? 'active' : ''}">🛡️ ${state.adBlockEnabled ? 'AdBlock ON' : 'AdBlock OFF'}</button>` : ''}
+            <button type="button" id="player-fullscreen-toggle" class="tv-osd-btn">⛶ Pantalla</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   return `
     <div class="player-page-view">
       <!-- Top Navigation & Channel Header -->
       <div class="player-top-bar">
-        <button type="button" id="player-back-btn" class="player-back-pill" title="Volver al listado de canales">
+        <button type="button" id="player-back-btn" class="player-back-pill" title="Volver al listado">
           <span class="back-arrow">←</span>
           <span class="back-text">Volver</span>
         </button>
@@ -2418,52 +2852,30 @@ function player() {
 
       <!-- Cinema Video Theater Stage -->
       <div class="player-theater-stage">
-        <div class="player-video-box" id="player-video-box">
-          <div class="player-overlay-badges">
-            <span class="player-overlay-badge live-badge">${item.type === 'web_embed' || item.type === 'web_video' ? '🌐 WEB' : '● EN VIVO'}</span>
-            <span class="player-overlay-badge quality-badge" id="player-quality-badge" hidden>HD</span>
-            <span class="player-overlay-badge aspect-badge" id="player-aspect-badge">${aspectLabel}</span>
-          </div>
-
-          ${item.type === 'web_embed' || item.embed_url ? `
-            <iframe id="vault-iframe-player"
-                    src="${escapeHTML(item.embed_url)}"
-                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write"
-                    allowfullscreen="true"
-                    webkitallowfullscreen="true"
-                    mozallowfullscreen="true"
-                    referrerpolicy="no-referrer"
-                    style="width:100%;height:100%;border:none;background:#000;display:block;">
-            </iframe>
-          ` : `
-            <video id="vault-video-player" controls autoplay playsinline style="object-fit:${aspectMode}"></video>
-          `}
-
-          <div id="player-spinner" class="player-theater-spinner" hidden>
-            <div class="theater-spinner-ring"></div>
-            <span>Conectando con la señal…</span>
-          </div>
-
-          <div id="player-video-retry" class="player-theater-retry" hidden>
-            <span class="retry-icon">⚠️</span>
-            <p>Señal interrumpida o no disponible en este momento</p>
-            <button type="button" id="player-retry-stream-btn" class="primary-button retry-btn">↻ Reintentar conexión</button>
-          </div>
-        </div>
+        ${videoStageHTML}
       </div>
 
       <!-- Modern Control Deck -->
       <div class="player-control-deck" aria-label="Controles de reproducción">
-        <button type="button" id="player-zap-prev" class="player-deck-btn" title="Canal anterior en esta categoría">
+        <button type="button" id="player-zap-prev" class="player-deck-btn" title="Anterior">
           <span class="deck-icon">⏮</span> Anterior
         </button>
-        <button type="button" id="player-zap-next" class="player-deck-btn" title="Canal siguiente en esta categoría">
+        <button type="button" id="player-zap-next" class="player-deck-btn" title="Siguiente">
           Siguiente <span class="deck-icon">⏭</span>
         </button>
-        <button type="button" id="player-reconnect-btn" class="player-deck-btn" title="Reiniciar señal IPTV">
-          <span class="deck-icon">↻</span> Reconectar
-        </button>
-        <button type="button" id="player-aspect-toggle" class="player-deck-btn" title="Cambiar escala de video (Ajustar / Zoom / Estirar)">
+        ${isWebItem ? `
+          <button type="button" class="player-deck-btn exit-ad-deck-btn" data-exit-web-ad="1" title="Quitar anuncio sin salir de la app y volver al video">
+            <span class="deck-icon">✕</span> Quitar anuncio
+          </button>
+          <button type="button" id="player-adblock-toggle" class="player-deck-btn ${state.adBlockEnabled ? 'active' : ''}" title="Bloquear anuncios y popups de la web externa">
+            <span class="deck-icon">🛡️</span> ${state.adBlockEnabled ? 'AdBlock ON' : 'AdBlock OFF'}
+          </button>
+        ` : `
+          <button type="button" id="player-reconnect-btn" class="player-deck-btn" title="Reiniciar señal IPTV">
+            <span class="deck-icon">↻</span> Reconectar
+          </button>
+        `}
+        <button type="button" id="player-aspect-toggle" class="player-deck-btn" title="Cambiar escala de video">
           <span class="deck-icon">📐</span> ${aspectMode === 'contain' ? 'Ajuste 16:9' : (aspectMode === 'cover' ? 'Zoom' : 'Estirar')}
         </button>
         <button type="button" id="player-mute-toggle" class="player-deck-btn" title="Silenciar / Activar sonido">
@@ -2472,11 +2884,8 @@ function player() {
         <button type="button" id="player-sleep-timer" class="player-deck-btn ${sleepMinutes > 0 ? 'active' : ''}" title="Temporizador de apagado">
           <span class="deck-icon">⏱️</span> ${sleepMinutes > 0 ? `${sleepMinutes} min` : 'Temporizador'}
         </button>
-        <button type="button" id="player-copy-link" class="player-deck-btn" title="Copiar enlace de transmisión directa">
+        <button type="button" id="player-copy-link" class="player-deck-btn" title="Copiar enlace">
           <span class="deck-icon">📋</span> Copiar URL
-        </button>
-        <button type="button" id="player-external-btn" class="player-deck-btn" title="Abrir en VLC o reproductor externo">
-          <span class="deck-icon">↗</span> Externo
         </button>
       </div>
 
@@ -2484,25 +2893,25 @@ function player() {
       <div class="player-details-card">
         <div class="player-channel-info-row">
           <div class="player-channel-badge">
-            <span class="player-badge-live">● EN EMISIÓN</span>
+            <span class="player-badge-live">${isWebItem ? '🌐 WEB PLAYLIST' : '● EN EMISIÓN'}</span>
             <span class="player-badge-meta">${getCountryFlag(item.country)} ${escapeHTML(item.country || 'Internacional')}</span>
             <span class="player-badge-meta">${getCategoryIcon(item.category)} ${escapeHTML(item.category || 'General')}</span>
             ${item.listName ? `<span class="player-badge-meta list-name-badge">📋 ${escapeHTML(item.listName)}</span>` : ''}
           </div>
-          <span class="playback-status-chip" id="playback-message">Conectado a la señal IPTV</span>
+          <span class="playback-status-chip" id="playback-message">${isWebItem ? '🛡️ Reproducción protegida con AdBlock' : 'Conectado a la señal IPTV'}</span>
         </div>
 
         <div class="player-epg-info">
           <div class="epg-time-row">
             <span class="epg-time-chip">⏱️ ${escapeHTML(item.program_time || 'En vivo')}</span>
-            <span class="epg-order-chip">Canal ${currentIdxInGroup >= 0 ? currentIdxInGroup + 1 : 1} de ${groupChannels.length}</span>
+            <span class="epg-order-chip">${isWebItem ? 'Elemento' : 'Canal'} ${currentIdxInGroup >= 0 ? currentIdxInGroup + 1 : 1} de ${groupChannels.length}</span>
           </div>
           <h2 class="epg-program-heading">${escapeHTML(item.current_program || item.channel_name || 'Programación en vivo')}</h2>
         </div>
       </div>
 
       ${!state.noAds ? `
-        <!-- MONETIZACIÓN: BANNER DEL REPRODUCTOR -->
+        <!-- MONETIZACIÓN: BANNER DEL REPRODUCTOR (ANUNCIO PROPIO DE VAULT) -->
         <div class="ad-container-section in-player" aria-label="Espacio Publicitario">
           <div class="ad-banner-card player-ad" id="ad-banner-player">
             <div class="ad-tag-row">
@@ -2526,14 +2935,13 @@ function player() {
         <div class="guide-header-row">
           <div class="guide-title-wrap">
             <span class="guide-section-title">${groupBadge} ${escapeHTML(groupTitle)}</span>
-            <small class="guide-channels-count">${groupChannels.length} canales en esta sección</small>
+            <small class="guide-channels-count">${groupChannels.length} elementos en esta sección</small>
           </div>
         </div>
 
-        <!-- Quick Switcher Chips: País, Categoría, Todos -->
         ${isWebItem ? `
           <div class="player-guide-chips">
-            <span class="player-guide-chip active">🎬 ${state.webEpisodes?.length ? `Capítulos (${state.webEpisodes.length})` : 'Video Web'}</span>
+            <span class="player-guide-chip active">🌐 Playlist Web (${groupChannels.length})</span>
           </div>
         ` : `
         <div class="player-guide-chips">
@@ -2565,18 +2973,18 @@ function player() {
             const globalIdx = state.channels.indexOf(c);
             return `
               <button type="button" class="guide-channel-item ${isPlayingThis ? 'playing' : ''}"
-                      ${isWebItem && c.page_url ? `data-guide-web-ep="${encodeURIComponent(JSON.stringify(c))}"` : `data-zap="${globalIdx >= 0 ? globalIdx : 0}"`}>
+                      ${isWebItem && (c.page_url || c.url) ? `data-guide-web-ep="${encodeURIComponent(JSON.stringify(c))}"` : `data-zap="${globalIdx >= 0 ? globalIdx : 0}"`}>
                 <div class="guide-item-left">
                   <span class="guide-item-flag">${isWebItem ? '🎬' : getCountryFlag(c.country)}</span>
                   <div class="guide-item-names">
                     <strong class="guide-item-title">${escapeHTML(c.channel_name)}</strong>
-                    <small class="guide-item-sub">${isWebItem ? `Capítulo · ${escapeHTML(item.category || 'Web')}` : `${getCountryFlag(c.country)} ${escapeHTML(c.country || 'Internacional')} · ${getCategoryIcon(c.category)} ${escapeHTML(c.category || 'General')}`}</small>
+                    <small class="guide-item-sub">${isWebItem ? `Playlist Web · ${escapeHTML(c.listName || item.listName || 'Web')}` : `${getCountryFlag(c.country)} ${escapeHTML(c.country || 'Internacional')} · ${getCategoryIcon(c.category)} ${escapeHTML(c.category || 'General')}`}</small>
                   </div>
                 </div>
                 ${isPlayingThis ? '<span class="guide-playing-tag">● Sintonizado</span>' : '<span class="guide-play-arrow">▶</span>'}
               </button>
             `;
-          }).join('') || '<p class="empty-state" style="padding:14px;text-align:center">No hay canales que coincidan con la búsqueda en esta sección.</p>'}
+          }).join('') || '<p class="empty-state" style="padding:14px;text-align:center">No hay elementos que coincidan con la búsqueda.</p>'}
         </div>
       </div>
     </div>
@@ -2728,6 +3136,11 @@ function play(item, channelIndex) {
     openXtreamSeries(item);
     return;
   }
+  if (item?.type === 'web_episode') {
+    loadAndPlayWebEpisode(item);
+    return;
+  }
+  state.tvPlayerGuideOpen = false;
   if (channelIndex !== undefined) {
     currentChannelIndex = channelIndex;
   } else {
@@ -3154,6 +3567,89 @@ document.addEventListener('click', async event => {
     return navigate('live');
   }
 
+  if (button.id === 'tv-pick-list-btn') {
+    const activeId = state.listFilter || 'all';
+    return dialog(`
+      <span class="eyebrow">FILTRAR POR LISTA</span>
+      <h2>📋 Seleccionar Lista</h2>
+      <div class="tv-picker-list">
+        <button type="button" class="tv-picker-item ${activeId === 'all' ? 'active' : ''}" data-tv-select-list="all">
+          <span>● Todas las listas</span><small>${state.channels.length}</small>
+        </button>
+        ${state.userLists.map(l => `
+          <button type="button" class="tv-picker-item ${activeId === l.id ? 'active' : ''}" data-tv-select-list="${escapeHTML(l.id)}">
+            <span>${l.type === 'xtream' ? '⚡' : (l.type === 'web_playlist' ? '🌐' : '🔗')} ${escapeHTML(l.name)}</span>
+            <small>${(l.channels || []).length}</small>
+          </button>
+        `).join('')}
+      </div>
+    `);
+  }
+
+  if (button.id === 'tv-pick-country-btn') {
+    const activeListId = state.listFilter || 'all';
+    const scoped = state.channels.filter(c => activeListId === 'all' || c.listId === activeListId);
+    const countries = ['Todos', ...new Set(scoped.map(c => c.country || 'Internacional').filter(Boolean)).values()].sort((a, b) => a === 'Todos' ? -1 : b === 'Todos' ? 1 : a.localeCompare(b, 'es'));
+    return dialog(`
+      <span class="eyebrow">FILTRAR POR PAÍS / FUENTE</span>
+      <h2>🌎 Seleccionar País</h2>
+      <div class="tv-picker-list">
+        ${countries.map(c => `
+          <button type="button" class="tv-picker-item ${state.countryFilter === c ? 'active' : ''}" data-tv-select-country="${escapeHTML(c)}">
+            <span>${c === 'Todos' ? '🌐 Todos' : `${getCountryFlag(c)} ${escapeHTML(c)}`}</span>
+          </button>
+        `).join('')}
+      </div>
+    `);
+  }
+
+  if (button.id === 'tv-search-btn') {
+    return dialog(`
+      <span class="eyebrow">BUSCAR EN VAULT TV</span>
+      <h2>🔍 Buscar Canal o Episodio</h2>
+      <form id="tv-search-form">
+        <input id="tv-search-modal-input" type="search" value="${escapeHTML(state.query)}" placeholder="Escribe el nombre…" autofocus>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button type="submit" class="primary-button" style="flex:1">Buscar</button>
+          <button type="button" id="tv-search-clear-btn" class="secondary-button" style="width:auto">Limpiar</button>
+        </div>
+      </form>
+    `);
+  }
+
+  if (button.id === 'tv-search-clear-btn') {
+    state.query = '';
+    closeDialog();
+    return render();
+  }
+
+  if (button.dataset.tvSelectList !== undefined) {
+    state.listFilter = button.dataset.tvSelectList;
+    state.countryFilter = 'Todos';
+    state.categoryFilter = 'Todas';
+    state.channelPageLimit = 60;
+    closeDialog();
+    return render();
+  }
+
+  if (button.dataset.tvSelectCountry !== undefined) {
+    state.countryFilter = button.dataset.tvSelectCountry;
+    state.channelPageLimit = 60;
+    closeDialog();
+    return render();
+  }
+
+  if (button.id === 'tv-toggle-guide-btn') {
+    state.tvPlayerGuideOpen = !state.tvPlayerGuideOpen;
+    return render();
+  }
+
+  if (button.id === 'player-adblock-toggle') {
+    state.adBlockEnabled = !state.adBlockEnabled;
+    toast(state.adBlockEnabled ? '🛡️ AdBlock activado: anuncios y popups bloqueados' : '⚠️ AdBlock desactivado para este reproductor');
+    return render();
+  }
+
   if (button.dataset.refreshList) {
     const listId = button.dataset.refreshList;
     const list = state.userLists.find(l => l.id === listId);
@@ -3161,7 +3657,10 @@ document.addEventListener('click', async event => {
     button.disabled = true;
     toast(`Actualizando "${list.name}"...`);
     try {
-      if (list.type === 'xtream') {
+      if (list.type === 'web_playlist') {
+        const updated = await refreshWebPlaylist(list.id);
+        toast(`"${updated.name}" actualizada (${updated.channels.length} elementos).`);
+      } else if (list.type === 'xtream') {
         const updated = await fetchAndAddXtreamList({
           name: list.name,
           server: list.url,
@@ -3490,13 +3989,20 @@ document.addEventListener('input', event => {
 
 document.addEventListener('submit', async event => {
   const form = event.target;
-  const handled = ['login-form', 'register-form', 'add-m3u-form', 'add-xtream-modal-form', 'xtream-form', 'notice-form', 'profile-name-form', 'admin-create-form', 'checkout-purchase-form', 'web-extractor-form'];
+  const handled = ['login-form', 'register-form', 'add-m3u-form', 'add-xtream-modal-form', 'xtream-form', 'notice-form', 'profile-name-form', 'admin-create-form', 'checkout-purchase-form', 'web-extractor-form', 'tv-search-form'];
   if (!handled.includes(form.id)) return;
   event.preventDefault();
   const button = form.querySelector('button[type="submit"]') || form.querySelector('button');
   if (button) button.disabled = true;
 
   try {
+    if (form.id === 'tv-search-form') {
+      state.query = ($('#tv-search-modal-input')?.value || '').trim();
+      state.channelPageLimit = 60;
+      closeDialog();
+      render();
+      return;
+    }
     if (form.id === 'web-extractor-form') {
       const urlInput = form.elements.web_url;
       const targetUrl = (urlInput ? urlInput.value : '').trim();
@@ -3690,21 +4196,6 @@ document.addEventListener('submit', async event => {
 
 $('#detail-dialog').addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
 
-document.addEventListener('keydown', event => {
-  if (state.device !== 'tv' || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key)) return;
-  if (event.key === 'Escape') { if ($('#detail-dialog').open) closeDialog(); else if (!$('#vault-view').hidden) navigate('home'); return; }
-  if (document.activeElement?.tagName === 'SELECT') return;
-  if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) && ['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
-  const scope = $('#detail-dialog').open ? $('#detail-dialog') : $('#app-screen');
-  const controls = [...scope.querySelectorAll('button,a,input,select')].filter(el => !el.disabled && el.getClientRects().length);
-  const active = document.activeElement;
-  if (!controls.includes(active)) { event.preventDefault(); controls[0]?.focus(); return; }
-  const rect = active.getBoundingClientRect(); const x = rect.x + rect.width / 2; const y = rect.y + rect.height / 2;
-  const horizontal = ['ArrowLeft', 'ArrowRight'].includes(event.key); const positive = ['ArrowRight', 'ArrowDown'].includes(event.key);
-  const candidates = controls.filter(el => el !== active).map(el => { const r = el.getBoundingClientRect(); const dx = r.x + r.width / 2 - x; const dy = r.y + r.height / 2 - y; const forward = horizontal ? dx : dy; return { el, forward, score: Math.abs(forward) + Math.abs(horizontal ? dy : dx) * 3 }; }).filter(c => positive ? c.forward > 8 : c.forward < -8).sort((a, b) => a.score - b.score);
-  if (candidates[0]) { event.preventDefault(); candidates[0].el.focus(); candidates[0].el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
-});
-
 setInterval(async () => {
   if (document.hidden || !state.token || syncing) return;
   await sync();
@@ -3746,32 +4237,72 @@ document.addEventListener('input', event => {
   document.querySelectorAll('.admin-user').forEach(user => user.hidden = !user.dataset.username.includes(query));
 });
 
+function moveTvSpatialFocus(key) {
+  const scope = $('#detail-dialog')?.open ? $('#detail-dialog') : $('#vault-view');
+  if (!scope) return;
+  const controls = [...scope.querySelectorAll('button, a[data-nav], input, select, [tabindex]:not([tabindex="-1"])')]
+    .filter(el => !el.disabled && !el.hidden && el.offsetParent !== null && el.getClientRects().length);
+  if (!controls.length) return;
+  const active = document.activeElement;
+  if (!controls.includes(active)) {
+    controls[0].focus();
+    controls[0].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    return;
+  }
+  const rect = active.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const horizontal = key === 'ArrowLeft' || key === 'ArrowRight';
+  const positive = key === 'ArrowRight' || key === 'ArrowDown';
+
+  const candidates = controls
+    .filter(el => el !== active)
+    .map(el => {
+      const r = el.getBoundingClientRect();
+      const dx = (r.left + r.width / 2) - cx;
+      const dy = (r.top + r.height / 2) - cy;
+      const forward = horizontal ? dx : dy;
+      const ortho = horizontal ? dy : dx;
+      return { el, forward, score: Math.abs(forward) + Math.abs(ortho) * 2.5 };
+    })
+    .filter(c => positive ? c.forward > 8 : c.forward < -8)
+    .sort((a, b) => a.score - b.score);
+
+  if (candidates[0]) {
+    candidates[0].el.focus();
+    candidates[0].el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+}
+
 document.addEventListener('keydown', event => {
-  if (state.tab === 'player' || $('#detail-dialog.video-dialog')?.open) {
-    const video = $('#vault-video-player');
-    if (event.key === 'Escape') {
+  if (event.key === 'Escape' || event.key === 'BrowserBack') {
+    if ($('#detail-dialog')?.open) {
       event.preventDefault();
-      if (state.tab === 'player') {
-        cleanupPlayer();
-        return navigate(state.previousTab || 'live');
-      }
       return closeDialog();
     }
-    if (['f', 'F'].includes(event.key)) {
+    if (state.tab === 'player') {
+      event.preventDefault();
+      if (state.device === 'tv' && state.tvPlayerGuideOpen) {
+        state.tvPlayerGuideOpen = false;
+        return render();
+      }
+      cleanupPlayer();
+      return navigate(state.previousTab || 'live');
+    }
+    if (state.device === 'tv' && state.tab !== 'home') {
+      event.preventDefault();
+      return navigate('home');
+    }
+    return;
+  }
+
+  if (state.tab === 'player' || $('#detail-dialog.video-dialog')?.open) {
+    const video = $('#vault-video-player');
+    if (['f', 'F'].includes(event.key) && event.target.tagName !== 'INPUT') {
       ($('#player-fullscreen-toggle') || $('#player-fullscreen'))?.click();
       return;
     }
-    if (['ArrowDown', 'PageDown'].includes(event.key)) {
-      event.preventDefault();
-      $('#player-zap-next')?.click();
-      return;
-    }
-    if (['ArrowUp', 'PageUp'].includes(event.key)) {
-      event.preventDefault();
-      $('#player-zap-prev')?.click();
-      return;
-    }
-    if ([' ', 'Spacebar'].includes(event.key) && event.target.tagName !== 'INPUT') {
+    if ([' ', 'Spacebar'].includes(event.key) && event.target.tagName !== 'INPUT' && event.target.tagName !== 'BUTTON') {
       event.preventDefault();
       if (video) { video.paused ? video.play() : video.pause(); }
       return;
@@ -3786,33 +4317,40 @@ document.addEventListener('keydown', event => {
       $('#player-reconnect-btn')?.click();
       return;
     }
-    if (['p', 'P'].includes(event.key) && event.target.tagName !== 'INPUT') {
-      event.preventDefault();
-      $('#player-pip-toggle')?.click();
-      return;
-    }
     if (['a', 'A'].includes(event.key) && event.target.tagName !== 'INPUT') {
       event.preventDefault();
       $('#player-aspect-toggle')?.click();
       return;
     }
+
+    if (state.device === 'tv' && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      event.preventDefault();
+      if (state.tvPlayerGuideOpen || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        return moveTvSpatialFocus(event.key);
+      }
+      if (event.key === 'ArrowDown') return $('#player-zap-next')?.click();
+      if (event.key === 'ArrowUp') return $('#player-zap-prev')?.click();
+      return;
+    }
+
+    if (['PageDown'].includes(event.key) || (state.device !== 'tv' && event.key === 'ArrowDown' && event.target.tagName !== 'INPUT')) {
+      event.preventDefault();
+      $('#player-zap-next')?.click();
+      return;
+    }
+    if (['PageUp'].includes(event.key) || (state.device !== 'tv' && event.key === 'ArrowUp' && event.target.tagName !== 'INPUT')) {
+      event.preventDefault();
+      $('#player-zap-prev')?.click();
+      return;
+    }
     return;
   }
-  if (event.key === 'Escape' && $('#detail-dialog')?.open) {
+
+  if (state.device === 'tv' && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+    if (document.activeElement?.tagName === 'SELECT') return;
+    if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) && ['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
     event.preventDefault();
-    return closeDialog();
-  }
-  if (state.device === 'tv') {
-    const focusable = [...document.querySelectorAll('#vault-view button, #vault-view input, #vault-view [tabindex]:not([tabindex="-1"])')].filter(el => !el.hidden && el.offsetParent !== null);
-    if (!focusable.length) return;
-    const currentIndex = focusable.indexOf(document.activeElement);
-    if (['ArrowDown', 'ArrowRight'].includes(event.key) && currentIndex < focusable.length - 1) {
-      event.preventDefault();
-      focusable[currentIndex + 1].focus();
-    } else if (['ArrowUp', 'ArrowLeft'].includes(event.key) && currentIndex > 0) {
-      event.preventDefault();
-      focusable[currentIndex - 1].focus();
-    }
+    moveTvSpatialFocus(event.key);
   }
 });
 
@@ -3839,11 +4377,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (window.Capacitor?.Plugins?.App?.addListener) {
     try {
       window.Capacitor.Plugins.App.addListener('backButton', () => {
+        if (document.fullscreenElement) {
+          (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+          return;
+        }
         if ($('#detail-dialog')?.open) {
           closeDialog();
           return;
         }
         if (state.tab === 'player') {
+          if (state.device === 'tv' && state.tvPlayerGuideOpen) {
+            state.tvPlayerGuideOpen = false;
+            render();
+            return;
+          }
           cleanupPlayer();
           navigate(state.previousTab || 'live');
           return;
