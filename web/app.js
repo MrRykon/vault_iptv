@@ -1988,10 +1988,7 @@ function home() {
               <span class="tv-tile-icon">🔗</span>
               <span class="tv-tile-label">Agregar IPTV</span>
             </button>
-            <button type="button" data-open-web-extractor="1" class="tv-action-tile web">
-              <span class="tv-tile-icon">🌐</span>
-              <span class="tv-tile-label">Playlist Web</span>
-            </button>
+
             <button type="button" data-nav="xtream" class="tv-action-tile">
               <span class="tv-tile-icon">⚡</span>
               <span class="tv-tile-label">Xtream</span>
@@ -2054,7 +2051,7 @@ function home() {
   return `
     <div class="home-welcome">
       <h1>${greeting}</h1>
-      <p>Tu reproductor IPTV y Playlists Web limpio, directo y con AdBlock integrado.</p>
+      <p>Tu reproductor IPTV limpio, directo y con AdBlock integrado.</p>
     </div>
 
     ${hasLists ? `
@@ -2067,13 +2064,7 @@ function home() {
               <small>Lista .M3U o .M3U8</small>
             </div>
           </button>
-          <button type="button" data-open-web-extractor="1" class="compact-add-card web">
-            <span class="compact-add-icon">🌐</span>
-            <div class="compact-add-text">
-              <strong>+ Playlist desde Web</strong>
-              <small>Series, videos y AdBlock</small>
-            </div>
-          </button>
+
         </div>
       </section>
     ` : `
@@ -2091,14 +2082,7 @@ function home() {
             </div>
             <span class="source-action-plus">+</span>
           </button>
-          <button type="button" data-open-web-extractor="1" class="source-action-card web">
-            <span class="source-action-icon">🌐</span>
-            <div class="source-action-body">
-              <strong>Crear Playlist desde Web</strong>
-              <small>Pega el enlace de cualquier web para guardar sus videos/episodios y verlos sin anuncios</small>
-            </div>
-            <span class="source-action-plus">▶</span>
-          </button>
+
         </div>
       </section>
     `}
@@ -2275,7 +2259,7 @@ function live() {
       <p class="page-subtitle" style="margin:0">${state.channels.length} elementos disponibles · ${totalMatches} coincidentes</p>
     </div>
     <div class="iptv-actions">
-      <button type="button" data-open-web-extractor="1" class="action-chip web-chip" title="Crear Playlist desde enlace web">🌐 + Playlist Web</button>
+
       ${state.user?.admin_status ? `
         <button id="refresh-iptv-btn" class="action-chip" title="Sincronizar listas del servidor">↻ Servidor</button>
       ` : ''}
@@ -2289,7 +2273,7 @@ function live() {
       <p class="muted">Agrega una lista IPTV por URL o una Playlist Web para empezar a ver contenido.</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px">
         <button type="button" data-add-m3u="empty" class="primary-button" style="width:auto">🔗 Agregar IPTV con URL</button>
-        <button type="button" data-open-web-extractor="1" class="secondary-button" style="width:auto">🌐 Crear Playlist Web</button>
+
       </div>
     </div>
   ` : `
